@@ -5,8 +5,8 @@
 This project is dedicated to creating animations using Manim, a powerful mathematical animation engine. The main objective is to visually illustrate the Depth-First Search (DFS) algorithm through an engaging and educational video. The animations are created in Python, leveraging Manim's extensive capabilities to produce high-quality visuals.
 
 ## Video Link
-
-You can watch the DFS animation video on YouTube: [DFS Video](https://youtu.be/prcsjvhN_c8?si=x5BY5rC3O7wk8ZSK)
+DFS animation [FR]: [DFS Video](https://youtu.be/prcsjvhN_c8?si=x5BY5rC3O7wk8ZSK) 
+DFS animation [ENG]: [DFS Video](https://youtu.be/gcrqye-KYvI?si=fzHtF3jvvSbl9dQV) 
 
 ### Directories
 

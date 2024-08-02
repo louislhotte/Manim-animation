@@ -1,8 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/1185818338_656158172_223132457.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_1959358871_3994363963.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_1134552066_4145230097.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_1995022054_1134043854.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_2354374403_3737608868.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_1339606265_379131979.mp4'
-file 'file:C:/Users/Louis/OneDrive/The Eggcellent/Coding Projects/2024/Manim/media/videos/youtube/480p15/partial_movie_files/Youtube/624642324_1959358871_3632999845.mp4'
