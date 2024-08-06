@@ -9,6 +9,7 @@ This project is dedicated to creating animations using Manim, a powerful mathema
 - DFS animation [ENG]: [DFS Video](https://youtu.be/gcrqye-KYvI?si=fzHtF3jvvSbl9dQV) 
 - French Executives Salaries Evolution (1996 to 2022) [ENG]: [Salaries](https://youtu.be/rVqmQHxI0p4) 
 - Double pendulum animation - Butterfly effect | ManimCE [ENG]: [Double Pendulum](https://youtu.be/k4zENntIkM0) 
+- Statistic and parametric models [ENG]: [Handbook of statistics - Part I](https://youtu.be/gGh_hHVSbD8)
 
 ### Files
 - 'XXXXX.py' : Animation python file used to generate videos and create media folder of wanted quality.
