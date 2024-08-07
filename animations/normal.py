@@ -20,44 +20,50 @@ class GaussianDistribution(Scene):
         def gaussian_func(mu, sigma):
             return lambda x: np.exp(-(x - mu) ** 2 / (2 * sigma ** 2)) / (sigma * np.sqrt(2 * np.pi))
         
-        # Initial Gaussian curve with mu=-1 and sigma=1
-        mu_start, mu_end = -1, 1
-        sigma_start, sigma_end = 1, 2
-        sigma_squared_start, sigma_squared_end = 1, 4
+        # Initial Gaussian curve with mu=-3 and sigma=sqrt(0.5)
+        mu_start, mu_end = -3, 2
+        sigma_start, sigma_end = np.sqrt(0.5), np.sqrt(3)
+        sigma_squared_start, sigma_squared_end = 0.5, 3
         gauss_graph = axes.plot(gaussian_func(mu_start, sigma_start), color=YELLOW)
         
         # Create a label for mean (mu)
-        mu_label = MathTex(r"\mu", color=YELLOW).next_to(axes.c2p(mu_start, 0), UP)
+        mu_label = MathTex(r"\mu =", color=YELLOW).next_to(axes.c2p(mu_start, 0), UP)
+        mu_value_label = DecimalNumber(mu_start, num_decimal_places=1, color=YELLOW).next_to(mu_label, RIGHT)
+        mu_group = VGroup(mu_label, mu_value_label)
         
         # Create a label for sigma (sigma^2)
-        sigma_label = MathTex(r"\sigma^2", color=GREEN).next_to(axes.c2p(2, 0.4), RIGHT)
+        sigma_label = MathTex(r"\sigma^2 =", color=GREEN).next_to(axes.c2p(3, 0.7), UP)
+        sigma_value_label = DecimalNumber(sigma_squared_start, num_decimal_places=1, color=GREEN).next_to(sigma_label, RIGHT)
+        sigma_group = VGroup(sigma_label, sigma_value_label)
         
         self.play(Create(axes), Write(labels))
-        self.play(Create(gauss_graph), Write(mu_label), Write(sigma_label))
+        self.play(Create(gauss_graph), Write(mu_group), Write(sigma_group))
         
-        # Animation to shift mu from -1 to 1
+        # Animation to shift mu from -3 to 2
         self.play(
-            mu_label.animate.next_to(axes.c2p(mu_end, 0), UP),
+            mu_group.animate.next_to(axes.c2p(mu_end, 0), UP),
+            UpdateFromAlphaFunc(mu_value_label, lambda m, a: m.set_value(mu_start + (mu_end - mu_start) * a)),
             UpdateFromAlphaFunc(gauss_graph, lambda m, a: m.become(
                 axes.plot(gaussian_func(mu_start + (mu_end - mu_start) * a, sigma_start), color=YELLOW)
             )),
-            run_time=3
+            run_time=12
         )
         
-        # Animation to change sigma^2 from 1 to 4 (sigma from 1 to 2)
+        # Animation to change sigma^2 from 0.5 to 3 (sigma from sqrt(0.5) to sqrt(3))
         self.play(
-            sigma_label.animate.next_to(axes.c2p(2, 0.1), RIGHT),
+            sigma_group.animate.next_to(axes.c2p(2, 0.3), UP),
+            UpdateFromAlphaFunc(sigma_value_label, lambda m, a: m.set_value(sigma_squared_start + (sigma_squared_end - sigma_squared_start) * a)),
             UpdateFromAlphaFunc(gauss_graph, lambda m, a: m.become(
                 axes.plot(gaussian_func(mu_end, sigma_start + (sigma_end - sigma_start) * a), color=YELLOW)
             )),
-            run_time=3
+            run_time=12
         )
         
         # Highlight that E(X) converges to mu
-        ex_label = MathTex(r"E(X) \rightarrow \mu", color=RED).to_edge(UP)
+        ex_label = MathTex(r"E(X) \rightarrow \mu", color=RED).to_corner(UR, buff = 1.5)
         self.play(Write(ex_label))
-        
-        self.wait(2)
+        self.wait(5)
+
 
     def introduction(self, title1, title2):
         header = Tex(title1)
@@ -73,6 +79,6 @@ class GaussianDistribution(Scene):
         self.wait(0.5)
         self.play(Transform(header, Tex(title2)))
         self.play(Write(writer))
-        self.wait(1.5)
+        self.wait(8)
         
         return VGroup(header, writer, line)

@@ -10,6 +10,7 @@ This project is dedicated to creating animations using Manim, a powerful mathema
 - French Executives Salaries Evolution (1996 to 2022) [ENG]: [Salaries](https://youtu.be/rVqmQHxI0p4) 
 - Double pendulum animation - Butterfly effect | ManimCE [ENG]: [Double Pendulum](https://youtu.be/k4zENntIkM0) 
 - Statistic and parametric models [ENG]: [Handbook of statistics - Part I](https://youtu.be/gGh_hHVSbD8)
+- Gaussian Distribution Visualisation [ENG]: [Handbook of statistics - Part II](https://youtu.be/vMAus69cC74)
 
 ### Files
 - 'XXXXX.py' : Animation python file used to generate videos and create media folder of wanted quality.
