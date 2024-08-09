@@ -1,5 +1,7 @@
 import pygame
 from footsoldier import *
+from monsters import Monster
+import random
 
 pygame.init()
 
@@ -28,21 +30,22 @@ class KeyboardController:
             return 'attack'
         return 'idle'
 
-class AIController:
-    def __init__(self):
-        pass
-
-    def GetAction(self, state):
-        return 'left'
-
 player = Footsoldier(position=(100, 100))
 
 controller = KeyboardController()
 
 def center_camera_on_player(player_position):
-    camera_x = player_position[0] - GAME_WIDTH // 2
-    camera_y = player_position[1] - GAME_HEIGHT // 2
+    camera_x = player_position.x - GAME_WIDTH // 2
+    camera_y = player_position.y - GAME_HEIGHT // 2
     return camera_x, camera_y
+
+# Initialize 20 monsters with random positions
+monsters = []
+for i in range(20):
+    x = random.randint(0, 2000)  # Generate a random x position
+    y = random.randint(0, 2000)  # Generate a random y position
+    monster_type = 'strong' if i % 4 == 0 else 'weak'  # Every 4th monster is strong
+    monsters.append(Monster(position=(x, y), monster_type=monster_type))
 
 running = True
 while running:
@@ -51,7 +54,7 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                player.attack()
+                player.attack(monsters=monsters)
 
     action = controller.GetAction()
 
@@ -65,6 +68,12 @@ while running:
     screen.fill(BACKGROUND_COLOR)
 
     player.draw(screen, camera_x, camera_y)
+
+    # Update and draw all monsters
+    for monster in monsters:
+        if monster.alive:
+            monster.handle_event(event, player)
+            monster.draw(screen, camera_x, camera_y)
 
     pygame.display.flip()
 

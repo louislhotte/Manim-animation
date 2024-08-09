@@ -13,7 +13,7 @@ class Footsoldier:
         # Initialize animation state
         self.current_action = 'idle'
         self.current_frame = 0
-        self.animation_speed = 15  # Number of ticks before the next frame
+        self.animation_speed = 20  # Number of ticks before the next frame
         self.tick_count = 0
 
         self.health = 100
@@ -60,18 +60,38 @@ class Footsoldier:
         elif direction == 'down':
             self.position.y += self.speed
 
-    def attack(self):
+    def attack(self, monsters):
+        """Perform an attack, checking if any monster is in range in front of the footsoldier."""
         self.current_action = 'attack'
         self.current_frame = 0 
+
+        # Define the attack range based on the footsoldier's direction
+        attack_range = 30  # Example attack range distance in pixels
+
+        if self.direction == 'right':
+            attack_rect = pygame.Rect(self.position.right, self.position.y, attack_range, self.position.height)
+        elif self.direction == 'left':
+            attack_rect = pygame.Rect(self.position.left - attack_range, self.position.y, attack_range, self.position.height)
+        elif self.direction == 'up':
+            attack_rect = pygame.Rect(self.position.x, self.position.top - attack_range, self.position.width, attack_range)
+        elif self.direction == 'down':
+            attack_rect = pygame.Rect(self.position.x, self.position.bottom, self.position.width, attack_range)
+
+        # Check for collisions with monsters within the attack range
+        for monster in monsters:
+            if attack_rect.colliderect(monster.position) and monster.alive:
+                monster.take_damage(self.attack_power)
+                print(f"Monster hit! Monster health: {monster.health}")
 
     def take_damage(self, amount):
         """Reduces health by a specified amount and checks if the footsoldier is still alive."""
         if self.alive:
             self.health -= amount
             if self.health <= 0:
+                self.health = 0  # Ensure health doesn't go negative
                 self.alive = False
-                self.health = 0
                 self.die()
+        print("AOUCH")
 
     def die(self):
         """Handles the logic for when the footsoldier dies."""
@@ -106,10 +126,15 @@ class Footsoldier:
     def draw(self, screen, camera_x, camera_y):
         if self.alive:
             current_sprite = self.update_animation()
-            adjusted_position = (self.position[0] - camera_x, self.position[1] - camera_y)
+            adjusted_position = (self.position.x - camera_x, self.position.y - camera_y)
             screen.blit(current_sprite, adjusted_position)
-            self.draw_health_bar(screen, camera_x, camera_y)
+        else:
+            # Display "GAME OVER" if the footsoldier is dead
+            font = pygame.font.SysFont(None, 48, bold=True)
+            game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+            screen.blit(game_over_text, (camera_x + 200, camera_y + 200))  # Adjust position as needed
 
+        self.draw_health_bar(screen, camera_x, camera_y)
 
     def draw_health_bar(self, screen, camera_x, camera_y):
         if self.alive:
@@ -124,33 +149,15 @@ class Footsoldier:
             background_color = (255, 0, 0)  # Red background for missing health
             health_color = (0, 255, 0)  # Green for current health
             outline_color = (0, 0, 0)  # Black outline
-            shadow_color = (50, 50, 50)  # Shadow color
-            hp_text_color = (255, 0, 0)  # Red color for the HP text
 
-            # Draw shadow
-            shadow_offset = 2
-            pygame.draw.rect(screen, shadow_color, (health_bar_position[0] + shadow_offset, health_bar_position[1] + shadow_offset, bar_width, bar_height), border_radius=3)
+            # Draw background
+            pygame.draw.rect(screen, background_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height))
 
-            # Draw background with rounded corners
-            pygame.draw.rect(screen, background_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height), border_radius=3)
-
-            # Draw health bar with rounded corners and gradient effect
-            for i in range(health_bar_width):
-                gradient_color = (
-                    int(health_color[0] * (i / health_bar_width)),
-                    int(health_color[1] * (i / health_bar_width)),
-                    int(health_color[2] * (i / health_bar_width))
-                )
-                pygame.draw.line(screen, gradient_color, (health_bar_position[0] + i, health_bar_position[1]), (health_bar_position[0] + i, health_bar_position[1] + bar_height))
+            # Draw health bar
+            pygame.draw.rect(screen, health_color, (health_bar_position[0], health_bar_position[1], health_bar_width, bar_height))
 
             # Draw outline around the health bar
-            pygame.draw.rect(screen, outline_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 2, border_radius=3)
-
-            # Draw current HP value above the health bar
-            font = pygame.font.SysFont(None, 14, bold=True)
-            hp_text = font.render(f'{self.health} HP', True, hp_text_color)
-            hp_text_position = (health_bar_position[0] + (bar_width // 2) - (hp_text.get_width() // 2), health_bar_position[1] - 15)
-            screen.blit(hp_text, hp_text_position)
+            pygame.draw.rect(screen, outline_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 2)
 
     def handle_event(self, event):
         """Handles input events, such as attacking on left click."""
@@ -159,4 +166,3 @@ class Footsoldier:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.position.collidepoint(mouse_pos):
                     self.attack()
-
