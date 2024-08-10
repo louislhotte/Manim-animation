@@ -208,4 +208,3 @@ class Footsoldier:
         pygame.draw.rect(screen, (0, 0, 0), (rect_x, rect_y, rect_width, rect_height), 2)  # Black outline
         screen.blit(exp_surface, (rect_x + padding, rect_y + padding))
         screen.blit(gold_surface, (rect_x + padding, rect_y + exp_surface.get_height() + padding * 2))
-
