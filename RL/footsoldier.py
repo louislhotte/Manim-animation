@@ -14,7 +14,7 @@ class Footsoldier:
         # Initialize animation state
         self.current_action = 'idle'
         self.current_frame = 0
-        self.animation_speed = 20  # Number of ticks before the next frame
+        self.animation_speed = 2 
         self.tick_count = 0
         self.last_attack_time = 0 
         self.attack_cooldown = 1.0 
