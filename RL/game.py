@@ -39,12 +39,13 @@ def center_camera_on_player(player_position):
     camera_y = player_position.y - GAME_HEIGHT // 2
     return camera_x, camera_y
 
-# Initialize 20 monsters with random positions
+
+random.seed(42) 
 monsters = []
-for i in range(20):
-    x = random.randint(0, 2000)  # Generate a random x position
-    y = random.randint(0, 2000)  # Generate a random y position
-    monster_type = 'strong' if i % 4 == 0 else 'weak'  # Every 4th monster is strong
+for i in range(30):
+    x = random.randint(0, 2000) 
+    y = random.randint(0, 2000)  
+    monster_type = 'strong' if i % 4 == 0 else 'weak' 
     monsters.append(Monster(position=(x, y), monster_type=monster_type))
 
 running = True
@@ -69,7 +70,6 @@ while running:
 
     player.draw(screen, camera_x, camera_y)
 
-    # Update and draw all monsters
     for monster in monsters:
         if monster.alive:
             monster.handle_event(event, player)
