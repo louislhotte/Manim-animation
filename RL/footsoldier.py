@@ -2,8 +2,9 @@ import pygame
 import time
 
 class Footsoldier:
-    def __init__(self, position, team_color=None, sprite_folder="C:\\Users\\Louis\\OneDrive\\The Eggcellent\\Coding Projects\\2024\\Manim\\RL\\knight\\"):
+    def __init__(self, position, screen, team_color=None, sprite_folder="C:\\Users\\Louis\\OneDrive\\The Eggcellent\\Coding Projects\\2024\\Manim\\RL\\knight\\"):
         self.position = pygame.Rect(position[0], position[1], 50, 50)
+        self.screen = screen
         self.team_color = team_color
 
         # Load and crop sprites with fixed dimensions
@@ -100,12 +101,21 @@ class Footsoldier:
                 self.health = 0  # Ensure health doesn't go negative
                 self.alive = False
                 self.die()
-        print("AOUCH")
-
+                
     def die(self):
         """Handles the logic for when the footsoldier dies."""
-        print("Footsoldier has died.")
-        self.current_action = 'idle'  # Could change to a 'dead' state if there's a death animation
+        pass
+        # self.current_action = 'idle'
+        # self.alive = False  
+        # while True:
+        #     game_over_x = self.position.x - 100
+        #     game_over_y = self.position.y - 25
+
+        #     font = pygame.font.SysFont(None, 48, bold=True)
+        #     game_over_text = font.render("GAME OVER", True, (255, 0, 0))
+        #     self.screen.blit(game_over_text, (game_over_x, game_over_y))
+        #     pygame.display.flip()
+        #     time.sleep(5)
 
     def update_animation(self):
         # Determine which frames to use based on the current action
@@ -132,21 +142,21 @@ class Footsoldier:
         
         return current_frame
 
-    def draw(self, screen, camera_x, camera_y):
+    def draw(self, camera_x, camera_y):
         if self.alive:
             current_sprite = self.update_animation()
             adjusted_position = (self.position.x - camera_x, self.position.y - camera_y)
-            screen.blit(current_sprite, adjusted_position)
+            self.screen.blit(current_sprite, adjusted_position)
         else:
             # Display "GAME OVER" if the footsoldier is dead
             font = pygame.font.SysFont(None, 48, bold=True)
             game_over_text = font.render("GAME OVER", True, (255, 0, 0))
-            screen.blit(game_over_text, (camera_x + 200, camera_y + 200))
+            self.screen.blit(game_over_text, (camera_x + 200, camera_y + 200))
 
-        self.draw_health_bar(screen, camera_x, camera_y)
-        self.draw_status_bar(screen)
+        self.draw_health_bar(camera_x, camera_y)
+        self.draw_status_bar()
 
-    def draw_health_bar(self, screen, camera_x, camera_y):
+    def draw_health_bar(self, camera_x, camera_y):
         if self.alive:
             bar_width = 50
             bar_height = 10
@@ -159,15 +169,15 @@ class Footsoldier:
             outline_color = (255, 255, 255)  # White outline
 
             # Draw the background (full bar)
-            pygame.draw.rect(screen, background_color, 
+            pygame.draw.rect(self.screen, background_color, 
                             (health_bar_position[0], health_bar_position[1], bar_width, bar_height))
 
             # current health bar
-            pygame.draw.rect(screen, health_color, 
+            pygame.draw.rect(self.screen, health_color, 
                             (health_bar_position[0], health_bar_position[1], health_bar_width, bar_height))
 
             # Health bar outline
-            pygame.draw.rect(screen, outline_color, 
+            pygame.draw.rect(self.screen, outline_color, 
                             (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 
                             2)
 
@@ -177,7 +187,7 @@ class Footsoldier:
             text_rect = text_surface.get_rect(center=(health_bar_position[0] + bar_width // 2, health_bar_position[1] - 12))
             
             # Draw the text
-            screen.blit(text_surface, text_rect)
+            self.screen.blit(text_surface, text_rect)
 
     def handle_event(self, event):
         """Handles input events, such as attacking on left click."""
@@ -188,7 +198,7 @@ class Footsoldier:
                     self.attack()
 
 
-    def draw_status_bar(self, screen):
+    def draw_status_bar(self):
         """Draw the EXP and GOLD on the top-right corner of the screen surrounded by a white rectangle."""
         font = pygame.font.SysFont(None, 16, bold=True)
         exp_text = f"EXP: {self.exp}"
@@ -201,10 +211,10 @@ class Footsoldier:
         rect_width = max(exp_surface.get_width(), gold_surface.get_width()) + padding * 2
         rect_height = exp_surface.get_height() + gold_surface.get_height() + padding * 3
 
-        screen_width = screen.get_width()
+        screen_width = self.screen.get_width()
         rect_x = screen_width - rect_width - 20  
         rect_y = 20  
-        pygame.draw.rect(screen, (255, 255, 255), (rect_x, rect_y, rect_width, rect_height))
-        pygame.draw.rect(screen, (0, 0, 0), (rect_x, rect_y, rect_width, rect_height), 2)  # Black outline
-        screen.blit(exp_surface, (rect_x + padding, rect_y + padding))
-        screen.blit(gold_surface, (rect_x + padding, rect_y + exp_surface.get_height() + padding * 2))
+        pygame.draw.rect(self.screen, (255, 255, 255), (rect_x, rect_y, rect_width, rect_height))
+        pygame.draw.rect(self.screen, (0, 0, 0), (rect_x, rect_y, rect_width, rect_height), 2)  # Black outline
+        self.screen.blit(exp_surface, (rect_x + padding, rect_y + padding))
+        self.screen.blit(gold_surface, (rect_x + padding, rect_y + exp_surface.get_height() + padding * 2))

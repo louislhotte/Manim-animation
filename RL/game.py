@@ -49,7 +49,7 @@ class KeyboardController:
             return 'attack'
         return 'idle'
 
-player = Footsoldier(position=(100, 100))
+player = Footsoldier((100, 100), screen)
 
 controller = KeyboardController()
 
@@ -92,7 +92,7 @@ while running:
     # Blit the part of the background corresponding to the camera position
     screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
 
-    player.draw(screen, camera_x, camera_y)
+    player.draw(camera_x, camera_y)
 
     for monster in monsters:
         if monster.alive:
