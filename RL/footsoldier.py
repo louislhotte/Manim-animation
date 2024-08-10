@@ -1,4 +1,5 @@
 import pygame
+import time
 
 class Footsoldier:
     def __init__(self, position, team_color=None, sprite_folder="C:\\Users\\Louis\\OneDrive\\The Eggcellent\\Coding Projects\\2024\\Manim\\RL\\knight\\"):
@@ -15,7 +16,9 @@ class Footsoldier:
         self.current_frame = 0
         self.animation_speed = 20  # Number of ticks before the next frame
         self.tick_count = 0
-
+        self.last_attack_time = 0 
+        self.attack_cooldown = 1.0 
+        self.attack_range = 30
         self.health = 100
         self.attack_power = 10
         self.speed = 5
@@ -65,22 +68,25 @@ class Footsoldier:
 
     def attack(self, monsters):
         """Perform an attack, checking if any monster is in range in front of the footsoldier."""
+        current_time = time.time()
+        if current_time - self.last_attack_time < self.attack_cooldown:
+            return
+
+        # Update the last attack time
+        self.last_attack_time = current_time
+
         self.current_action = 'attack'
         self.current_frame = 0 
 
-        # Define the attack range based on the footsoldier's direction
-        attack_range = 30  # Example attack range distance in pixels
-
         if self.direction == 'right':
-            attack_rect = pygame.Rect(self.position.right, self.position.y, attack_range, self.position.height)
+            attack_rect = pygame.Rect(self.position.right, self.position.y, self.attack_range, self.position.height)
         elif self.direction == 'left':
-            attack_rect = pygame.Rect(self.position.left - attack_range, self.position.y, attack_range, self.position.height)
+            attack_rect = pygame.Rect(self.position.left - self.attack_range, self.position.y, self.attack_range, self.position.height)
         elif self.direction == 'up':
-            attack_rect = pygame.Rect(self.position.x, self.position.top - attack_range, self.position.width, attack_range)
+            attack_rect = pygame.Rect(self.position.x, self.position.top - self.attack_range, self.position.width, self.attack_range)
         elif self.direction == 'down':
-            attack_rect = pygame.Rect(self.position.x, self.position.bottom, self.position.width, attack_range)
+            attack_rect = pygame.Rect(self.position.x, self.position.bottom, self.position.width, self.attack_range)
 
-        # Check for collisions with monsters within the attack range
         for monster in monsters:
             if attack_rect.colliderect(monster.position) and monster.alive:
                 monster.take_damage(self.attack_power, self)
@@ -135,7 +141,7 @@ class Footsoldier:
             # Display "GAME OVER" if the footsoldier is dead
             font = pygame.font.SysFont(None, 48, bold=True)
             game_over_text = font.render("GAME OVER", True, (255, 0, 0))
-            screen.blit(game_over_text, (camera_x + 200, camera_y + 200))  # Adjust position as needed
+            screen.blit(game_over_text, (camera_x + 200, camera_y + 200))
 
         self.draw_health_bar(screen, camera_x, camera_y)
         self.draw_status_bar(screen)
@@ -145,8 +151,6 @@ class Footsoldier:
             bar_width = 50
             bar_height = 10
             health_bar_width = int(bar_width * (self.health / 100))
-
-            # Adjust the position of the health bar based on the camera offset
             health_bar_position = (self.position.x - camera_x, self.position.y - camera_y - 10)
 
             # Colors
@@ -158,19 +162,18 @@ class Footsoldier:
             pygame.draw.rect(screen, background_color, 
                             (health_bar_position[0], health_bar_position[1], bar_width, bar_height))
 
-            # Draw the health bar (current health)
+            # current health bar
             pygame.draw.rect(screen, health_color, 
                             (health_bar_position[0], health_bar_position[1], health_bar_width, bar_height))
 
-            # Draw outline around the health bar
+            # Health bar outline
             pygame.draw.rect(screen, outline_color, 
                             (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 
                             2)
 
-            # Display the current HP over total HP
-            font = pygame.font.Font(None, 14)  # Slightly smaller font for simplicity
+            font = pygame.font.Font(None, 14)  
             hp_text = f"{self.health} / 100"
-            text_surface = font.render(hp_text, True, (255, 255, 255))  # White text for clarity
+            text_surface = font.render(hp_text, True, (255, 255, 255))  
             text_rect = text_surface.get_rect(center=(health_bar_position[0] + bar_width // 2, health_bar_position[1] - 12))
             
             # Draw the text
@@ -191,25 +194,18 @@ class Footsoldier:
         exp_text = f"EXP: {self.exp}"
         gold_text = f"GOLD: {self.gold}"
 
-        # Render text surfaces
-        exp_surface = font.render(exp_text, True, (0, 0, 0))  # Black text
-        gold_surface = font.render(gold_text, True, (0, 0, 0))  # Black text
+        exp_surface = font.render(exp_text, True, (0, 0, 0))  
+        gold_surface = font.render(gold_text, True, (0, 0, 0))  
 
-        # Calculate the rectangle size based on text dimensions
         padding = 10
         rect_width = max(exp_surface.get_width(), gold_surface.get_width()) + padding * 2
         rect_height = exp_surface.get_height() + gold_surface.get_height() + padding * 3
 
-        # Position of the rectangle (top-right corner)
         screen_width = screen.get_width()
-        rect_x = screen_width - rect_width - 20  # 20 pixels from the right edge
-        rect_y = 20  # 20 pixels from the top edge
-
-        # Draw the white rectangle
+        rect_x = screen_width - rect_width - 20  
+        rect_y = 20  
         pygame.draw.rect(screen, (255, 255, 255), (rect_x, rect_y, rect_width, rect_height))
         pygame.draw.rect(screen, (0, 0, 0), (rect_x, rect_y, rect_width, rect_height), 2)  # Black outline
-
-        # Draw the text inside the rectangle
         screen.blit(exp_surface, (rect_x + padding, rect_y + padding))
         screen.blit(gold_surface, (rect_x + padding, rect_y + exp_surface.get_height() + padding * 2))
 
