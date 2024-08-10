@@ -14,8 +14,8 @@ class Monster:
             self.attack_power = 20
             self.attack_range = 100  # Attack range for strong monsters
             self.speed = 2
-            self.EXP = 50
-            self.gold = 200
+            self.EXP = 10
+            self.gold = 10
             self.detection_range = 150
             self.color = (255, 0, 0)  # Red for strong monster
 
@@ -65,12 +65,9 @@ class Monster:
                 attack_range = pygame.Rect(self.position.centerx - 10, self.position.bottom, 20, 10)
 
             # Check if the player's position intersects with the attack range
-            if attack_range.colliderect(player.position):
+            if attack_range.colliderect(player.rect):
                 player.take_damage(self.attack_power)
-                print(f"Player hit! Player health: {player.health}")
-            else:
-                print("Player avoided the attack!")
-
+                print(f"Player hit by monster! Player health: {player.health}")
             # Set the last attack time to now
             self.last_attack_time = current_time
 
