@@ -22,7 +22,7 @@ class Monster:
             self.health = 50
             self.max_health = 50
             self.attack_power = 5
-            self.attack_range = 50  # Attack range for weak monsters
+            self.attack_range = 80  # Attack range for weak monsters
             self.speed = 1
             self.EXP = 10
             self.gold = 25
