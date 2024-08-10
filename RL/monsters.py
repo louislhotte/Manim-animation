@@ -15,9 +15,10 @@ class Monster:
             self.attack_range = 100  # Attack range for strong monsters
             self.speed = 2
             self.EXP = 50
-            self.gold = 100
+            self.gold = 200
             self.detection_range = 150
             self.color = (255, 0, 0)  # Red for strong monster
+
         else:  # 'weak' monster
             self.health = 50
             self.max_health = 50
