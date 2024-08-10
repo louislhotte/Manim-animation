@@ -73,23 +73,21 @@ class Monster:
             # Set the last attack time to now
             self.last_attack_time = current_time
 
+    def die(self, player):
+        """Handles the logic for when the monster dies and rewards the player."""
+        print(f"{self.monster_type.capitalize()} monster has died. Gained {self.EXP} EXP and {self.gold} Gold.")
+        player.gold += self.gold
+        player.exp += self.EXP
+        self.current_action = 'idle'  
 
-
-
-
-    def take_damage(self, amount):
+    def take_damage(self, amount, player):
         """Reduces health by a specified amount and checks if the monster is still alive."""
         if self.alive:
             self.health -= amount
             if self.health <= 0:
                 self.alive = False
                 self.health = 0
-                self.die()
-
-    def die(self):
-        """Handles the logic for when the monster dies."""
-        print(f"{self.monster_type.capitalize()} monster has died. Gained {self.EXP} EXP and {self.gold} Gold.")
-        self.current_action = 'idle'  # Could change to a 'dead' state if there's a death animation
+                self.die(player)  
 
     def draw(self, screen, camera_x, camera_y):
         """Draw the monster as a simple cube and its detection range on the screen."""

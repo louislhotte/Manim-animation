@@ -20,6 +20,9 @@ class Footsoldier:
         self.attack_power = 10
         self.speed = 5
         self.alive = True
+        self.gold = 0
+        self.exp = 0
+        self.level = 1
 
         # Direction state
         self.direction = 'right'
@@ -80,7 +83,7 @@ class Footsoldier:
         # Check for collisions with monsters within the attack range
         for monster in monsters:
             if attack_rect.colliderect(monster.position) and monster.alive:
-                monster.take_damage(self.attack_power)
+                monster.take_damage(self.attack_power, self)
                 print(f"Monster hit! Monster health: {monster.health}")
 
     def take_damage(self, amount):
@@ -135,6 +138,7 @@ class Footsoldier:
             screen.blit(game_over_text, (camera_x + 200, camera_y + 200))  # Adjust position as needed
 
         self.draw_health_bar(screen, camera_x, camera_y)
+        self.draw_status_bar(screen)
 
     def draw_health_bar(self, screen, camera_x, camera_y):
         if self.alive:
@@ -179,3 +183,33 @@ class Footsoldier:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.position.collidepoint(mouse_pos):
                     self.attack()
+
+
+    def draw_status_bar(self, screen):
+        """Draw the EXP and GOLD on the top-right corner of the screen surrounded by a white rectangle."""
+        font = pygame.font.SysFont(None, 16, bold=True)
+        exp_text = f"EXP: {self.exp}"
+        gold_text = f"GOLD: {self.gold}"
+
+        # Render text surfaces
+        exp_surface = font.render(exp_text, True, (0, 0, 0))  # Black text
+        gold_surface = font.render(gold_text, True, (0, 0, 0))  # Black text
+
+        # Calculate the rectangle size based on text dimensions
+        padding = 10
+        rect_width = max(exp_surface.get_width(), gold_surface.get_width()) + padding * 2
+        rect_height = exp_surface.get_height() + gold_surface.get_height() + padding * 3
+
+        # Position of the rectangle (top-right corner)
+        screen_width = screen.get_width()
+        rect_x = screen_width - rect_width - 20  # 20 pixels from the right edge
+        rect_y = 20  # 20 pixels from the top edge
+
+        # Draw the white rectangle
+        pygame.draw.rect(screen, (255, 255, 255), (rect_x, rect_y, rect_width, rect_height))
+        pygame.draw.rect(screen, (0, 0, 0), (rect_x, rect_y, rect_width, rect_height), 2)  # Black outline
+
+        # Draw the text inside the rectangle
+        screen.blit(exp_surface, (rect_x + padding, rect_y + padding))
+        screen.blit(gold_surface, (rect_x + padding, rect_y + exp_surface.get_height() + padding * 2))
+
