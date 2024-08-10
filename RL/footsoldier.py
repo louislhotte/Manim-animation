@@ -139,25 +139,38 @@ class Footsoldier:
     def draw_health_bar(self, screen, camera_x, camera_y):
         if self.alive:
             bar_width = 50
-            bar_height = 7
+            bar_height = 10
             health_bar_width = int(bar_width * (self.health / 100))
-            
+
             # Adjust the position of the health bar based on the camera offset
             health_bar_position = (self.position.x - camera_x, self.position.y - camera_y - 10)
 
             # Colors
-            background_color = (255, 0, 0)  # Red background for missing health
-            health_color = (0, 255, 0)  # Green for current health
-            outline_color = (0, 0, 0)  # Black outline
+            background_color = (200, 0, 0)  # Red for background
+            health_color = (0, 200, 0)  # Green for current health
+            outline_color = (255, 255, 255)  # White outline
 
-            # Draw background
-            pygame.draw.rect(screen, background_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height))
+            # Draw the background (full bar)
+            pygame.draw.rect(screen, background_color, 
+                            (health_bar_position[0], health_bar_position[1], bar_width, bar_height))
 
-            # Draw health bar
-            pygame.draw.rect(screen, health_color, (health_bar_position[0], health_bar_position[1], health_bar_width, bar_height))
+            # Draw the health bar (current health)
+            pygame.draw.rect(screen, health_color, 
+                            (health_bar_position[0], health_bar_position[1], health_bar_width, bar_height))
 
             # Draw outline around the health bar
-            pygame.draw.rect(screen, outline_color, (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 2)
+            pygame.draw.rect(screen, outline_color, 
+                            (health_bar_position[0], health_bar_position[1], bar_width, bar_height), 
+                            2)
+
+            # Display the current HP over total HP
+            font = pygame.font.Font(None, 14)  # Slightly smaller font for simplicity
+            hp_text = f"{self.health} / 100"
+            text_surface = font.render(hp_text, True, (255, 255, 255))  # White text for clarity
+            text_rect = text_surface.get_rect(center=(health_bar_position[0] + bar_width // 2, health_bar_position[1] - 12))
+            
+            # Draw the text
+            screen.blit(text_surface, text_rect)
 
     def handle_event(self, event):
         """Handles input events, such as attacking on left click."""

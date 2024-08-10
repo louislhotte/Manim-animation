@@ -12,7 +12,7 @@ class Monster:
             self.health = 200
             self.max_health = 200
             self.attack_power = 20
-            self.attack_range = 40  # Attack range for strong monsters
+            self.attack_range = 100  # Attack range for strong monsters
             self.speed = 2
             self.EXP = 50
             self.gold = 100
@@ -22,7 +22,7 @@ class Monster:
             self.health = 50
             self.max_health = 50
             self.attack_power = 5
-            self.attack_range = 20  # Attack range for weak monsters
+            self.attack_range = 50  # Attack range for weak monsters
             self.speed = 1
             self.EXP = 10
             self.gold = 25
@@ -48,42 +48,32 @@ class Monster:
             self.position.y -= self.speed
 
     def attack(self, player):
-        """Perform an attack on the player if within a 20x20 rectangle and after a delay."""
+        """Perform an attack on the player if within a 10-pixel range and after a delay."""
         current_time = time.time()
         
         # If more than 1 second has passed since the last attack, perform the attack
         if current_time - self.last_attack_time >= 1:
-            # Check if an attack was initiated more than 1 second ago
-            if hasattr(self, 'attack_rect'):
-                # Draw the attack rectangle (optional, for visualization)
-                pygame.draw.rect(pygame.display.get_surface(), (0, 0, 255), self.attack_rect)
+            # Calculate the attack range based on the direction and include a 10-pixel range
+            if self.direction == 'right':
+                attack_range = pygame.Rect(self.position.right, self.position.centery - 10, 10, 20)
+            elif self.direction == 'left':
+                attack_range = pygame.Rect(self.position.left - 10, self.position.centery - 10, 10, 20)
+            elif self.direction == 'up':
+                attack_range = pygame.Rect(self.position.centerx - 10, self.position.top - 10, 20, 10)
+            elif self.direction == 'down':
+                attack_range = pygame.Rect(self.position.centerx - 10, self.position.bottom, 20, 10)
 
-                # Check if the player is still within the attack rectangle
-                if self.attack_rect.colliderect(player.position):
-                    player.take_damage(self.attack_power)
-                    print(f"Player hit! Player health: {player.health}")
-                else:
-                    print("Player avoided the attack!")
-
-                # Clear the attack rectangle after checking
-                del self.attack_rect
+            # Check if the player's position intersects with the attack range
+            if attack_range.colliderect(player.position):
+                player.take_damage(self.attack_power)
+                print(f"Player hit! Player health: {player.health}")
+            else:
+                print("Player avoided the attack!")
 
             # Set the last attack time to now
             self.last_attack_time = current_time
-            
-        else:
-            # Start the attack by defining the attack rectangle based on direction
-            if self.direction == 'right':
-                self.attack_rect = pygame.Rect(self.position.right, self.position.centery - 10, 20, 20)
-            elif self.direction == 'left':
-                self.attack_rect = pygame.Rect(self.position.left - 20, self.position.centery - 10, 20, 20)
-            elif self.direction == 'up':
-                self.attack_rect = pygame.Rect(self.position.centerx - 10, self.position.top - 20, 20, 20)
-            elif self.direction == 'down':
-                self.attack_rect = pygame.Rect(self.position.centerx - 10, self.position.bottom, 20, 20)
-            
-            # Draw the attack rectangle (optional, for visualization)
-            pygame.draw.rect(pygame.display.get_surface(), (0, 0, 255), self.attack_rect)
+
+
 
 
 
