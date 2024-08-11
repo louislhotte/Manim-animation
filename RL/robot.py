@@ -4,12 +4,14 @@ import pygame
 from footsoldier import Footsoldier
 from monsters import Monster
 import time
-from game import GAME_HEIGHT, GAME_WIDTH, tile_image
 
 # Screen and world dimensions
 WORLD_WIDTH = 2000
 WORLD_HEIGHT = 2000
 SIMULATION_TIME = 120 
+GAME_WIDTH = 1200
+GAME_HEIGHT = 800
+tile_image = pygame.image.load('RL/tile.png').convert()
 
 # Constants for genetic algorithm
 POPULATION_SIZE = 20
@@ -101,7 +103,7 @@ def run_evolution(screen):
 
         # Evaluate fitness
         for robot in population:
-            robot.evaluate_fitness(screen, initial_seed)
+            robot.evaluate_fitness(screen, seed=42)
 
         # Sort robots by fitness (higher is better)
         population.sort(key=lambda robot: robot.fitness, reverse=True)
