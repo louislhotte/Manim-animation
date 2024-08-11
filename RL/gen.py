@@ -1,131 +1,164 @@
-import random
-import copy
 import pygame
-from footsoldier import Footsoldier
+from footsoldier import *
 from monsters import Monster
+import random
 import time
-import cv2 
-import multiprocessing
-from robot import Robot, draw_full_background
+import copy
+import cv2
+import numpy as np
 
 pygame.init()
 
-# Screen and world dimensions
 WORLD_WIDTH = 1200
 WORLD_HEIGHT = 800
-SIMULATION_TIME = 60 
 GAME_WIDTH = 1200
 GAME_HEIGHT = 800
+FPS = 20
+BACKGROUND_COLOR = (50, 50, 50)
+SIMULATION_TIME = 30
+POPULATION_SIZE = 20
+NUM_GENERATIONS = 50
+GENERATIONS_TO_CAPTURE = [1, 3, 5, 10, 20, 50]  # Specific generations to capture video
+
 screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
+pygame.display.set_caption("Footsoldier Melee Simulation")
+clock = pygame.time.Clock()
+# Load the tile image
 tile_image = pygame.image.load('RL/tile.png').convert()
 
-# Constants for genetic algorithm
-POPULATION_SIZE = 20
-GENOME_LENGTH = 10000  # Number of actions in a sequence
-MUTATION_RATE = 0.1
-NUM_GENERATIONS = 50
 
-# Possible actions for the bot
-ACTIONS = ['left', 'right', 'up', 'down', 'attack']
-
-# Pre-render the full background on a larger surface
 background_surface = pygame.Surface((WORLD_WIDTH, WORLD_HEIGHT))
+
+def draw_full_background(surface, tile_image):
+    tile_width = tile_image.get_width()
+    tile_height = tile_image.get_height()
+    
+    for y in range(0, WORLD_HEIGHT, tile_height):
+        for x in range(0, WORLD_WIDTH, tile_width):
+            surface.blit(tile_image, (x, y))
+
 # Generate the full background
-draw_full_background(background_surface, tile_image, WORLD_HEIGHT, WORLD_WIDTH)
+draw_full_background(background_surface, tile_image)
 
-def mutate(genome):
-    new_genome = copy.deepcopy(genome)
-    for i in range(len(new_genome)):
-        if random.random() < MUTATION_RATE:
-            new_genome[i] = random.choice(ACTIONS)
-    return new_genome
+class Robot:
+    def __init__(self, robot_id):
+        self.robot_id = robot_id
+        self.genome = [random.choice(['left', 'right', 'up', 'down', 'attack']) for _ in range(1000)]  # Placeholder genome
+        self.fitness = 0
+        self.player = Footsoldier((100, 100), screen)  
+        self.monsters = self.spawn_monsters(seed=robot_id)  # Each robot has its own monster set
 
-def crossover(parent1, parent2):
-    crossover_point = random.randint(0, GENOME_LENGTH - 1)
-    return parent1[:crossover_point] + parent2[crossover_point:]
+    def spawn_monsters(self, seed):
+        random.seed(seed)
+        return [Monster(position=(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT)),
+                        monster_type='strong' if i % 5 == 0 else 'weak') for i in range(30)]
 
-def evaluate_robot_parallel(robot_genome, seed, generation):
-    random.seed(seed)
-    robot = Robot(robot_id=0)
-    robot.genome = robot_genome
-    robot.evaluate_fitness(screen, seed) 
-    return robot.fitness
+    def evaluate_fitness(self):
+        # Fitness is based on the amount of gold collected and monsters defeated
+        self.fitness += self.player.gold
+        for monster in self.monsters:
+            if not monster.alive:
+                self.fitness += 10  # Example reward for defeating a monster
 
-def run_evolution_parallel_display(screen):
-    initial_seed = 34  
-    global generation
-    population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]
-    video_filename = "robot_simulation_parallel.mp4"
-    fps = 20
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_out = cv2.VideoWriter(video_filename, fourcc, fps, (GAME_WIDTH, GAME_HEIGHT))
+    def simulate(self, capture_video=False, out=None):
+        start_time = time.time()
+        running = True
 
-    for generation in range(NUM_GENERATIONS):
-        for i, robot in enumerate(population):
-            robot.generation = generation
-
-        print(f"Generation {generation + 1}")
-        with multiprocessing.Pool() as pool:
-            fitness_results = pool.starmap(
-                evaluate_robot_parallel,
-                [(robot.genome, initial_seed, generation) for robot in population]
-            )
-
-        for i, robot in enumerate(population):
-            robot.fitness = fitness_results[i]
-        
-        # Sort robots by fitness (higher is better)
-        population.sort(key=lambda r: r.fitness, reverse=True)
-        robot_to_display = population[0]
-        for action_index, action in enumerate(robot_to_display.genome):
-            screen.blit(background_surface, (0, 0))
-
-            if robot_to_display.player is None:
-                raise ValueError(f"Player not initialized for robot {robot_to_display.robot_id}")
-            if not robot_to_display.player.alive:
+        for action in self.genome:
+            if time.time() - start_time > SIMULATION_TIME or not self.player.alive:
                 break
 
             if action == 'attack':
-                hit = robot_to_display.player.attack(monsters=robot_to_display.monsters)
-                if hit:
-                    robot_to_display.fitness += 1
+                self.player.attack(monsters=self.monsters)
             else:
-                robot_to_display.player.move(action)
+                self.player.move(action)
 
-            robot_to_display.simulate_frame(screen, generation)
+            camera_x, camera_y = center_camera_on_player(self.player.position)
+
+            screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
+            self.player.draw(camera_x, camera_y)
+
+            for monster in self.monsters:
+                if monster.alive:
+                    monster.handle_event(None, self.player)
+                    monster.draw(screen, camera_x, camera_y)
+
             pygame.display.flip()
 
-            # Capture the frame for the video
-            frame = pygame.surfarray.array3d(screen)
-            frame = cv2.transpose(frame)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            video_out.write(frame)
+            if capture_video:
+                frame = pygame.surfarray.array3d(screen)
+                frame = np.rot90(frame)
+                frame = np.flipud(frame)
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                out.write(frame)
 
-            time.sleep(0.05)
-        print(f"Best fitness: {population[0].fitness}")
-        print("===")
+            clock.tick(FPS)
 
+        self.evaluate_fitness()
 
-        next_population = population[:5]
+def center_camera_on_player(player_position):
+    camera_x = player_position.x - GAME_WIDTH // 2
+    camera_y = player_position.y - GAME_HEIGHT // 2
 
-        while len(next_population) < POPULATION_SIZE:
-            parent1, parent2 = random.sample(population[:10], 2)
-            child_genome = mutate(crossover(parent1.genome, parent2.genome))
-            child = Robot(robot_id=len(next_population))
-            child.genome = child_genome
-            next_population.append(child)
+    # Clamp camera to world bounds
+    camera_x = max(0, min(camera_x, WORLD_WIDTH - GAME_WIDTH))
+    camera_y = max(0, min(camera_y, WORLD_HEIGHT - GAME_HEIGHT))
 
-        population = next_population
+    return camera_x, camera_y
 
-    print("Final genome of the best robot:", population[0].genome)
-    video_out.release()
+def genetic_algorithm():
+    # Set up video capture for all selected generations
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('robot_animation.avi', fourcc, FPS, (GAME_WIDTH, GAME_HEIGHT))
 
-if __name__ == "__main__":
-    pygame.init()
+    # Initialize population
+    population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]
 
-    screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
-    pygame.display.set_caption("Footsoldier Melee Simulation - AI")
+    for generation in range(NUM_GENERATIONS):
+        print(f"Generation {generation + 1}")
+        capture_video = (generation + 1) in GENERATIONS_TO_CAPTURE
+        if capture_video:
+            random_robot = random.choice(population)  # Select a random robot to capture its run
 
-    run_evolution_parallel_display(screen)
+        for robot in population:
+            if capture_video and robot == random_robot:
+                robot.simulate(capture_video=True, out=out)
+            else:
+                robot.simulate()
+            print(f"Robot {robot.robot_id} Fitness: {robot.fitness}")
 
+        population.sort(key=lambda r: r.fitness, reverse=True)
+        best_fitness = population[0].fitness
+        print(f"Best fitness in generation {generation + 1}: {best_fitness}")
+        next_generation = []
+        next_generation.extend(copy.deepcopy(population[:POPULATION_SIZE // 5]))
+
+        # Breed new individuals from the top performers
+        while len(next_generation) < POPULATION_SIZE:
+            parent1, parent2 = random.sample(population[:POPULATION_SIZE // 5], 2)
+            child_genome = crossover(parent1.genome, parent2.genome)
+            child_genome = mutate(child_genome)
+            next_generation.append(Robot(robot_id=len(next_generation)))
+            next_generation[-1].genome = child_genome
+
+        # Replace old population with the new one
+        population = next_generation
+
+    # Release the video writer object after all generations are done
+    out.release()
+
+def crossover(genome1, genome2):
+    crossover_point = random.randint(0, len(genome1) - 1)
+    return genome1[:crossover_point] + genome2[crossover_point:]
+
+def mutate(genome):
+    MUTATION_RATE = 0.1
+    for i in range(len(genome)):
+        if random.random() < MUTATION_RATE:
+            genome[i] = random.choice(['left', 'right', 'up', 'down', 'attack'])
+    return genome
+
+if __name__ == '__main__':
+    genetic_algorithm()
     pygame.quit()
+    cv2.destroyAllWindows()

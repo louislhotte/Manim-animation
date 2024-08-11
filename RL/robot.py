@@ -50,18 +50,14 @@ class Robot:
         self.robot_id = robot_id
         self.genome = [random.choice(ACTIONS) for _ in range(GENOME_LENGTH)]
         self.fitness = 0
-        self.player = None  # Initialize as None
-        self.monsters = []  # Initialize as an empty list
+        self.player = Footsoldier((100, 100), screen)  
+        self.monsters = self.spawn_monsters(seed=34)  
         self.generation = 1
 
-    def evaluate_fitness(self, screen, seed):
-        start_time = time.time()
-
-        # Initialize player and monsters for this robot
+    def evaluate_fitness(self, seed):
         random.seed(seed)
-        self.player = Footsoldier((100, 100), screen)
-        self.monsters = self.spawn_monsters(seed)
-
+        start_time = time.time()
+        
         for action in self.genome:
             if time.time() - start_time > SIMULATION_TIME:
                 break
@@ -76,8 +72,7 @@ class Robot:
             else:
                 self.player.move(action)
 
-            self.simulate_frame(screen)
-
+        # Add any leftover gold as fitness
         self.fitness += self.player.gold
 
     def simulate_frame(self, screen):
