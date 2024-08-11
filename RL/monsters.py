@@ -21,8 +21,8 @@ class Monster:
             self.color = (255, 0, 0)  # Red for strong monster
 
         else:  # 'weak' monster
-            self.health = 50
-            self.max_health = 50
+            self.health = 20
+            self.max_health = 20
             self.attack_power = 5
             self.attack_range = 80  # Attack range for weak monsters
             self.speed = 1

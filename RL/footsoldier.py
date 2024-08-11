@@ -54,18 +54,26 @@ class Footsoldier:
             frames.append(frame)
         return frames
 
-    def move(self, direction):
+    def move(self, direction, width=1200, height=800):
         self.current_action = 'run'
         if direction == 'left':
             self.position.x -= self.speed
+            if self.position.x < 0:
+                self.position.x = 0
             self.direction = 'left'
         elif direction == 'right':
             self.position.x += self.speed
+            if self.position.x > width - self.position.width:
+                self.position.x = width - self.position.width
             self.direction = 'right'
         elif direction == 'up':
             self.position.y -= self.speed
+            if self.position.y < 0:
+                self.position.y = 0
         elif direction == 'down':
             self.position.y += self.speed
+            if self.position.y > height - self.position.height:
+                self.position.y = height - self.position.height
 
     def attack(self, monsters):
         """Perform an attack, checking if any monster is in range in front of the footsoldier."""
