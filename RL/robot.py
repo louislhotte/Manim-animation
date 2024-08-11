@@ -4,6 +4,7 @@ import pygame
 from footsoldier import Footsoldier
 from monsters import Monster
 import time
+import cv2  # Import OpenCV for video recording
 
 pygame.init()
 
@@ -127,14 +128,23 @@ def run_evolution_single_display(screen):
     
     global generation
     population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]
-    
+
+    # Setup for video recording
+    video_filename = "robot_simulation.mp4"
+    fps = 20  # Frames per second for the video
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video_out = cv2.VideoWriter(video_filename, fourcc, fps, (GAME_WIDTH, GAME_HEIGHT))
+
     for generation in range(NUM_GENERATIONS):
         print(f"Generation {generation + 1}")
+
         for robot in population:
             robot.evaluate_fitness(screen, initial_seed)
+
+        # Randomly choose one robot to display and record
         robot_to_display = random.choice(population)
 
-        # Simulate the selected robot
+        # Simulate and record the selected robot
         for action_index, action in enumerate(robot_to_display.genome):
             screen.blit(background_surface, (0, 0))
             
@@ -152,6 +162,13 @@ def run_evolution_single_display(screen):
             
             robot_to_display.simulate_frame(screen)
             pygame.display.flip()
+            
+            # Capture the frame for the video
+            frame = pygame.surfarray.array3d(screen)
+            frame = cv2.transpose(frame)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            video_out.write(frame)
+            
             time.sleep(0.05)
 
         # Evaluate fitness for each robot after finishing its genome
@@ -175,6 +192,9 @@ def run_evolution_single_display(screen):
         population = next_population
 
     print("Final genome of the best robot:", population[0].genome)
+
+    # Release the video writer
+    video_out.release()
 
 if __name__ == "__main__":
     pygame.init()
