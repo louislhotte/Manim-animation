@@ -1,6 +1,7 @@
 import pygame
 from footsoldier import Footsoldier
 import time
+import math
 
 class Monster:
     def __init__(self, position, monster_type='weak', size=50):
@@ -48,26 +49,21 @@ class Monster:
         elif self.position.y > target_position[1]:
             self.position.y -= self.speed
 
-    def attack(self, player):
-        """Perform an attack on the player if within a 10-pixel range and after a delay."""
+    def attack(self, player, max_attack_range=30):
+        """Perform an attack on the player if within max_attack_range and after a delay."""
         current_time = time.time()
-        
+
         # If more than 1 second has passed since the last attack, perform the attack
         if current_time - self.last_attack_time >= 1:
-            # Calculate the attack range based on the direction and include a 10-pixel range
-            if self.direction == 'right':
-                attack_range = pygame.Rect(self.position.right, self.position.centery - 10, 10, 20)
-            elif self.direction == 'left':
-                attack_range = pygame.Rect(self.position.left - 10, self.position.centery - 10, 10, 20)
-            elif self.direction == 'up':
-                attack_range = pygame.Rect(self.position.centerx - 10, self.position.top - 10, 20, 10)
-            elif self.direction == 'down':
-                attack_range = pygame.Rect(self.position.centerx - 10, self.position.bottom, 20, 10)
-
-            # Check if the player's position intersects with the attack range
-            if attack_range.colliderect(player.rect):
+            # Calculate the Euclidean distance between the monster and the player
+            distance = math.sqrt((self.position.centerx - player.position.centerx) ** 2 + 
+                                 (self.position.centery - player.position.centery) ** 2)
+            
+            # Check if the distance is within the max attack range
+            if distance <= max_attack_range:
                 player.take_damage(self.attack_power)
                 print(f"Player hit by monster! Player health: {player.health}")
+            
             # Set the last attack time to now
             self.last_attack_time = current_time
 
@@ -149,4 +145,4 @@ class Monster:
             if distance_to_player <= self.detection_range:
                 self.move_towards(player_center)
                 if distance_to_player <= self.attack_range:  # Attack if close enough
-                    self.attack(player)
+                    self.attack(player, max_attack_range=self.attack_range)
