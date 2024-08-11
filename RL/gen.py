@@ -13,10 +13,11 @@ GAME_WIDTH = 1200
 GAME_HEIGHT = 800
 FPS = 20
 BACKGROUND_COLOR = (50, 50, 50)
-SIMULATION_TIME = 60
-POPULATION_SIZE = 10
+SIMULATION_TIME = 30
+POPULATION_SIZE = 3
 NUM_GENERATIONS = 50
-GENERATIONS_TO_CAPTURE = [1, 3, 5, 10, 20, 50]  # Specific generations to capture video
+GENERATIONS_TO_CAPTURE = [1, 3, 5, 10, 20, 35, 50]  # Specific generations to capture video
+ENCOUNTER_RADIUS = 200
 
 screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
 pygame.display.set_caption("Footsoldier Melee Simulation")
@@ -45,10 +46,11 @@ draw_full_background(background_surface, tile_image)
 class Robot:
     def __init__(self, robot_id):
         self.robot_id = robot_id
-        self.genome = [random.choice(['left', 'right', 'up', 'down', 'attack']) for _ in range(1000)]  # Placeholder genome
+        self.genome = [random.choice(['left', 'right', 'up', 'down', 'attack']) for _ in range(4000)]  # Placeholder genome
         self.fitness = 0
         self.player = Footsoldier((100, 100), screen)  
         self.monsters = self.spawn_monsters(seed=34)  # Each robot has its own monster set
+        self.encountered_monsters = set()
 
     def spawn_monsters(self, seed):
         random.seed(seed)
@@ -56,13 +58,18 @@ class Robot:
                         monster_type='strong' if i % 5 == 0 else 'weak') for i in range(20)]
 
     def evaluate_fitness(self):
-        # Fitness is based on the amount of gold collected and monsters defeated
         self.fitness += self.player.gold
         for monster in self.monsters:
-            if not monster.alive:
-                self.fitness += 10  # Example reward for defeating a monster
+            distance_to_monster = np.linalg.norm(np.array(self.player.position) - np.array(monster.position))
+            if distance_to_monster < ENCOUNTER_RADIUS:  # Consider an encounter if within 50 pixels
+                if monster not in self.encountered_monsters:
+                    self.encountered_monsters.add(monster)
+                    self.fitness += 1  # Reward for encountering a new monster
 
-    def simulate(self, capture_video=False, out=None, generation=None):
+            if not monster.alive:
+                self.fitness += 30 
+
+    def simulate(self, capture_video=False, out=None, generation=None, render=True):
         start_time = time.time()
         running = True
 
@@ -74,23 +81,24 @@ class Robot:
                 self.player.attack(monsters=self.monsters)
             else:
                 self.player.move(action)
+                
+            if render:
+                camera_x, camera_y = center_camera_on_player(self.player.position)
 
-            camera_x, camera_y = center_camera_on_player(self.player.position)
+                screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
+                self.player.draw(camera_x, camera_y)
 
-            screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
-            self.player.draw(camera_x, camera_y)
+                # Draw monsters
+                for monster in self.monsters:
+                    if monster.alive:
+                        monster.handle_event(None, self.player)
+                        monster.draw(screen, camera_x, camera_y)
 
-            # Draw monsters
-            for monster in self.monsters:
-                if monster.alive:
-                    monster.handle_event(None, self.player)
-                    monster.draw(screen, camera_x, camera_y)
+                # Display generation and robot ID
+                text_surface = font.render(f"Generation: {generation + 1}  Robot ID: {self.robot_id}", True, (255, 255, 255))
+                screen.blit(text_surface, (10, 10))
 
-            # Display generation and robot ID
-            text_surface = font.render(f"Generation: {generation + 1}  Robot ID: {self.robot_id}", True, (255, 255, 255))
-            screen.blit(text_surface, (10, 10))
-
-            pygame.display.flip()
+                pygame.display.flip()
 
             if capture_video:
                 # Capture the frame
@@ -136,41 +144,51 @@ def genetic_algorithm():
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter('robot_animation.avi', fourcc, FPS, (GAME_WIDTH, GAME_HEIGHT))
 
-    # Initialize population
+    # Initialize population with random genomes
     population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]
 
     for generation in range(NUM_GENERATIONS):
         print(f"Generation {generation + 1}")
         capture_video = (generation + 1) in GENERATIONS_TO_CAPTURE
         if capture_video:
-            random_robot = random.choice(population)  # Select a random robot to capture its run
+            random_robot = population[0] # Select a random robot to capture its run
 
         for robot in population:
             if capture_video and robot == random_robot:
-                robot.simulate(capture_video=True, out=out, generation=generation)
+                robot.simulate(capture_video=True, out=out, generation=generation, render=True)
             else:
-                robot.simulate(generation=generation)
+                robot.simulate(generation=generation, render=False)  
             print(f"Robot {robot.robot_id} Fitness: {robot.fitness}")
 
         population.sort(key=lambda r: r.fitness, reverse=True)
         best_fitness = population[0].fitness
         print(f"Best fitness in generation {generation + 1}: {best_fitness}")
-        next_generation = []
-        next_generation.extend(robot.copy_without_surface() for robot in population[:POPULATION_SIZE // 5])
+        if generation == 0:
+            next_generation = []
+            next_generation.append(population[0].copy_without_surface())
+            next_generation.append(population[1].copy_without_surface())
 
-        # Breed new individuals from the top performers
-        while len(next_generation) < POPULATION_SIZE:
-            parent1, parent2 = random.sample(next_generation[:POPULATION_SIZE // 5], 2)
-            child_genome = crossover(parent1.genome, parent2.genome)
-            child_genome = mutate(child_genome)
-            new_robot = Robot(robot_id=len(next_generation))
-            new_robot.genome = child_genome
-            next_generation.append(new_robot)
+            for i in range(2, POPULATION_SIZE):
+                parent = random.choice(next_generation[:2])
+                child_genome = mutate(copy.deepcopy(parent.genome))
+                new_robot = Robot(robot_id=i)
+                new_robot.genome = child_genome
+                next_generation.append(new_robot)
+        else:
+            next_generation = []
+            next_generation.extend(robot.copy_without_surface() for robot in population[:2])
 
-        # Replace old population with the new one
+            # Breed new individuals from the top performers
+            while len(next_generation) < POPULATION_SIZE:
+                parent1, parent2 = random.sample(next_generation[:2], 2)
+                child_genome = crossover(parent1.genome, parent2.genome)
+                child_genome = mutate(child_genome)
+                new_robot = Robot(robot_id=len(next_generation))
+                new_robot.genome = child_genome
+                next_generation.append(new_robot)
+
         population = next_generation
 
-    # Release the video writer object after all generations are done
     out.release()
 
 def crossover(genome1, genome2):
