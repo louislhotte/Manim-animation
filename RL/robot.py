@@ -4,32 +4,28 @@ import pygame
 from footsoldier import Footsoldier
 from monsters import Monster
 import time
-import cv2  # Import OpenCV for video recording
-
-pygame.init()
+import cv2 
+import multiprocessing
 
 # Screen and world dimensions
 WORLD_WIDTH = 1200
 WORLD_HEIGHT = 800
-SIMULATION_TIME = 240 
+SIMULATION_TIME = 60 
 GAME_WIDTH = 1200
 GAME_HEIGHT = 800
 screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
 tile_image = pygame.image.load('RL/tile.png').convert()
 
 # Constants for genetic algorithm
-POPULATION_SIZE = 10
-GENOME_LENGTH = 500  # Number of actions in a sequence
+POPULATION_SIZE = 20
+GENOME_LENGTH = 10000  # Number of actions in a sequence
 MUTATION_RATE = 0.1
-NUM_GENERATIONS = 20
+NUM_GENERATIONS = 50
 
 # Possible actions for the bot
 ACTIONS = ['left', 'right', 'up', 'down', 'attack']
 
-# Pre-render the full background on a larger surface
-background_surface = pygame.Surface((WORLD_WIDTH, WORLD_HEIGHT))
-
-def draw_full_background(surface, tile_image):
+def draw_full_background(surface, tile_image, WORLD_HEIGHT, WORLD_WIDTH):
     tile_width = tile_image.get_width()
     tile_height = tile_image.get_height()
     
@@ -37,10 +33,7 @@ def draw_full_background(surface, tile_image):
         for x in range(0, WORLD_WIDTH, tile_width):
             surface.blit(tile_image, (x, y))
 
-# Generate the full background
-draw_full_background(background_surface, tile_image)
-
-def center_camera_on_player(player_position):
+def center_camera_on_player(player_position, GAME_WIDTH, GAME_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT):
     camera_x = player_position[0] - GAME_WIDTH // 2
     camera_y = player_position[1] - GAME_HEIGHT // 2
 
@@ -57,6 +50,7 @@ class Robot:
         self.fitness = 0
         self.player = None  # Initialize as None
         self.monsters = []  # Initialize as an empty list
+        self.generation = 1
 
     def evaluate_fitness(self, screen, seed):
         start_time = time.time()
@@ -88,7 +82,6 @@ class Robot:
         if self.player is None:
             raise ValueError(f"Player not initialized for robot {self.robot_id}")
         
-        # Simulate a single frame (basic environment interaction)
         camera_x, camera_y = center_camera_on_player(self.player.position)
         screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
         self.player.draw(camera_x, camera_y)
@@ -99,10 +92,9 @@ class Robot:
                     monster.handle_event(None, self.player)
                     monster.draw(screen, camera_x, camera_y)
 
-        # Display the robot ID and generation number
-        self.display_info(screen)
+        self.display_info(screen, self.generation)
 
-    def display_info(self, screen):
+    def display_info(self, screen, generation):
         font = pygame.font.Font(None, 36)
         text = font.render(f"Robot ID: {self.robot_id}  Generation: {generation + 1}", True, (255, 255, 255))
         screen.blit(text, (10, 10))
@@ -112,97 +104,3 @@ class Robot:
         random.seed(seed)
         return [Monster(position=(random.randint(0, WORLD_WIDTH), random.randint(0, WORLD_HEIGHT)),
                         monster_type='strong' if i % 5 == 0 else 'weak') for i in range(15)]
-
-def mutate(genome):
-    new_genome = copy.deepcopy(genome)
-    for i in range(len(new_genome)):
-        if random.random() < MUTATION_RATE:
-            new_genome[i] = random.choice(ACTIONS)
-    return new_genome
-
-def crossover(parent1, parent2):
-    crossover_point = random.randint(0, GENOME_LENGTH - 1)
-    return parent1[:crossover_point] + parent2[crossover_point:]
-
-def run_evolution_single_display(screen):
-    initial_seed = 34  # Consistent random seed for environment
-    
-    global generation
-    population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]
-
-    # Setup for video recording
-    video_filename = "robot_simulation.mp4"
-    fps = 20  # Frames per second for the video
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_out = cv2.VideoWriter(video_filename, fourcc, fps, (GAME_WIDTH, GAME_HEIGHT))
-
-    for generation in range(NUM_GENERATIONS):
-        print(f"Generation {generation + 1}")
-
-        for robot in population:
-            robot.evaluate_fitness(screen, initial_seed)
-
-        # Randomly choose one robot to display and record
-        robot_to_display = random.choice(population)
-
-        # Simulate and record the selected robot
-        for action_index, action in enumerate(robot_to_display.genome):
-            screen.blit(background_surface, (0, 0))
-            
-            if robot_to_display.player is None:
-                raise ValueError(f"Player not initialized for robot {robot_to_display.robot_id}")
-            
-            # Stop processing actions if the player is dead
-            if not robot_to_display.player.alive:
-                break
-            
-            if action == 'attack':
-                robot_to_display.player.attack(monsters=robot_to_display.monsters)
-            else:
-                robot_to_display.player.move(action)
-            
-            robot_to_display.simulate_frame(screen)
-            pygame.display.flip()
-            
-            # Capture the frame for the video
-            frame = pygame.surfarray.array3d(screen)
-            frame = cv2.transpose(frame)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            video_out.write(frame)
-            
-            time.sleep(0.05)
-
-        # Evaluate fitness for each robot after finishing its genome
-        for robot in population:
-            robot.fitness = robot.player.gold
-        
-        # Sort robots by fitness (higher is better)
-        population.sort(key=lambda r: r.fitness, reverse=True)
-        print(f"Best fitness: {population[0].fitness}")
-
-        # Create the next generation
-        next_population = population[:2]  # Keep the top 2 robots
-        
-        while len(next_population) < POPULATION_SIZE:
-            parent1, parent2 = random.sample(population[:10], 2)
-            child_genome = mutate(crossover(parent1.genome, parent2.genome))
-            child = Robot(robot_id=len(next_population))
-            child.genome = child_genome
-            next_population.append(child)
-        
-        population = next_population
-
-    print("Final genome of the best robot:", population[0].genome)
-
-    # Release the video writer
-    video_out.release()
-
-if __name__ == "__main__":
-    pygame.init()
-
-    screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
-    pygame.display.set_caption("Footsoldier Melee Simulation - AI")
-    
-    run_evolution_single_display(screen)
-
-    pygame.quit()
