@@ -70,6 +70,10 @@ class Robot:
             if time.time() - start_time > SIMULATION_TIME:
                 break
 
+            # Stop simulation if the player is dead
+            if not self.player.alive:
+                break
+
             if action == 'attack':
                 self.player.attack(monsters=self.monsters)
             else:
@@ -87,10 +91,11 @@ class Robot:
         screen.blit(background_surface, (0, 0), (camera_x, camera_y, GAME_WIDTH, GAME_HEIGHT))
         self.player.draw(camera_x, camera_y)
 
-        for monster in self.monsters:
-            if monster.alive:
-                monster.handle_event(None, self.player)
-                monster.draw(screen, camera_x, camera_y)
+        if self.player.alive:
+            for monster in self.monsters:
+                if monster.alive:
+                    monster.handle_event(None, self.player)
+                    monster.draw(screen, camera_x, camera_y)
 
         # Display the robot ID and generation number
         self.display_info(screen)
@@ -136,6 +141,10 @@ def run_evolution_single_display(screen):
             if robot_to_display.player is None:
                 raise ValueError(f"Player not initialized for robot {robot_to_display.robot_id}")
             
+            # Stop processing actions if the player is dead
+            if not robot_to_display.player.alive:
+                break
+            
             if action == 'attack':
                 robot_to_display.player.attack(monsters=robot_to_display.monsters)
             else:
@@ -176,4 +185,3 @@ if __name__ == "__main__":
     run_evolution_single_display(screen)
 
     pygame.quit()
-
