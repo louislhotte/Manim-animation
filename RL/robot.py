@@ -24,8 +24,10 @@ NUM_GENERATIONS = 50
 
 # Possible actions for the bot
 ACTIONS = ['left', 'right', 'up', 'down', 'attack']
+# Pre-render the full background on a larger surface
+background_surface = pygame.Surface((WORLD_WIDTH, WORLD_HEIGHT))
 
-def draw_full_background(surface, tile_image, WORLD_HEIGHT, WORLD_WIDTH):
+def draw_full_background(surface, tile_image, WORLD_HEIGHT=WORLD_HEIGHT, WORLD_WIDTH=WORLD_WIDTH):
     tile_width = tile_image.get_width()
     tile_height = tile_image.get_height()
     
@@ -33,7 +35,7 @@ def draw_full_background(surface, tile_image, WORLD_HEIGHT, WORLD_WIDTH):
         for x in range(0, WORLD_WIDTH, tile_width):
             surface.blit(tile_image, (x, y))
 
-def center_camera_on_player(player_position, GAME_WIDTH, GAME_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT):
+def center_camera_on_player(player_position):
     camera_x = player_position[0] - GAME_WIDTH // 2
     camera_y = player_position[1] - GAME_HEIGHT // 2
 

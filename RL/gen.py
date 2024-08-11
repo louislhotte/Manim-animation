@@ -44,7 +44,7 @@ def crossover(parent1, parent2):
     crossover_point = random.randint(0, GENOME_LENGTH - 1)
     return parent1[:crossover_point] + parent2[crossover_point:]
 
-def evaluate_robot_parallel(robot_genome, seed):
+def evaluate_robot_parallel(robot_genome, seed, generation):
     random.seed(seed)
     robot = Robot(robot_id=0)
     robot.genome = robot_genome
@@ -61,6 +61,9 @@ def run_evolution_parallel_display(screen):
     video_out = cv2.VideoWriter(video_filename, fourcc, fps, (GAME_WIDTH, GAME_HEIGHT))
 
     for generation in range(NUM_GENERATIONS):
+        for i, robot in enumerate(population):
+            robot.generation = generation
+
         print(f"Generation {generation + 1}")
         with multiprocessing.Pool() as pool:
             fitness_results = pool.starmap(
