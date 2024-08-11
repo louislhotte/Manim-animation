@@ -12,7 +12,7 @@ class Monster:
         if monster_type == 'strong':
             self.health = 200
             self.max_health = 200
-            self.attack_power = 20
+            self.attack_power = 15
             self.attack_range = 100  # Attack range for strong monsters
             self.speed = 2
             self.EXP = 10
@@ -72,7 +72,7 @@ class Monster:
         print(f"{self.monster_type.capitalize()} monster has died. Gained {self.EXP} EXP and {self.gold} Gold.")
         player.gold += self.gold
         player.exp += self.EXP
-        self.current_action = 'idle'  
+        self.current_action = 'idle'
 
     def take_damage(self, amount, player):
         """Reduces health by a specified amount and checks if the monster is still alive."""

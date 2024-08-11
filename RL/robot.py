@@ -19,7 +19,7 @@ tile_image = pygame.image.load('RL/tile.png').convert()
 
 # Constants for genetic algorithm
 POPULATION_SIZE = 10
-GENOME_LENGTH = 200  # Number of actions in a sequence
+GENOME_LENGTH = 500  # Number of actions in a sequence
 MUTATION_RATE = 0.1
 NUM_GENERATIONS = 20
 
@@ -60,28 +60,29 @@ class Robot:
 
     def evaluate_fitness(self, screen, seed):
         start_time = time.time()
-        
+
         # Initialize player and monsters for this robot
         random.seed(seed)
         self.player = Footsoldier((100, 100), screen)
         self.monsters = self.spawn_monsters(seed)
-        
+
         for action in self.genome:
-            # Check if simulation time has exceeded
             if time.time() - start_time > SIMULATION_TIME:
                 break
 
-            # Stop simulation if the player is dead
             if not self.player.alive:
                 break
 
             if action == 'attack':
-                self.player.attack(monsters=self.monsters)
+                hit = self.player.attack(monsters=self.monsters)
+                if hit:
+                    self.fitness += 1
             else:
                 self.player.move(action)
+
             self.simulate_frame(screen)
-        
-        self.fitness = self.player.gold
+
+        self.fitness += self.player.gold
 
     def simulate_frame(self, screen):
         if self.player is None:
@@ -124,7 +125,7 @@ def crossover(parent1, parent2):
     return parent1[:crossover_point] + parent2[crossover_point:]
 
 def run_evolution_single_display(screen):
-    initial_seed = 69  # Consistent random seed for environment
+    initial_seed = 34  # Consistent random seed for environment
     
     global generation
     population = [Robot(robot_id=i) for i in range(POPULATION_SIZE)]

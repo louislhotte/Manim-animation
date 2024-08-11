@@ -71,7 +71,7 @@ class Footsoldier:
         """Perform an attack, checking if any monster is in range in front of the footsoldier."""
         current_time = time.time()
         if current_time - self.last_attack_time < self.attack_cooldown:
-            return
+            return False  # Return False if the attack is on cooldown
 
         # Update the last attack time
         self.last_attack_time = current_time
@@ -79,6 +79,7 @@ class Footsoldier:
         self.current_action = 'attack'
         self.current_frame = 0 
 
+        # Determine the attack rectangle based on the direction of the footsoldier
         if self.direction == 'right':
             attack_rect = pygame.Rect(self.position.right, self.position.y, self.attack_range, self.position.height)
         elif self.direction == 'left':
@@ -88,10 +89,17 @@ class Footsoldier:
         elif self.direction == 'down':
             attack_rect = pygame.Rect(self.position.x, self.position.bottom, self.position.width, self.attack_range)
 
+        # Initialize a variable to track if a monster was hit
+        hit_monster = False
+
         for monster in monsters:
             if attack_rect.colliderect(monster.position) and monster.alive:
                 monster.take_damage(self.attack_power, self)
+                hit_monster = True 
                 print(f"Monster hit! Monster health: {monster.health}")
+
+        return hit_monster
+
 
     def take_damage(self, amount):
         """Reduces health by a specified amount and checks if the footsoldier is still alive."""
