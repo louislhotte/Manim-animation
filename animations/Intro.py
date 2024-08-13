@@ -3,7 +3,7 @@ from manim import *
 class Intro(Scene):
     def construct(self):
         intro_group = self.introduction("Koch Curve Animation", 
-                                            "Manim CE | Python ")
+                                            "Manim CE - Python ")
         self.play(FadeOut(intro_group))
         self.wait(1)
 
