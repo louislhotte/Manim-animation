@@ -2,8 +2,8 @@ from manim import *
 
 class Intro(Scene):
     def construct(self):
-        intro_group = self.introduction("Koch Curve Animation", 
-                                            "Manim CE - Python ")
+        intro_group = self.introduction("Randomness", 
+                                            "What is it and how do computers generate it?")
         self.play(FadeOut(intro_group))
         self.wait(1)
 
