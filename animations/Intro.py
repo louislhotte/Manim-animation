@@ -24,3 +24,12 @@ class Intro(Scene):
         self.wait(4)
         
         return VGroup(header, writer, line)
+    
+    def Outro(self, text):
+        header = Tex(text)
+        header.set_width(8)
+        from_pos = [header.get_left()[0] - 1, header.get_bottom()[1] - 0.5, 0]
+        to_pos = [header.get_right()[0] + 1, header.get_bottom()[1] - 0.5, 0]
+        line = Line(from_pos, to_pos)        
+        self.play(Write(header), Write(line))
+        self.wait(0.5)
