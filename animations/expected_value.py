@@ -2,38 +2,13 @@ from manim import *
 
 class ExpectedValueDice(Scene):
     def construct(self):
-        # intro_group = self.introduction("Expected Value Animation", 
-        #                                 "Handbook of Statistics - Part IV")
-        # self.play(FadeOut(intro_group))
-        # self.wait(1)
-        # self.dice_scene()
+        intro_group = self.introduction("Expected Value Animation", 
+                                        "Handbook of Statistics - Part IV")
+        self.play(FadeOut(intro_group))
+        self.wait(1)
+        self.dice_scene()
         self.explanations()
-        # Define a rounded square to represent the dice faces
-        
-
-        # # Display the formula for Expected Value
-        # formula = MathTex(
-        #     r"E[X] = \sum_{i=1}^{6} x_i f(x_i) = \sum_{i=1}^{6} x_i \times \frac{1}{6}"
-        # ).to_edge(UP)
-        # self.play(Write(formula))
-        
-        # # Show the calculated Expected Value
-        # expected_value_text = Text("Expected Value: 3.5").to_edge(DOWN)
-        # self.play(FadeIn(expected_value_text))
-
-        # # Animate Convergence
-        # avg_value = sum(np.random.randint(1, 7, 1000)) / 1000
-        # convergence_text = Text(f"Average of Rolls: {avg_value:.2f}").next_to(expected_value_text, DOWN)
-        # self.play(FadeIn(convergence_text))
-        
-        # # Show the convergence
-        # self.play(convergence_text.animate.to_edge(RIGHT))
-
-        # # Final summary
-        # summary = Text("As the number of rolls increases, \nthe average converges to the expected value: 3.5").to_edge(DOWN)
-        # self.play(Write(summary))
-
-        # self.wait(3)
+        self.outro()  
 
 
     def explanations(self):
@@ -43,28 +18,68 @@ class ExpectedValueDice(Scene):
         self.play(Transform(text, Text("The following simulation gives us the result of 100 throws").scale(0.5)))
         self.wait(2)
         self.play(FadeOut(text))
-        self.boxes()
+        average = self.boxes()
+        text = Text("Averaging the last 100 dice throws gives us a result of " + str(average)).scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        self.play(Transform(text, Text("Let's repeat the experiment").scale(0.5)))
+        self.wait(1)
+        self.play(FadeOut(text))
+        average = self.boxes()
+        text = Text("This time around, the experiment gave us an average value of " + str(average)).scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        self.play(Transform(text, Text("The expected value represents the value that we expect after an infinite number of experiments").scale(0.5)))
+        self.wait(2)
+        formula = MathTex(
+            r"E[X] = \sum_{i=1}^{6} x_i f(x_i) = \sum_{i=1}^{6} x_i \times \frac{1}{6}"
+        ).to_edge(UP)
+        self.play(Transform(text, formula))
+        expected_value_text = Text("Expected Value = 3.5").to_edge(ORIGIN).scale(0.6)
+        self.play(FadeIn(expected_value_text))
+        self.wait(3)
+        self.play(FadeOut(expected_value_text, text, formula))
     
 
     def boxes(self):
+        header = Tex("Simulation of 100 dice throws").scale(0.5)
+        header.set_width(8)
+        header.to_edge(UP)
+        from_pos = [header.get_left()[0] - 1, header.get_bottom()[1] - 0.25, 0]
+        to_pos = [header.get_right()[0] + 1, header.get_bottom()[1] - 0.25, 0]
+        line = Line(from_pos, to_pos)
+        self.play(Write(header), Write(line))
+        self.wait(0.5)
+
         num_boxes = 100
         grid = VGroup()
         num_columns = 10
         spacing = 0.6
+        roll_results = []  # Liste pour stocker les résultats des lancers
+
         for i in range(num_boxes):
             roll_result = np.random.randint(1, 7)
-            box = Square(side_length=1, fill_color=BLUE, fill_opacity=0.6, stroke_color=WHITE).scale(0.5)
-            label = Text(str(roll_result), font_size=24).move_to(box.get_center()).scale(0.3)  # Move the label inside the box
+            roll_results.append(roll_result)  # Ajouter le résultat du lancer à la liste
+            box = Square(side_length=1, fill_color=RED_B, fill_opacity=0.4, stroke_color=WHITE).scale(0.5)
+            label = Text(str(roll_result), font_size=24).move_to(box.get_center())  # Placer le label à l'intérieur de la boîte
             box_group = VGroup(box, label)
             row = i // num_columns
             col = i % num_columns
             box_group.move_to(np.array([col * spacing, -row * spacing, 0]))
             grid.add(box_group)
 
-        grid.move_to(ORIGIN)  # Center the entire grid on the screen
+        grid.move_to(ORIGIN - np.array([0.0, 0.25, 0.0]))
         self.play(FadeIn(grid, lag_ratio=0.1))
         self.wait(5)
-        self.play(FadeOut(grid))
+        self.play(FadeOut(grid, line, header))
+
+        # Calculer la moyenne des résultats
+        average = sum(roll_results) / num_boxes
+        # Formater la moyenne avec un chiffre après la virgule
+        average = round(average, 3)
+
+        return average
+
 
 
     def dice_scene(self):
