@@ -1,4 +1,5 @@
-import pygame, random
+import pygame
+import random
 
 pygame.init()
 
@@ -75,6 +76,15 @@ class Ground(pygame.sprite.Sprite):
     def update(self):
         self.rect.x -= GAME_SPEED
 
+class Boundary(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((SCREEN_WIDTH, 5))
+        self.image.fill(GROUND_COLOR)
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = SCREEN_HEIGHT - 5
+
 def is_off_screen(sprite):
     return sprite.rect.x < -sprite.rect.width
 
@@ -97,6 +107,10 @@ for i in range(2):
     pipes = get_random_pipes(SCREEN_WIDTH * i + 800)
     pipe_group.add(pipes[0])
     pipe_group.add(pipes[1])
+
+boundary_group = pygame.sprite.Group()
+boundary = Boundary()
+boundary_group.add(boundary)
 
 clock = pygame.time.Clock()
 
@@ -145,6 +159,7 @@ while running:
         bird_group.update()
         ground_group.update()
         pipe_group.update()
+        boundary_group.update()
 
         bird.draw_trail(screen)
         pygame.draw.ellipse(screen, BIRD_COLOR, bird.rect)
@@ -153,6 +168,8 @@ while running:
             screen.blit(pipe.image, pipe.rect)
         for ground in ground_group:
             screen.blit(ground.image, ground.rect)
+        for boundary in boundary_group:
+            screen.blit(boundary.image, boundary.rect)
         
         font = pygame.font.Font(None, 36)
         score_text = font.render(f'Score: {score}', True, BIRD_COLOR)
@@ -161,7 +178,8 @@ while running:
         pygame.display.update()
 
         if (pygame.sprite.spritecollideany(bird, ground_group) or
-                pygame.sprite.spritecollideany(bird, pipe_group)):
+                pygame.sprite.spritecollideany(bird, pipe_group) or
+                pygame.sprite.spritecollideany(bird, boundary_group)):
             game_over = True
     
     else:
