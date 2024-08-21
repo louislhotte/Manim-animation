@@ -31,9 +31,19 @@ class Bird(pygame.sprite.Sprite):
     def update(self):
         self.speed += GRAVITY
         self.rect.y += self.speed
-        self.trail.append(self.rect.copy())
+        self.trail.append((self.rect.centerx, self.rect.centery))
         if len(self.trail) > 20:
             self.trail.pop(0)
+
+    def draw_trail(self, screen):
+        if len(self.trail) > 1:
+            for i in range(1, len(self.trail)):
+                start_pos = self.trail[i - 1]
+                end_pos = self.trail[i]
+                alpha = int(255 * (i / len(self.trail)))
+                thickness = max(1, int(BIRD_SIZE * (i / len(self.trail))))
+                color = (alpha, alpha, alpha)
+                pygame.draw.line(screen, color, start_pos, end_pos, thickness)
 
     def bump(self):
         self.speed = -SPEED * 1.2
@@ -105,7 +115,6 @@ while running:
                 if not game_over:
                     bird.bump()
                 else:
-                    # Restart the game
                     game_over = False
                     score = 0
                     bird.rect.y = SCREEN_HEIGHT / 2
@@ -137,15 +146,13 @@ while running:
         ground_group.update()
         pipe_group.update()
 
-        for i, pos in enumerate(bird.trail):
-            alpha = 255 * (i / len(bird.trail))
-            color = (alpha, alpha, alpha)
-            pygame.draw.ellipse(screen, color, pos)
+        bird.draw_trail(screen)
+        pygame.draw.ellipse(screen, BIRD_COLOR, bird.rect)
         
         for pipe in pipe_group:
-            pygame.draw.rect(screen, PIPE_COLOR, pipe.rect)
+            screen.blit(pipe.image, pipe.rect)
         for ground in ground_group:
-            pygame.draw.rect(screen, GROUND_COLOR, ground.rect)
+            screen.blit(ground.image, ground.rect)
         
         font = pygame.font.Font(None, 36)
         score_text = font.render(f'Score: {score}', True, BIRD_COLOR)
@@ -158,7 +165,6 @@ while running:
             game_over = True
     
     else:
-        # Display "Game Over" and wait for user input
         font = pygame.font.Font(None, 74)
         game_over_text = font.render('Game Over', True, BIRD_COLOR)
         screen.blit(game_over_text, (SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 50))
