@@ -4,8 +4,8 @@ pygame.init()
 
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
-SPEED = 4
-GRAVITY = 0.5
+SPEED = 8
+GRAVITY = 1
 GAME_SPEED = 5
 
 PIPE_WIDTH = 50
@@ -36,7 +36,7 @@ class Bird(pygame.sprite.Sprite):
             self.trail.pop(0)
 
     def bump(self):
-        self.speed = -SPEED * 1.5
+        self.speed = -SPEED * 1.2
 
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, inverted, xpos, ysize):
@@ -91,6 +91,7 @@ for i in range(2):
 clock = pygame.time.Clock()
 
 score = 0
+game_over = False
 
 running = True
 while running:
@@ -101,45 +102,66 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
-                bird.bump()
+                if not game_over:
+                    bird.bump()
+                else:
+                    # Restart the game
+                    game_over = False
+                    score = 0
+                    bird.rect.y = SCREEN_HEIGHT / 2
+                    bird.speed = SPEED
+                    bird.trail.clear()
+                    pipe_group.empty()
+                    for i in range(2):
+                        pipes = get_random_pipes(SCREEN_WIDTH * i + 800)
+                        pipe_group.add(pipes[0])
+                        pipe_group.add(pipes[1])
 
-    screen.fill(BACKGROUND_COLOR)
+    if not game_over:
+        screen.fill(BACKGROUND_COLOR)
+        
+        if is_off_screen(ground):
+            ground_group.remove(ground)
+            new_ground = Ground(SCREEN_WIDTH - 20)
+            ground_group.add(new_ground)
+        
+        if is_off_screen(pipe_group.sprites()[0]):
+            pipe_group.remove(pipe_group.sprites()[0])
+            pipe_group.remove(pipe_group.sprites()[0])
+            pipes = get_random_pipes(SCREEN_WIDTH * 2)
+            pipe_group.add(pipes[0])
+            pipe_group.add(pipes[1])
+            score += 1
+
+        bird_group.update()
+        ground_group.update()
+        pipe_group.update()
+
+        for i, pos in enumerate(bird.trail):
+            alpha = 255 * (i / len(bird.trail))
+            color = (alpha, alpha, alpha)
+            pygame.draw.ellipse(screen, color, pos)
+        
+        for pipe in pipe_group:
+            pygame.draw.rect(screen, PIPE_COLOR, pipe.rect)
+        for ground in ground_group:
+            pygame.draw.rect(screen, GROUND_COLOR, ground.rect)
+        
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f'Score: {score}', True, BIRD_COLOR)
+        screen.blit(score_text, (10, 10))
+
+        pygame.display.update()
+
+        if (pygame.sprite.spritecollideany(bird, ground_group) or
+                pygame.sprite.spritecollideany(bird, pipe_group)):
+            game_over = True
     
-    if is_off_screen(ground):
-        ground_group.remove(ground)
-        new_ground = Ground(SCREEN_WIDTH - 20)
-        ground_group.add(new_ground)
-    
-    if is_off_screen(pipe_group.sprites()[0]):
-        pipe_group.remove(pipe_group.sprites()[0])
-        pipe_group.remove(pipe_group.sprites()[0])
-        pipes = get_random_pipes(SCREEN_WIDTH * 2)
-        pipe_group.add(pipes[0])
-        pipe_group.add(pipes[1])
-        score += 1
-
-    bird_group.update()
-    ground_group.update()
-    pipe_group.update()
-
-    for i, pos in enumerate(bird.trail):
-        alpha = 255 * (i / len(bird.trail))
-        color = (alpha, alpha, alpha)
-        pygame.draw.ellipse(screen, color, pos)
-    
-    for pipe in pipe_group:
-        pygame.draw.rect(screen, PIPE_COLOR, pipe.rect)
-    for ground in ground_group:
-        pygame.draw.rect(screen, GROUND_COLOR, ground.rect)
-    
-    font = pygame.font.Font(None, 36)
-    score_text = font.render(f'Score: {score}', True, BIRD_COLOR)
-    screen.blit(score_text, (10, 10))
-
-    pygame.display.update()
-
-    if (pygame.sprite.spritecollideany(bird, ground_group) or
-            pygame.sprite.spritecollideany(bird, pipe_group)):
-        running = False
+    else:
+        # Display "Game Over" and wait for user input
+        font = pygame.font.Font(None, 74)
+        game_over_text = font.render('Game Over', True, BIRD_COLOR)
+        screen.blit(game_over_text, (SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 50))
+        pygame.display.update()
 
 pygame.quit()
