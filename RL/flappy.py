@@ -85,6 +85,15 @@ class Boundary(pygame.sprite.Sprite):
         self.rect.x = 0
         self.rect.y = SCREEN_HEIGHT - 5
 
+class Ceiling(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((SCREEN_WIDTH, 5))
+        self.image.fill(GROUND_COLOR)
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+
 def is_off_screen(sprite):
     return sprite.rect.x < -sprite.rect.width
 
@@ -111,6 +120,10 @@ for i in range(2):
 boundary_group = pygame.sprite.Group()
 boundary = Boundary()
 boundary_group.add(boundary)
+
+ceiling_group = pygame.sprite.Group()
+ceiling = Ceiling()
+ceiling_group.add(ceiling)
 
 clock = pygame.time.Clock()
 
@@ -160,6 +173,7 @@ while running:
         ground_group.update()
         pipe_group.update()
         boundary_group.update()
+        ceiling_group.update()
 
         bird.draw_trail(screen)
         pygame.draw.ellipse(screen, BIRD_COLOR, bird.rect)
@@ -170,6 +184,8 @@ while running:
             screen.blit(ground.image, ground.rect)
         for boundary in boundary_group:
             screen.blit(boundary.image, boundary.rect)
+        for ceiling in ceiling_group:
+            screen.blit(ceiling.image, ceiling.rect)
         
         font = pygame.font.Font(None, 36)
         score_text = font.render(f'Score: {score}', True, BIRD_COLOR)
@@ -179,7 +195,8 @@ while running:
 
         if (pygame.sprite.spritecollideany(bird, ground_group) or
                 pygame.sprite.spritecollideany(bird, pipe_group) or
-                pygame.sprite.spritecollideany(bird, boundary_group)):
+                pygame.sprite.spritecollideany(bird, boundary_group) or
+                pygame.sprite.spritecollideany(bird, ceiling_group)):
             game_over = True
     
     else:
