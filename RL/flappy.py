@@ -27,12 +27,11 @@ class Bird(pygame.sprite.Sprite):
         self.rect = pygame.Rect(SCREEN_WIDTH / 6, SCREEN_HEIGHT / 2, BIRD_SIZE, BIRD_SIZE)
         self.speed = SPEED
         self.trail = []
-        self.horizontal_speed = 5  # Assume a constant horizontal speed
+        self.horizontal_speed = GAME_SPEED  
 
     def update(self):
         self.speed += GRAVITY
         self.rect.y += self.speed
-        # Update the trail
         for i in range(len(self.trail)):
             self.trail[i] = (self.trail[i][0] - self.horizontal_speed, self.trail[i][1])
         self.trail.append((self.rect.centerx, self.rect.centery))
