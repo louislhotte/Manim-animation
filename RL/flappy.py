@@ -21,17 +21,20 @@ GROUND_COLOR = (0, 0, 0)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Obstacle Game - Enhanced Version')
-
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.rect = pygame.Rect(SCREEN_WIDTH / 6, SCREEN_HEIGHT / 2, BIRD_SIZE, BIRD_SIZE)
         self.speed = SPEED
         self.trail = []
+        self.horizontal_speed = 5  # Assume a constant horizontal speed
 
     def update(self):
         self.speed += GRAVITY
         self.rect.y += self.speed
+        # Update the trail
+        for i in range(len(self.trail)):
+            self.trail[i] = (self.trail[i][0] - self.horizontal_speed, self.trail[i][1])
         self.trail.append((self.rect.centerx, self.rect.centery))
         if len(self.trail) > 20:
             self.trail.pop(0)
@@ -41,10 +44,7 @@ class Bird(pygame.sprite.Sprite):
             for i in range(1, len(self.trail)):
                 start_pos = self.trail[i - 1]
                 end_pos = self.trail[i]
-                alpha = int(255 * (i / len(self.trail)))
-                thickness = max(1, int(BIRD_SIZE * (i / len(self.trail))))
-                color = (alpha, alpha, alpha)
-                pygame.draw.line(screen, color, start_pos, end_pos, thickness)
+                pygame.draw.line(screen, (31, 31, 31), start_pos, end_pos, BIRD_SIZE // 2)
 
     def bump(self):
         self.speed = -SPEED * 1.2
