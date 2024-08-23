@@ -10,14 +10,14 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 class CombinedNeuralNetworkScene(Scene):
     def construct(self):
-        points = self.play_function_graph()
-        self.play_neural_network_approximation(points)
+        # points = self.play_function_graph()
+        self.play_neural_network_approximation()
 
     def play_function_graph(self):
         return PointGraph.construct(self)
 
-    def play_neural_network_approximation(self, points):
-        PlayNeuralNetworkApproximation.construct(self, points)
+    def play_neural_network_approximation(self):
+        PlayNeuralNetworkApproximation.construct(self)
 
 
 class PointGraph(Scene):
@@ -33,14 +33,14 @@ class PointGraph(Scene):
         
         ax = Axes(
             x_range=[-10, 10, 2], 
-            y_range=[-3, 3, 1], 
+            y_range=[-3, 6, 1], 
             x_length=10, 
             y_length=5,
             axis_config={"include_numbers": True}
         )
         ax.to_edge(DOWN, buff=1)
         points = [
-            ax.coords_to_point(x, 2 * np.sin(x) + np.cos(x) + np.random.uniform(-0.1, 0.1)) 
+            ax.coords_to_point(x, 0.5 * x * np.sin(x) + np.random.uniform(-0.1, 0.1)) 
             for x in np.linspace(-10, 10, 1000)
         ]
         dots = VGroup(*[Dot(point, color=BLUE, radius=0.015) for point in points])
@@ -69,7 +69,7 @@ class PointGraph(Scene):
         return [(x, 2 * np.sin(x) + np.cos(x) + np.random.uniform(-0.1, 0.1), 0) for x in np.linspace(-10, 10, 1000)]
 
 class PlayNeuralNetworkApproximation(Scene):
-    def construct(self, points):
+    def construct(self):
         header = Tex("Neural Network Approximation").scale(0.5)
         header.set_width(8)
         header.to_edge(UP)
@@ -82,14 +82,14 @@ class PlayNeuralNetworkApproximation(Scene):
         
         ax = Axes(
             x_range=[-12, 12, 2], 
-            y_range=[-3, 3, 1], 
+            y_range=[-3, 6, 1], 
             x_length=10, 
             y_length=5,
             axis_config={"include_numbers": True}
         )
         ax.to_edge(DOWN, buff=1)
         points = [
-            ax.coords_to_point(x, 2 * np.sin(x) + np.cos(x) + np.random.uniform(-0.1, 0.1)) 
+            ax.coords_to_point(x, 0.5 * x * np.sin(x) + np.random.uniform(-0.1, 0.1)) 
             for x in np.linspace(-10, 10, 1000)
         ]
         
@@ -107,14 +107,8 @@ class PlayNeuralNetworkApproximation(Scene):
         self.play(FadeIn(dots))
         self.play(FadeIn(mse_group), FadeIn(epoch_group))
         
-        model = MLPRegressor(
-            hidden_layer_sizes=(100,),   # More neurons since target seem periodic
-            max_iter=500,                # Allow more iterations for convergence
-            alpha=0.001,                 # Add some L2 regularization
-            learning_rate_init=0.001,    
-            solver='adam',               # Use Adam optimizer (default)
-            random_state=42              # For reproducibility
-        )
+        mlp = MLPRegressor(hidden_layer_sizes=(50, 50), activation='relu', solver='adam', 
+                   alpha=0.001, learning_rate='adaptive', max_iter=2000, random_state=42)
 
         X = np.array([x for x, y, z in points]).reshape(-1, 1)
         y = np.array([y for x, y, z in points])
@@ -125,7 +119,7 @@ class PlayNeuralNetworkApproximation(Scene):
         future_x_scaled = scaler.transform(future_x)
 
         approx_line = None
-        for epoch in range(1, 201):
+        for epoch in range(1, 51):
             model.fit(X_scaled, y)
             y_pred = model.predict(future_x_scaled)
             new_approx_line = ax.plot_line_graph(
@@ -153,6 +147,7 @@ class PlayNeuralNetworkApproximation(Scene):
                 ).arrange(RIGHT, buff=0.5).to_corner(DR)
                 self.play(FadeIn(legend))
             elif epoch in [1, 10, 20, 50, 100, 200, 500, 1000, 1800, 3000, 5000]:
+                print("EPOCH = ", epoch)
                 self.play(Transform(approx_line, new_approx_line))
                 self.play(Transform(mse_value, mse_value), Transform(epoch_value, epoch_value))
                 self.wait(0.5)
