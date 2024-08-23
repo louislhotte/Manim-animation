@@ -11,9 +11,17 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 class CombinedNeuralNetworkScene(Scene):
     def construct(self):
+        intro_group = self.introduction("Neural Networks", 
+                                        "Handbook of Statistics - Part IV")
+        self.play(FadeOut(intro_group))
+        self.wait(1)
         # points = self.play_function_graph()
         # self.play_neural_network_approximation()
-        self.play_explanations()
+        # self.play_explanations()
+        # self.play_maths()
+        self.play_neural_network_approximation_two()
+        self.Outro("Thanks for watching") 
+
 
     def play_function_graph(self):
         return PointGraph.construct(self)
@@ -23,6 +31,12 @@ class CombinedNeuralNetworkScene(Scene):
 
     def play_explanations(self):
         Explanations.construct(self)
+
+    def play_maths(self):
+        Maths.construct(self)
+    
+    def play_neural_network_approximation_two(self): 
+        PlayNeuralNetworkApproximationTwo.construct(self)
     
     def introduction(self, title1, title2):
         header = Tex(title1)
@@ -52,7 +66,70 @@ class CombinedNeuralNetworkScene(Scene):
         self.wait(0.5)
 
 
+class Maths(Scene):
+    def construct(self):
+        # Initial explanation
+        text = Text("Now you get the idea of what a neural network is").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
 
+        header = Tex("The Maths underlying").scale(0.4)
+        header.set_width(8)
+        header.to_edge(UP)
+        from_pos = [header.get_left()[0] - 1, header.get_bottom()[1] - 0.25, 0]
+        to_pos = [header.get_right()[0] + 1, header.get_bottom()[1] - 0.25, 0]
+        line = Line(from_pos, to_pos)
+        self.play(Write(header), Write(line))
+        self.wait(0.5)
+
+        self.play(Transform(text, Text("Mathematically, a neural network can be represented as:").scale(0.5)))
+        self.wait(2)
+        self.play(FadeOut(text))
+        
+        # Equation for the neural network output
+        equation = MathTex(
+            r"\mathbf{y}_k = f\left(\sum_{j} \mathbf{W}_{kj}^{(2)} \cdot f\left(\sum_{i} \mathbf{W}_{ji}^{(1)} \cdot \mathbf{x}_i + \mathbf{b}_j^{(1)}\right) + \mathbf{b}_k^{(2)}\right)"
+        ).scale(0.7).next_to(line, DOWN)
+        self.play(Write(equation))
+        self.wait(3)
+        
+        # Explanation of the equation
+        text = Tex("In this expression, each neuron in the hidden layer computes the weighted sum:").scale(0.5).next_to(equation, DOWN)
+        weighted_sum_hidden = MathTex(r"\mathbf{z}_j = \sum_{i} \mathbf{W}_{ji}^{(1)} \cdot \mathbf{x}_i + \mathbf{b}_j^{(1)}").scale(0.7).next_to(text, DOWN)
+        self.play(FadeIn(text, shift=DOWN))
+        self.wait(2)
+        self.play(FadeIn(weighted_sum_hidden, shift=DOWN))
+        self.wait(30)
+        
+        # Continue with the explanation of the output neuron
+        next_text = Tex("The output of each neuron is then:", r"").scale(0.5).next_to(weighted_sum_hidden, DOWN)
+        activation_hidden = MathTex(r"\mathbf{a}_j = f(\mathbf{z}_j)").scale(0.7).next_to(next_text, DOWN)
+        self.play(FadeIn(next_text, shift=DOWN))
+        self.wait(2)
+        self.play(FadeIn(activation_hidden, shift=DOWN))
+        self.wait(3)
+        
+        # Output layer explanation
+        output_text = Tex("Finally, the output layer computes:").scale(0.5).next_to(activation_hidden, DOWN)
+        output_equation = MathTex(
+            r"\mathbf{y}_k = f\left(\sum_{j} \mathbf{W}_{kj}^{(2)} \cdot \mathbf{a}_j + \mathbf{b}_k^{(2)}\right)"
+        ).scale(0.7).next_to(output_text, DOWN)
+        self.play(FadeIn(output_text, shift=DOWN))
+        self.wait(2)
+        self.play(FadeIn(output_equation, shift=DOWN))
+        self.wait(3)
+        self.play(FadeOut(equation), FadeOut(text), FadeOut(weighted_sum_hidden), FadeOut(next_text), FadeOut(activation_hidden), FadeOut(output_text), FadeOut(output_equation))
+
+        # Final explanation about activation function
+        activation_text = Text("The activation function introduces non-linearity,").scale(0.5)
+        activation_text2 = Text("which allows the network to model complex, non-linear relationships.").scale(0.5).next_to(activation_text, DOWN)
+        self.play(FadeIn(activation_text))
+        self.play(FadeIn(activation_text2))
+        self.wait(20)
+
+        self.play(FadeOut(activation_text), FadeOut(activation_text2), FadeOut(header), FadeOut(line))
+        
+        
 class Explanations(Scene):
     def construct(self):
         text = Text("But...How does it work really?").scale(0.5)
@@ -90,8 +167,9 @@ class Explanations(Scene):
 
         for i, layer_size in enumerate(layers):
             layer_neurons = []
+            colors = { 0 : BLUE, 1: RED, 2: RED, 3: GREEN }
             for j in range(layer_size):
-                neuron = Circle(radius=neuron_radius, color=BLUE)
+                neuron = Circle(radius=neuron_radius, color=colors[i])
                 neuron.move_to(np.array([i * layer_spacing - center_offset + 0.5, j * neuron_spacing - (layer_size - 1) / 2 * neuron_spacing - 1.5, 0]))
                 layer_neurons.append(neuron)
                 all_neurons.add(neuron)
@@ -107,7 +185,7 @@ class Explanations(Scene):
                     connections.append(connection)
         all_connections = VGroup(*connections)
         self.wait(20)
-        self.play(FadeOut(all_connections), FadeOut(all_neurons))
+        self.play(FadeOut(all_connections), FadeOut(all_neurons), FadeOut(header), FadeOut(line))
 
 class PointGraph(Scene):
     def construct(self):
@@ -237,3 +315,132 @@ class PlayNeuralNetworkApproximation(Scene):
         self.wait(2)
         self.play(FadeOut(ax), FadeOut(dots), FadeOut(mse_group), 
                   FadeOut(iter_group), FadeOut(approx_line), FadeOut(legend), FadeOut(header), FadeOut(line))
+
+
+class PlayNeuralNetworkApproximationTwo(Scene):
+    def construct(self):
+        text = Text("At the end of the day, creating a decent neural network requires two things").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        text2 = Text("   - Sufficient training data").scale(0.5).next_to(text, DOWN)
+        text3 = Text("   - A good model").scale(0.5).next_to(text2, DOWN)
+        self.play(FadeIn(text2))
+        self.wait(1)
+        self.play(FadeIn(text3))
+        self.wait(20)
+        self.play(FadeOut(text), FadeOut(text2), FadeOut(text3))
+
+        text = Text("In the previous simulation, I iterated many times to find a good architecture").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        text2 = Text("There were many hidden layers, and many neurons").scale(0.5).next_to(text, DOWN)
+        text3 = Text("It allows us to capture the complexity of functions faster").scale(0.5).next_to(text2, DOWN)
+        self.play(FadeIn(text2))
+        self.wait(1)
+        self.play(FadeIn(text3))
+        self.wait(20)
+        self.play(FadeOut(text), FadeOut(text2), FadeOut(text3))
+
+        text = Text("Let's reduce the number of neurons from 50 to 3, to make it obvious").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        self.play(FadeOut(text))
+
+        header = Tex("Neural Network Approximation").scale(0.5)
+        header.set_width(8)
+        header.to_edge(UP)
+        from_pos = [header.get_left()[0] - 1, header.get_bottom()[1] - 0.25, 0]
+        to_pos = [header.get_right()[0] + 1, header.get_bottom()[1] - 0.25, 0]
+        line = Line(from_pos, to_pos)
+        self.play(Write(header), Write(line))
+        self.wait(0.5)
+        
+        ax = Axes(
+            x_range=[-12, 12, 2], 
+            y_range=[-6, 6, 2], 
+            x_length=10, 
+            y_length=5,
+            axis_config={"include_numbers": True}
+        )
+        ax.to_edge(DOWN, buff=1)
+        x_values = np.linspace(-10, 10, 1000)
+        y_values = 0.5 * x_values * np.sin(x_values) + np.random.uniform(-0.1, 0.1, size=1000)
+        points = [ax.coords_to_point(x, y) for x, y in zip(x_values, y_values)]
+        
+        dots = VGroup(*[Dot(point, color=BLUE, radius=0.015) for point in points])
+        
+        mse_text = Tex("MSE:").scale(0.7).next_to(ax, np.array([-1.5, 0.5, 0.0]))
+        mse_value = DecimalNumber(0, num_decimal_places=2).scale(0.7).next_to(mse_text, RIGHT)
+        mse_group = VGroup(mse_text, mse_value)
+        
+        iter_text = Tex("Iterations:").scale(0.7).next_to(mse_text, DOWN, buff=0.15)
+        iter_value = DecimalNumber(1, num_decimal_places=0).scale(0.7).next_to(iter_text, RIGHT)
+        iter_group = VGroup(iter_text, iter_value)
+        
+        self.play(FadeIn(ax))
+        self.play(FadeIn(dots))
+        self.play(FadeIn(mse_group), FadeIn(iter_group))
+        
+        X = x_values.reshape(-1, 1)
+        y = y_values
+        
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        future_x = np.linspace(-10, 10, 1000).reshape(-1, 1)
+        future_x_scaled = scaler.transform(future_x)
+        
+        max_iters = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 400, 500, 1000]
+        approx_line = None
+        
+        legend = VGroup(
+            Dot(color=BLUE).scale(1.2),
+            Tex("Training Data Points").scale(0.7),
+            Line(color=RED).scale(0.7),
+            Tex("NN Predictions").scale(0.7)
+        ).arrange(RIGHT, buff=0.5).to_corner(DR)
+        self.play(FadeIn(legend))
+
+        for idx, max_iter in enumerate(max_iters):
+            model = MLPRegressor(hidden_layer_sizes=(3, 3), activation='relu', solver='adam', 
+                                 alpha=0.001, learning_rate='adaptive', max_iter=max_iter, random_state=42)
+            model.fit(X_scaled, y)
+            y_pred = model.predict(future_x_scaled)
+            new_approx_line = ax.plot_line_graph(
+                future_x.flatten(), 
+                y_pred, 
+                add_vertex_dots=False,
+                line_color=RED,
+            )
+            mse = mean_squared_error(y, model.predict(X_scaled))
+            mse_value.set_value(mse)
+            iter_value.set_value(max_iter)
+            if idx == 0:
+                self.play(Create(new_approx_line))
+                approx_line = new_approx_line
+            else:
+                self.play(Transform(approx_line, new_approx_line))
+            self.wait(1)
+        
+        self.wait(2)
+        self.play(FadeOut(ax), FadeOut(dots), FadeOut(mse_group), 
+                  FadeOut(iter_group), FadeOut(approx_line), FadeOut(legend))
+        
+
+        text = Text("Of course, the architecture of the layers is not the only thing that matters").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        text2 = Text("Bias and variance tradeoff, iteration, choosing the right activation functions...").scale(0.5).next_to(text, DOWN)
+        text3 = Text("All of these do matter in the choice of your model").scale(0.5).next_to(text2, DOWN)
+        self.play(FadeIn(text2))
+        self.wait(1)
+        self.play(FadeIn(text3))
+        self.wait(20)
+        self.play(FadeOut(text), FadeOut(text2), FadeOut(text3))
+
+
+        text = Text("But if done correctly, you can provide excellent forecasts on complex data").scale(0.5)
+        self.play(FadeIn(text))
+        self.wait(1)
+        self.play(FadeOut(text))
+
+        self.play(FadeOut(header), FadeOut(line))
