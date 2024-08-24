@@ -12,13 +12,13 @@ warnings.filterwarnings("ignore", category=ConvergenceWarning)
 class CombinedNeuralNetworkScene(Scene):
     def construct(self):
         intro_group = self.introduction("Neural Networks", 
-                                        "Handbook of Statistics - Part IV")
+                                        "Handbook of Statistics - Part V")
         self.play(FadeOut(intro_group))
         self.wait(1)
-        # points = self.play_function_graph()
-        # self.play_neural_network_approximation()
-        # self.play_explanations()
-        # self.play_maths()
+        points = self.play_function_graph()
+        self.play_neural_network_approximation()
+        self.play_explanations()
+        self.play_maths()
         self.play_neural_network_approximation_two()
         self.Outro("Thanks for watching") 
 
@@ -205,21 +205,21 @@ class PointGraph(Scene):
             y_length=5,
             axis_config={"include_numbers": True}
         )
-        ax.to_edge(DOWN, buff=2)
+        ax.to_edge(DOWN, buff=0.5)
         points = [
             ax.coords_to_point(x, 0.5 * x * np.sin(x) + np.random.uniform(-0.1, 0.1)) 
             for x in np.linspace(-10, 10, 1000)
         ]
         dots = VGroup(*[Dot(point, color=BLUE, radius=0.015) for point in points])
         
-        formula = MathTex("y \\approx 2\\sin(x) + \\cos(x)").scale(0.5).next_to(ax, UP)
+        formula = MathTex("y \\approx 0.5x \\cdot \\sin(x)").scale(0.4).next_to(ax, UP)
         formula_rect = SurroundingRectangle(formula, color=WHITE)
         
         x_label = MathTex("x").scale(0.7).next_to(ax, RIGHT, buff=0.1)
         
         legend = VGroup(
-            Line(color=BLUE).scale(0.5),
-            MathTex("y \\approx 2\\sin(x) + \\cos(x)").scale(0.7)
+            Line(color=BLUE).scale(0.4),
+            MathTex("y \\approx 0.5x \\cdot \\sin(x)").scale(0.5)
         ).arrange(RIGHT, buff=0.2).to_corner(DR)
         
         self.play(FadeIn(ax))
@@ -434,7 +434,7 @@ class PlayNeuralNetworkApproximationTwo(Scene):
         self.play(FadeIn(text2))
         self.wait(1)
         self.play(FadeIn(text3))
-        self.wait(20)
+        self.wait(60)
         self.play(FadeOut(text), FadeOut(text2), FadeOut(text3))
 
 
