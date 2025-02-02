@@ -15,6 +15,7 @@ This project is dedicated to creating animations using Manim, a mathematical eng
 - Statistic and parametric models [ENG]: [Handbook of statistics - Part I](https://youtu.be/gGh_hHVSbD8)
 - Gaussian Distribution Visualisation [ENG]: [Handbook of statistics - Part II](https://youtu.be/vMAus69cC74)
 - Taylor Series [ENG]: [Handbook of statistics - Part III](https://youtu.be/qcLvkmPo7xo)
+- KMeans Clustering using 3Blue1Brown's manim library [ENG](https://youtu.be/HZLAqS1Dtg8?si=SpvLudKwOLQ3VeSP)
 
 ### Files
 - 'XXXXX.py' : Animation python file used to generate videos and create media folder of wanted quality.
