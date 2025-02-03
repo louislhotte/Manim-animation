@@ -2,8 +2,8 @@ from manim import *
 
 class Intro(Scene):
     def construct(self):
-        intro_group = self.introduction("Introduction to Python - Core Concepts", 
-                                            "Variables, DP, Easy leetcode guide")
+        intro_group = self.introduction("Galton Board Animation with Manim", 
+                                            "Python | Statistics")
         self.play(FadeOut(intro_group))
         self.wait(1)
 
