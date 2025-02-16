@@ -100,7 +100,7 @@ class Scene2_2(MovingCameraScene):
         )
         img.scale(30)
         img_values = plt.imread("images/2_mnist.png")[:, :]
-
+        self.wait(1)
         # Lattice going on top of the image
 
         lattice = NumberPlane(
@@ -175,7 +175,7 @@ class Scene2_2(MovingCameraScene):
             ),
         )
         self.play(FadeIn(img, lattice))
-
+        self.wait(2)
         # Pan camera to the top of the image
 
         self.play(
@@ -212,11 +212,13 @@ class Scene2_2(MovingCameraScene):
                 # Add to the group
                 filter_text2.add(text)
 
-        self.play(Transform(filter_text1, filter_text2), run_time=1)
+        self.play(Transform(filter_text1, filter_text2), run_time=3)
+        self.wait(1)
 
         # Transform image into values
 
-        self.play(FadeOut(img), FadeIn(values), run_time=1)
+        self.play(FadeOut(img), FadeIn(values), run_time=3)
+        self.wait(1)
 
         # Filter and latice highlight
 
@@ -325,10 +327,12 @@ class Scene2_2(MovingCameraScene):
         self.play(
             Create(highlight_filter),
             Create(highlight_lattice),
+            run_time=2
         )
         self.play(
             Write(connection_line1),
             Write(connection_line2),
+            run_time=3
         )
         self.play(Create(formula))
 
@@ -339,7 +343,7 @@ class Scene2_2(MovingCameraScene):
             font_size=12,
         ).move_to(formula.get_center())
 
-        self.wait(0.8)
+        self.wait(2)
 
         self.play(
             LaggedStart(
@@ -347,7 +351,7 @@ class Scene2_2(MovingCameraScene):
                 Transform(formula, formula_target),
                 lag_ratio=0.3,
             ),
-            run_time=1,
+            run_time=3,
         )
 
         divide_line = Line(
@@ -362,17 +366,17 @@ class Scene2_2(MovingCameraScene):
         )
 
         self.play(
-            LaggedStart(Create(divide_line), Write(normalization), lag_ratio=0.2),
+            LaggedStart(Create(divide_line), Write(normalization), lag_ratio=0.2)
         )
 
         result = MathTex(r"= 175", font_size=12).next_to(normalization, DOWN, buff=0.2) # (0+184+253+107+255+211+212+254+98) / 9*1=175
 
-        self.play(Write(result))
-        self.wait()
+        self.play(Write(result), run_time=1)
+        self.wait(2)
 
         formula = VGroup(formula, divide_line, normalization, result)
 
-        self.play(FadeOut(formula), run_time=2)
+        self.play(FadeOut(formula), run_time=5)
 
         # Get back to the original position
 
@@ -389,10 +393,8 @@ class Scene2_2(MovingCameraScene):
                 lag_ratio=0.1,
             ),
         )
-
-        self.play(FadeOut(values, lattice), run_time=1)
-
-        self.wait(2)
+        self.wait(10)
+        self.play(FadeOut(values, lattice), run_time=3)
 
 
 # Render the scene
