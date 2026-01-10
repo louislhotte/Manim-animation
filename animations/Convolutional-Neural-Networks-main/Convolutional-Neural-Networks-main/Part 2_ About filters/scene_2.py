@@ -396,7 +396,6 @@ class Scene2_2(MovingCameraScene):
         self.wait(10)
         self.play(FadeOut(values, lattice), run_time=3)
 
-
 # Render the scene
 if __name__ == "__main__":
 
