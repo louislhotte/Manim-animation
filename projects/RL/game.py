@@ -1,3 +1,5 @@
+import os
+
 import pygame
 from footsoldier import *
 from monsters import Monster
@@ -16,7 +18,7 @@ pygame.display.set_caption("Footsoldier Melee Simulation")
 clock = pygame.time.Clock()
 
 # Load the tile image
-tile_image = pygame.image.load('RL/tile.png').convert()
+tile_image = pygame.image.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tile.png")).convert()
 
 # Pre-render the full background on a larger surface
 WORLD_WIDTH = 2000

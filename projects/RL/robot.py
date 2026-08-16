@@ -1,3 +1,4 @@
+import os
 import random
 import copy
 import pygame
@@ -14,7 +15,7 @@ SIMULATION_TIME = 60
 GAME_WIDTH = 1200
 GAME_HEIGHT = 800
 screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT))
-tile_image = pygame.image.load('RL/tile.png').convert()
+tile_image = pygame.image.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tile.png")).convert()
 
 # Constants for genetic algorithm
 POPULATION_SIZE = 20

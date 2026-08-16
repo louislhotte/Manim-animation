@@ -1,3 +1,5 @@
+import os
+
 import pygame
 from footsoldier import *
 from monsters import Monster
@@ -25,7 +27,7 @@ clock = pygame.time.Clock()
 font = pygame.font.Font(None, 36)  # Font for displaying text
 
 # Load the tile image
-tile_image = pygame.image.load('RL/tile.png').convert()
+tile_image = pygame.image.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tile.png")).convert()
 
 # Pre-render the full background on a larger surface
 WORLD_WIDTH = 1200

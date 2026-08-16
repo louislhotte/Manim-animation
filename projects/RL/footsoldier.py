@@ -1,8 +1,13 @@
-import pygame
+import os
 import time
 
+import pygame
+
+
 class Footsoldier:
-    def __init__(self, position, screen, team_color=None, sprite_folder="C:\\Users\\Louis\\OneDrive\\The Eggcellent\\Coding Projects\\2024\\Manim\\RL\\knight\\"):
+    def __init__(self, position, screen, team_color=None, sprite_folder=None):
+        if sprite_folder is None:
+            sprite_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "knight") + os.sep
         self.position = pygame.Rect(position[0], position[1], 50, 50)
         self.screen = screen
         self.team_color = team_color
