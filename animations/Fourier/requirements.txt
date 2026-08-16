@@ -1,0 +1,6 @@
+# Self-contained deps for the Fourier / epicycle drawing (see render.sh).
+# Pinned to match the rest of the repo's Manim setup.
+manim==0.18.1
+numpy
+scipy
+Pillow
