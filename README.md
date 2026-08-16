@@ -22,3 +22,5 @@ This project is dedicated to creating animations using Manim, a mathematical eng
 ### Files
 - 'XXXXX.py' : Animation python file used to generate videos and create media folder of wanted quality.
 - `README.md`: This README file.
+
+<!-- identity test — temporary, will be reverted -->
