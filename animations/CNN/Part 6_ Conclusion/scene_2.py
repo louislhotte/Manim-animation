@@ -474,9 +474,19 @@ class Scene6_2(MovingCameraScene):
             .scale(0.8)
             .shift(3 * DOWN + RIGHT * 3)
         )
+        # The convolutional side does NOT change: a filter's weights are shared
+        # across the whole image, so its parameter count is independent of image
+        # size. Make that explicit so it doesn't read as an oversight.
+        conv_weight_large_txt = (
+            Tex("Still 810 parameters", color=BLUE)
+            .scale(0.8)
+            .shift(3 * DOWN + LEFT * 3)
+        )
         self.play(
             Transform(fc_weight_txt, fc_weight_large_txt),
+            Transform(conv_weight_txt, conv_weight_large_txt),
         )
+        self.play(Indicate(conv_weight_txt, color=BLUE))
 
         # FadeOut everything
 

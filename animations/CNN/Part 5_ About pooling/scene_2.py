@@ -4,56 +4,10 @@ import numpy as np
 
 
 class Scene5_2(MovingCameraScene):
-    def create_matrix_filter(self, matrix_content):
-        matrix_grid = NumberPlane(
-            x_range=[-1, 1],
-            y_range=[-1, 1],
-            x_length=2,
-            y_length=2,
-            background_line_style={
-                "stroke_color": GRAY,
-                "stroke_width": 2,
-                "stroke_opacity": 1,
-            },
-            axis_config={
-                "stroke_color": GRAY,
-                "stroke_width": 2,
-                "include_numbers": False,
-            },
-            faded_line_ratio=0,
-        ).move_to(ORIGIN)
-
-        # Directly using x_length and y_length for rectangle
-        rectangle = Rectangle(width=2, height=2, color=GRAY, stroke_width=2).move_to(
-            ORIGIN
-        )
-        cell_width_filter = matrix_grid.get_x_unit_size()
-
-        filter_text = VGroup()
-        for i in range(2):
-            for j in range(2):
-                coords = matrix_grid.coords_to_point(j, i)
-                val = matrix_content[j][i]
-                text = Tex(f"{val:.0f}", color=BLUE)
-                text.move_to(
-                    coords + LEFT * cell_width_filter / 2 + DOWN * cell_width_filter / 2
-                ).scale(0.5)
-                filter_text.add(text)
-
-        return matrix_grid, filter_text, rectangle
-
-    def create_prism(self, dimensions, fill_color, stroke_width):
-        prism = Prism(
-            dimensions=dimensions, fill_color=fill_color, stroke_width=stroke_width
-        )
-        prism.rotate(-85 * DEGREES, axis=UP, about_point=ORIGIN).rotate(
-            20 * DEGREES, axis=RIGHT, about_point=ORIGIN
-        )
-        return prism
-
     def construct(self):
         self.wait(2)
 
+        # --- Source image (28x28) + its lattice ------------------------------ #
         img = ImageMobject("images/0_mnist.png").set_resampling_algorithm(
             RESAMPLING_ALGORITHMS["box"]
         )
@@ -63,14 +17,17 @@ class Scene5_2(MovingCameraScene):
             RESAMPLING_ALGORITHMS["box"]
         )
         pool_img.scale(30)
-        # Pooled pixel intensities (14x14, values in [0, 1]) used to redraw the
-        # down-sampled image cell by cell as the kernel sweeps across.
+
+        # Pixel intensities in [0, 1] for the source (28x28) and the pooled
+        # (14x14) images. The source values drive the worked example; the pooled
+        # values are dropped in cell by cell as the window sweeps.
+        src_values = (
+            np.asarray(Image.open("images/0_mnist.png").convert("L"), dtype=float) / 255.0
+        )
         pooled_values = (
             np.asarray(Image.open("images/0_mnist_pooled.png").convert("L"), dtype=float)
             / 255.0
         )
-
-        # Lattice going on top of the image
 
         lattice_img = NumberPlane(
             x_range=(-14, 14, 1),
@@ -85,20 +42,17 @@ class Scene5_2(MovingCameraScene):
                 "stroke_width": 1,
                 "include_numbers": False,
             },
-            faded_line_ratio=0,  # Disable fading of grid lines
+            faded_line_ratio=0,
         )
-
         lattice_img.scale(img.get_height() / lattice_img.get_height())
-        cell_width_lattice = lattice_img.get_x_unit_size()
+        cell_src = lattice_img.get_x_unit_size()
 
         lattice_img_rectangle = Rectangle(
-            height=cell_width_lattice * 28,
-            width=cell_width_lattice * 28,
-            color=GRAY,
-            stroke_width=2,
+            height=cell_src * 28, width=cell_src * 28, color=GRAY, stroke_width=2
         )
         lattice_img_obj = VGroup(lattice_img, lattice_img_rectangle)
 
+        # --- Pooled image lattice (14x14), parked on the right --------------- #
         lattice_img_pool = NumberPlane(
             x_range=(-7, 7, 1),
             y_range=(-7, 7, 1),
@@ -112,118 +66,82 @@ class Scene5_2(MovingCameraScene):
                 "stroke_width": 1,
                 "include_numbers": False,
             },
-            faded_line_ratio=0,  # Disable fading of grid lines
+            faded_line_ratio=0,
         )
-
         lattice_img_pool.scale(pool_img.get_height() / lattice_img_pool.get_height())
-        cell_width_lattice = lattice_img_pool.get_x_unit_size()
+        cell_pool = lattice_img_pool.get_x_unit_size()
 
         lattice_img_pool_rectangle = Rectangle(
-            height=cell_width_lattice * 14,
-            width=cell_width_lattice * 14,
-            color=GRAY,
-            stroke_width=2,
+            height=cell_pool * 14, width=cell_pool * 14, color=GRAY, stroke_width=2
         )
         lattice_img_pool_obj = VGroup(
             lattice_img_pool, lattice_img_pool_rectangle
         ).shift(4 * RIGHT)
 
-        # Display the images
-
-        self.play(
-            FadeIn(img),
-            FadeIn(lattice_img_obj),
-        )
-
+        # Show the source, then slide it to the left to make room.
+        self.play(FadeIn(img), FadeIn(lattice_img_obj))
         self.wait()
         self.play(
             lattice_img_obj.animate.shift(4 * LEFT).scale(0.6),
             img.animate.shift(4 * LEFT).scale(0.6),
         )
 
-        # Display the kernel
+        # Geometry after the move (kept fixed for the whole sweep).
+        cell_src = lattice_img.get_x_unit_size()
+        cell_pool = lattice_img_pool.get_x_unit_size()
+        src_ul = lattice_img.get_corner(UL)
+        pool_ul = lattice_img_pool.get_corner(UL)
 
-        matrix_content1 = [
-            [1, 1],
-            [1, 1],
-        ]
+        def src_center(x, y):
+            return src_ul + (2 * x + 1) * cell_src * RIGHT + (2 * y + 1) * cell_src * DOWN
 
-        matrix_grid, filter_text1, filter_rectangle = self.create_matrix_filter(
-            matrix_content1
-        )
-        filter_obj1 = VGroup(matrix_grid, filter_text1, filter_rectangle)
-        filter_obj1.shift(RIGHT * 2).scale(2)
+        def pool_center(x, y):
+            return pool_ul + (x + 0.5) * cell_pool * RIGHT + (y + 0.5) * cell_pool * DOWN
 
-        # Display the parameters
+        # --- Pooling parameters --------------------------------------------- #
+        title = Tex("Average pooling").scale(0.9)
+        params = Tex(r"Window: $2\times2$ \quad Stride: 2").scale(0.7)
+        params.next_to(title, DOWN, buff=0.2)
+        param_group = VGroup(title, params).move_to(3.2 * UP)
+        self.play(FadeIn(param_group))
 
-        text_stride = Tex("Stride: 2").scale(0.9)
-        text_width = Tex("Width: 2").scale(0.9).next_to(text_stride, LEFT)
+        # --- The 2x2 window (a plain box, not a grid of ones) --------------- #
+        # Feature one window (row 8, col 10) that straddles the digit so the
+        # worked example uses a real mix of values rather than the black corner.
+        fy, fx = 8, 10
+        window = Square(side_length=2 * cell_src, color=RED, stroke_width=3)
+        window.set_fill(RED, opacity=0.15)
+        window.move_to(src_center(fx, fy))
+        self.play(Create(window))
 
-        parameters = VGroup(text_stride, text_width)
-        parameters.move_to(ORIGIN + 3 * UP)
-
-        self.play(FadeIn(parameters), run_time=1)
-
-        self.play(FadeIn(filter_obj1), run_time=1)
-
-        # Move the kernel to the image
-
-        cell_width_lattice = lattice_img.get_x_unit_size()
-        cell_width_lattice_pool = lattice_img_pool.get_x_unit_size()
-        cell_width_filter = matrix_grid.get_x_unit_size()
-
-        coords = (
-            lattice_img.get_corner(UL)
-            + cell_width_lattice * RIGHT
-            + cell_width_lattice * DOWN
-        )
-        self.play(
-            filter_obj1.animate.move_to(coords).scale(
-                cell_width_lattice / cell_width_filter
-            ),
-            run_time=1,
-        )
-
-        # Create individual pixels of the blurred image
-
-        self.play(filter_obj1.animate.set_color(RED), run_time=0.3)
-
+        # Output cell + the two red guide lines linking window -> output cell.
         rectangle_pool = Rectangle(
-            height=cell_width_lattice_pool,
-            width=cell_width_lattice_pool,
-            color=RED,
-            stroke_width=2,
-        ).move_to(
-            lattice_img_pool.get_corner(UL)
-            + 0.5 * cell_width_lattice_pool * RIGHT
-            + 0.5 * cell_width_lattice_pool * DOWN
-        )
+            height=cell_pool, width=cell_pool, color=RED, stroke_width=3
+        ).move_to(pool_center(fx, fy))
 
-        kernel_top_line = Line(
-            filter_obj1.get_corner(UR),
-            rectangle_pool.get_corner(UL),
-            color=RED,
-            stroke_width=2,
-        ).add_updater(
-            lambda l: l.become(
+        def link(a_corner, b_corner):
+            return Line(a_corner(), b_corner(), color=RED, stroke_width=2)
+
+        top_line = link(
+            lambda: window.get_corner(UR), lambda: rectangle_pool.get_corner(UL)
+        )
+        top_line.add_updater(
+            lambda m: m.become(
                 Line(
-                    filter_obj1.get_corner(UR),
+                    window.get_corner(UR),
                     rectangle_pool.get_corner(UL),
                     color=RED,
                     stroke_width=2,
                 )
             )
         )
-
-        kernel_bottom_line = Line(
-            filter_obj1.get_corner(DR),
-            rectangle_pool.get_corner(DL),
-            color=RED,
-            stroke_width=2,
-        ).add_updater(
-            lambda l: l.become(
+        bottom_line = link(
+            lambda: window.get_corner(DR), lambda: rectangle_pool.get_corner(DL)
+        )
+        bottom_line.add_updater(
+            lambda m: m.become(
                 Line(
-                    filter_obj1.get_corner(DR),
+                    window.get_corner(DR),
                     rectangle_pool.get_corner(DL),
                     color=RED,
                     stroke_width=2,
@@ -231,86 +149,107 @@ class Scene5_2(MovingCameraScene):
             )
         )
 
-        kernel_top_line.z_index = 1
-        kernel_bottom_line.z_index = 1
-
-        self.play(Create(kernel_top_line), Create(kernel_bottom_line), run_time=1)
-        self.play(Create(rectangle_pool), run_time=1)
         self.play(FadeIn(lattice_img_pool_obj), run_time=1)
+        self.play(Create(top_line), Create(bottom_line), Create(rectangle_pool))
+        self.wait(0.5)
 
-        self.wait(2)
+        # --- Worked example: average of the four pixels in this window ------- #
+        block = src_values[2 * fy : 2 * fy + 2, 2 * fx : 2 * fx + 2]
+        vals = [[round(float(block[r, c]), 2) for c in range(2)] for r in range(2)]
+        flat = [vals[0][0], vals[0][1], vals[1][0], vals[1][1]]
+        avg = round(sum(flat) / 4, 2)
 
-        # Sweep the kernel across the image, row by row.  Positioning each step
-        # absolutely (instead of shifting right forever) makes the kernel
-        # carriage-return to the left edge and step down at the end of each row.
-        src_ul = lattice_img.get_corner(UL)
-        pool_ul = lattice_img_pool.get_corner(UL)
+        # Magnified 2x2 with the actual values, shaded by intensity.
+        csize = 0.85
+        mag = VGroup()
+        for r in range(2):
+            for c in range(2):
+                v = vals[r][c]
+                sq = Square(
+                    side_length=csize,
+                    stroke_color=WHITE,
+                    stroke_width=2,
+                    fill_color=interpolate_color(BLACK, WHITE, v),
+                    fill_opacity=1,
+                )
+                sq.move_to([(c - 0.5) * csize, (0.5 - r) * csize, 0])
+                lab = Tex(f"{v:.2f}", color=(BLACK if v > 0.6 else WHITE)).scale(0.5)
+                lab.move_to(sq)
+                mag.add(VGroup(sq, lab))
+        mag.move_to(1.8 * UP)
+        mag_box = SurroundingRectangle(mag, color=RED, buff=0.04, stroke_width=2)
 
-        pixels = VGroup()
+        formula = MathTex(
+            r"\frac{%.2f + %.2f + %.2f + %.2f}{4} = %.2f"
+            % (flat[0], flat[1], flat[2], flat[3], avg)
+        ).scale(0.55)
+        formula.next_to(mag, DOWN, buff=0.4)
 
+        # Zoom-callout lines from the window up to the magnified view.
+        callout1 = DashedLine(
+            window.get_corner(UR), mag_box.get_corner(DL), color=GRAY, stroke_width=1.5
+        )
+        callout2 = DashedLine(
+            window.get_corner(DR), mag_box.get_corner(DR), color=GRAY, stroke_width=1.5
+        )
+
+        self.play(Create(callout1), Create(callout2), run_time=0.6)
+        self.play(FadeIn(mag, scale=0.6), FadeIn(mag_box))
+        self.play(Write(formula))
+        self.wait(1)
+
+        # The result drops into the output cell as a single grey pixel.
+        result_pixel = Rectangle(
+            width=cell_pool,
+            height=cell_pool,
+            fill_color=interpolate_color(BLACK, WHITE, avg),
+            fill_opacity=1,
+            stroke_width=0.1,
+        ).move_to(pool_center(fx, fy))
+        self.play(FadeIn(result_pixel))
+        self.wait(1)
+
+        # Clear the worked example, keep the computed pixel.
+        self.play(FadeOut(mag), FadeOut(mag_box), FadeOut(formula), FadeOut(callout1, callout2))
+
+        # --- Now sweep every window and fill the pooled image --------------- #
+        pixels = VGroup(result_pixel)
         for y in range(14):
             for x in range(14):
-                # Centre of the 2x2 source block and of the pooled output cell.
-                filter_pos = (
-                    src_ul
-                    + (2 * x + 1) * cell_width_lattice * RIGHT
-                    + (2 * y + 1) * cell_width_lattice * DOWN
-                )
-                pool_pos = (
-                    pool_ul
-                    + (x + 0.5) * cell_width_lattice_pool * RIGHT
-                    + (y + 0.5) * cell_width_lattice_pool * DOWN
-                )
-
                 self.play(
-                    filter_obj1.animate.move_to(filter_pos),
-                    rectangle_pool.animate.move_to(pool_pos),
+                    window.animate.move_to(src_center(x, y)),
+                    rectangle_pool.animate.move_to(pool_center(x, y)),
                     run_time=0.05,
                 )
-
-                # Drop the matching pooled pixel (intensity in [0, 1]).
                 color = interpolate_color(BLACK, WHITE, pooled_values[y, x])
                 pixel_rect = Rectangle(
-                    width=cell_width_lattice_pool,
-                    height=cell_width_lattice_pool,
+                    width=cell_pool,
+                    height=cell_pool,
                     fill_color=color,
                     fill_opacity=1,
                     stroke_width=0.1,
-                ).move_to(pool_pos)
+                ).move_to(pool_center(x, y))
                 pixels.add(pixel_rect)
                 self.add(pixel_rect)
 
+        top_line.clear_updaters()
+        bottom_line.clear_updaters()
         self.play(
-            FadeOut(
-                filter_obj1,
-                filter_text1,
-                kernel_top_line,
-                kernel_bottom_line,
-                rectangle_pool,
-            ),
-            FadeOut(text_width),
-            FadeOut(text_stride),
+            FadeOut(window, top_line, bottom_line, rectangle_pool, param_group),
         )
-
         self.play(
-            FadeOut(lattice_img),
-            FadeOut(img),
-            FadeOut(lattice_img_rectangle),
+            FadeOut(lattice_img, img, lattice_img_rectangle),
             run_time=1,
         )
 
-        # Move the pooled img to the center
-
+        # --- Center the pooled result and label its dimensions -------------- #
         self.play(
             lattice_img_pool_obj.animate.move_to(ORIGIN),
             pixels.animate.move_to(ORIGIN),
         )
 
-        # Brace to indicate the width and height
-
         brace_width = Brace(lattice_img_pool, direction=UP, color=WHITE)
         brace_width_txt = brace_width.get_text("Width = 14", buff=0.1).scale(0.5)
-
         brace_height = Brace(lattice_img_pool, direction=LEFT, color=WHITE)
         brace_height_txt = brace_height.get_text("Height = 14", buff=0.1).scale(0.5)
 
@@ -320,6 +259,7 @@ class Scene5_2(MovingCameraScene):
             FadeIn(brace_width_txt),
             FadeIn(brace_height_txt),
         )
+        self.wait(1)
 
         self.play(
             FadeOut(
@@ -331,13 +271,6 @@ class Scene5_2(MovingCameraScene):
                 brace_width_txt,
             ),
         )
-
-        txt = Tex("Receptive field", color=WHITE)
-        self.play(Write(txt))
-
-        txt_target = Tex("Like and subscribe !").scale(2)
-        self.play(Transform(txt, txt_target))
-        self.play(FadeOut(txt))
 
         self.wait(2)
 
