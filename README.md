@@ -1,5 +1,5 @@
 # Manim Project: Depth-First Search Animation
-![Manim Animation Repository](Manim.png)
+![Manim Animation Repository](assets/Manim.png)
 ## Overview
 
 This project is dedicated to creating animations using Manim, a mathematical engine. The main objective is to visually illustrate the Depth-First Search (DFS) algorithm, statistical concepts & machine learning. The animations are created in Python, leveraging Manim's extensive capabilities to produce high-quality visuals.
@@ -19,6 +19,35 @@ This project is dedicated to creating animations using Manim, a mathematical eng
 - [Galton Board](https://www.youtube.com/watch?v=c74jckgx80g)
 - [Gaussiam Mixture Model (GMM)](https://www.youtube.com/watch?v=-RZWfmYhllQ)
 
-### Files
-- 'XXXXX.py' : Animation python file used to generate videos and create media folder of wanted quality.
-- `README.md`: This README file.
+## Repository structure
+
+- `animations/` — all Manim scenes
+  - `2024/` — 2024 series (DFS, pendulum, Galton board, Taylor series, KMeans, GMM, …)
+  - `Quant/` — quant-interview notebooks
+  - `CNN/` — Convolutional Neural Network series (Parts 1–6, with voiceover)
+  - `conv.py` — standalone convolution scene
+- `projects/` — non-Manim side projects (`RL/` pygame simulation, `Sport Tracker/`)
+- `images/` — input images used by some scenes
+- `assets/` — repository assets (banner)
+- `docs/` — documentation
+
+## Getting started
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+manim -pqh animations/2024/galton.py GaltonBoard
+```
+
+See **[docs/README.md](docs/README.md)** for the full guide: prerequisites, rendering
+scenes, running the notebooks and the RL project, and the dev tooling.
+
+## Development
+
+```bash
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+Linting and formatting run automatically on every commit via **pre-commit**
+(`ruff` + `isort`). Run them across the whole repo with `pre-commit run --all-files`.
