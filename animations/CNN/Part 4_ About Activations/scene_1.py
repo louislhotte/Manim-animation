@@ -1,10 +1,8 @@
 from manim import *
-import matplotlib.pyplot as plt
-from manim_voiceover import VoiceoverScene
 import numpy as np
 
 
-class Scene4_1(VoiceoverScene, MovingCameraScene):
+class Scene4_1(MovingCameraScene):
     def create_prism(self, dimensions, fill_color, stroke_width):
         prism = Prism(
             dimensions=dimensions, fill_color=fill_color, stroke_width=stroke_width

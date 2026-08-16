@@ -1,0 +1,8 @@
+# Rendering dependencies for CNN Parts 4, 5 and 6.
+# Install into the local venv:  ./render.sh  (bootstraps automatically)
+# or manually:                  python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+manim==0.18.1     # animation engine (CLI + Scene API)
+numpy>=1.26       # array maths (scene_2 pixel intensities + asset generation)
+scipy>=1.11       # convolutions in generate_assets.py
+pillow>=10.0      # image IO for scenes and asset generation

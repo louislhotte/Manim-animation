@@ -1,48 +1,7 @@
 from manim import *
-import matplotlib.pyplot as plt
-from manim_voiceover import VoiceoverScene
-import numpy as np
 
 
-class Scene6_1(VoiceoverScene, MovingCameraScene):
-    def create_matrix_filter(self, matrix_content):
-        matrix_grid = NumberPlane(
-            x_range=[-1, 2],
-            y_range=[-1, 2],
-            x_length=2,
-            y_length=2,
-            background_line_style={
-                "stroke_color": GRAY,
-                "stroke_width": 2,
-                "stroke_opacity": 1,
-            },
-            axis_config={
-                "stroke_color": GRAY,
-                "stroke_width": 2,
-                "include_numbers": False,
-            },
-            faded_line_ratio=0,
-        ).move_to(ORIGIN)
-
-        # Directly using x_length and y_length for rectangle
-        rectangle = Rectangle(width=2, height=2, color=GRAY, stroke_width=2).move_to(
-            ORIGIN
-        )
-        cell_width_filter = matrix_grid.get_x_unit_size()
-
-        filter_text = VGroup()
-        for i in range(3):
-            for j in range(3):
-                coords = matrix_grid.coords_to_point(j, i)
-                val = matrix_content[j][i]
-                text = Tex(f"{val:.2f}", color=BLUE)
-                text.move_to(
-                    coords + LEFT * cell_width_filter / 2 + DOWN * cell_width_filter / 2
-                ).scale(0.5)
-                filter_text.add(text)
-
-        return VGroup(matrix_grid, rectangle, filter_text)
-
+class Scene6_1(MovingCameraScene):
     def create_prism(self, dimensions, fill_color, stroke_width):
         prism = Prism(
             dimensions=dimensions, fill_color=fill_color, stroke_width=stroke_width
@@ -380,16 +339,6 @@ class Scene6_1(VoiceoverScene, MovingCameraScene):
         )
 
         # Flatten the output
-
-        first_column = VGroup(
-            *[Circle() for _ in range(3)],
-            *[Dot() for _ in range(3)],
-            *[Circle() for _ in range(3)],
-        )
-
-        first_column.arrange(DOWN, buff=0.2).shift(LEFT * 3)
-
-        # Second column configuration
 
         # First column configuration
         first_column = VGroup(

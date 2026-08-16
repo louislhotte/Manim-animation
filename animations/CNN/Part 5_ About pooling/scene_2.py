@@ -1,10 +1,9 @@
 from manim import *
-import matplotlib.pyplot as plt
-from manim_voiceover import VoiceoverScene
+from PIL import Image
 import numpy as np
 
 
-class Scene5_2(VoiceoverScene, MovingCameraScene):
+class Scene5_2(MovingCameraScene):
     def create_matrix_filter(self, matrix_content):
         matrix_grid = NumberPlane(
             x_range=[-1, 1],
@@ -59,13 +58,17 @@ class Scene5_2(VoiceoverScene, MovingCameraScene):
             RESAMPLING_ALGORITHMS["box"]
         )
         img.scale(30)
-        img_values = plt.imread("images/0_mnist.png")[:, :, 0]
 
         pool_img = ImageMobject("images/0_mnist_pooled.png").set_resampling_algorithm(
             RESAMPLING_ALGORITHMS["box"]
         )
         pool_img.scale(30)
-        blur_image_values = plt.imread("images/0_mnist_pooled.png")
+        # Pooled pixel intensities (14x14, values in [0, 1]) used to redraw the
+        # down-sampled image cell by cell as the kernel sweeps across.
+        pooled_values = (
+            np.asarray(Image.open("images/0_mnist_pooled.png").convert("L"), dtype=float)
+            / 255.0
+        )
 
         # Lattice going on top of the image
 
@@ -237,54 +240,45 @@ class Scene5_2(VoiceoverScene, MovingCameraScene):
 
         self.wait(2)
 
+        # Sweep the kernel across the image, row by row.  Positioning each step
+        # absolutely (instead of shifting right forever) makes the kernel
+        # carriage-return to the left edge and step down at the end of each row.
+        src_ul = lattice_img.get_corner(UL)
+        pool_ul = lattice_img_pool.get_corner(UL)
+
         pixels = VGroup()
 
         for y in range(14):
-
             for x in range(14):
-
-                self.play(
-                    filter_obj1.animate.shift(2 * cell_width_lattice * RIGHT),
-                    rectangle_pool.animate.shift(cell_width_lattice_pool * RIGHT),
-                    run_time=0.05,
+                # Centre of the 2x2 source block and of the pooled output cell.
+                filter_pos = (
+                    src_ul
+                    + (2 * x + 1) * cell_width_lattice * RIGHT
+                    + (2 * y + 1) * cell_width_lattice * DOWN
                 )
-
-                # Map the intensity to a grayscale value (0 to 1)
-                intensity = blur_image_values[y, x]
-                color = interpolate_color(BLACK, WHITE, intensity)
-
-                # Calculate the position based on the lattice
-                pos = (
-                    lattice_img_pool.get_corner(UL)
+                pool_pos = (
+                    pool_ul
                     + (x + 0.5) * cell_width_lattice_pool * RIGHT
                     + (y + 0.5) * cell_width_lattice_pool * DOWN
                 )
 
-                # Create a rectangle for the pixel
+                self.play(
+                    filter_obj1.animate.move_to(filter_pos),
+                    rectangle_pool.animate.move_to(pool_pos),
+                    run_time=0.05,
+                )
+
+                # Drop the matching pooled pixel (intensity in [0, 1]).
+                color = interpolate_color(BLACK, WHITE, pooled_values[y, x])
                 pixel_rect = Rectangle(
                     width=cell_width_lattice_pool,
                     height=cell_width_lattice_pool,
                     fill_color=color,
                     fill_opacity=1,
                     stroke_width=0.1,
-                ).move_to(pos)
-
-                # Add the rectangle to the scene
+                ).move_to(pool_pos)
                 pixels.add(pixel_rect)
                 self.add(pixel_rect)
-
-            if y == 13:
-                break
-
-        self.play(
-            filter_obj1.animate.shift(
-                28 * cell_width_lattice * LEFT + 2 * cell_width_lattice * DOWN
-            ),
-            rectangle_pool.animate.shift(
-                14 * cell_width_lattice_pool * LEFT + cell_width_lattice_pool * DOWN
-            ),
-            run_time=0.05,
-        )
 
         self.play(
             FadeOut(

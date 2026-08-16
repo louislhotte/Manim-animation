@@ -32,3 +32,11 @@ media/
 Thumbs.db
 .vscode/
 .idea/
+
+
+# Python virtualenvs (e.g. the CNN render env) and build artifacts
+.venv/
+**/.venv/
+**/media/
+__pycache__/
+*.pyc
