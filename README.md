@@ -1,8 +1,9 @@
-# Manim Project: Depth-First Search Animation
+# Manim Project - Making AI & Dev accessible for all
 ![Manim Animation Repository](assets/Manim.png)
 ## Overview
 
-This project is dedicated to creating animations using Manim, a mathematical engine. The main objective is to visually illustrate the Depth-First Search (DFS) algorithm, statistical concepts & machine learning. The animations are created in Python, leveraging Manim's extensive capabilities to produce high-quality visuals.
+This project is dedicated to creating animations using Manim, a mathematical engine. The main objective is to visually illustrate algorithms, statistical and AI concepts. 
+The animations are created in Python, leveraging Manim's extensive capabilities to produce high-quality visuals (https://github.com/3b1b/manim)
 
 ## Video Link
 - [Manim Tutorial](https://youtu.be/ZsVbCt0uT0M)
