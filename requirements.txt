@@ -1,0 +1,28 @@
+# Runtime dependencies for the animations and side projects.
+# Pin versions as needed for your environment (e.g. manim==0.18.1).
+
+# --- Manim core ---
+manim
+manim-voiceover        # voiceover scenes (see animations/CNN/*)
+elevenlabs             # TTS backend used by manim-voiceover
+
+# --- Scientific / plotting ---
+numpy
+scipy
+scikit-learn
+matplotlib
+networkx
+
+# --- Imaging ---
+Pillow
+opencv-python
+
+# --- Deep learning (animations/2024/neural_network.py) ---
+torch
+torchvision
+
+# --- Games (projects/RL) ---
+pygame
+
+# --- Notebooks / scraping (main.ipynb) ---
+requests

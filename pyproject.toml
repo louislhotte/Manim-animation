@@ -1,0 +1,26 @@
+# Tooling configuration for the Manim-animation repository.
+# Ruff handles linting + formatting; isort handles import ordering.
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+# Never touch rendered output or vendored assets.
+extend-exclude = ["media", "assets", "images"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP"]
+ignore = [
+    "E501",  # line too long — handled by the formatter; long math/LaTeX lines are common
+    "E741",  # ambiguous variable names (l, I, O) — common in math code
+    "E402",  # module-level import not at top — some scenes configure before importing
+    "F403",  # `from manim import *` — idiomatic in Manim scenes
+    "F405",  # name may be undefined from a star import
+]
+# Import sorting is delegated to isort, so do not enable ruff's "I" rules here.
+
+[tool.ruff.format]
+# Black-compatible defaults.
+
+[tool.isort]
+profile = "black"
+line_length = 88

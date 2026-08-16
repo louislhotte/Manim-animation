@@ -1,0 +1,7 @@
+# Development tooling. Install with:  pip install -r requirements-dev.txt
+-r requirements.txt
+
+pre-commit
+ruff
+isort
+jupyterlab            # to open and run the .ipynb notebooks
