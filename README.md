@@ -25,6 +25,7 @@ This project is dedicated to creating animations using Manim, a mathematical eng
   - `2024/` — 2024 series (DFS, pendulum, Galton board, Taylor series, KMeans, GMM, …)
   - `Quant/` — quant-interview notebooks
   - `CNN/` — Convolutional Neural Network series (Parts 1–6, with voiceover)
+  - `Fourier/` — Fourier-series ("epicycle") portrait drawing + theory (self-contained, see its `README.md`)
   - `conv.py` — standalone convolution scene
 - `projects/` — non-Manim side projects (`RL/` pygame simulation, `Sport Tracker/`)
 - `images/` — input images used by some scenes
