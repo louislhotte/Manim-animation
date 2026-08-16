@@ -20,6 +20,7 @@ This project is dedicated to creating animations using Manim, a mathematical eng
 - [Gaussiam Mixture Model (GMM)](https://www.youtube.com/watch?v=-RZWfmYhllQ)
 - [Fourier Drawing](https://youtu.be/HBkDNkCT0UY)
 - [Fractal Leaf Animation](https://youtu.be/-akETcacMAw)
+- [Convolutional Neural Networks](https://youtu.be/vdqbAum4fuo)
 
 
 ## Repository structure
