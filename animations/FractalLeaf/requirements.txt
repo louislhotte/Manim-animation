@@ -1,0 +1,5 @@
+# Self-contained deps for the Fractal Leaf animation.
+# render.sh reuses the CNN series' .venv when present, so this is only used
+# when bootstrapping a fresh local .venv.
+manim==0.18.1
+numpy
