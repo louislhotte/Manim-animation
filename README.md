@@ -13,11 +13,14 @@ This project is dedicated to creating animations using Manim, a mathematical eng
 - [Koch Snowflake ](https://youtu.be/5fwHVGms3Zw)
 - [Linear Regression Animation](https://youtu.be/P-BVVLD41NM)
 - [Statistic and parametric models](https://youtu.be/gGh_hHVSbD8)
--  [Gaussian Distribution Visualisation](https://youtu.be/vMAus69cC74)
+- [Gaussian Distribution Visualisation](https://youtu.be/vMAus69cC74)
 - [Taylor Series](https://youtu.be/qcLvkmPo7xo)
 - [KMeans Clustering](https://youtu.be/HZLAqS1Dtg8?si=SpvLudKwOLQ3VeSP)
 - [Galton Board](https://www.youtube.com/watch?v=c74jckgx80g)
 - [Gaussiam Mixture Model (GMM)](https://www.youtube.com/watch?v=-RZWfmYhllQ)
+- [Fourier Drawing](https://youtu.be/HBkDNkCT0UY)
+- [Fractal Leaf Animation](https://youtu.be/-akETcacMAw)
+
 
 ## Repository structure
 
