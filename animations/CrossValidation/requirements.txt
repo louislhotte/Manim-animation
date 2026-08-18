@@ -1,0 +1,5 @@
+# Minimal deps for the Cross-Validation demo.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Data + model fits are pure NumPy (no scipy / scikit-learn needed).
+manim
+numpy
