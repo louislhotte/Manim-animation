@@ -1,0 +1,4 @@
+# Minimal deps for the "Story of Gravity" explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+manim
+numpy
