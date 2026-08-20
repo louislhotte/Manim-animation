@@ -1,0 +1,6 @@
+# Minimal deps for the Parameter-Evolution explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# The gradient descent, loss-surface contours, cross-validation and the neural
+# network (real back-prop) are all pure NumPy — no scipy / scikit-learn / torch.
+manim
+numpy
