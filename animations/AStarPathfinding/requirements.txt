@@ -1,0 +1,5 @@
+# Minimal deps for the A* Pathfinding explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# The map is generated procedurally, so no GIS stack (osmnx/geopandas) is needed.
+manim
+numpy
