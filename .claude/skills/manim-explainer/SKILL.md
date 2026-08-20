@@ -122,6 +122,15 @@ END_HOLD  = 0.2 if QUICK else 2.2   # hold at the end of each scene before the w
 - **`always_redraw`:** never `Create`/`FadeIn` an `always_redraw` mobject (strict-zip
   crash) — animate a *static copy*, then `add()` the live one and swap. Always
   `clear_updaters()` before wiping (the base `wipe()` does this).
+- **`Circle`/`Ellipse`/`Arc` default to `color=RED`**, and `.set_opacity(x)` turns on
+  the *fill* (not just the stroke). So a "stroke-only" ring you dim with
+  `.set_opacity(x)` renders as a **red disc**. Only ever dim a stroked shape with
+  `stroke_opacity=`/`.set_stroke(opacity=…)` and keep `fill_opacity=0`, or pass an
+  explicit `color=`/`fill_color=`. (This is what made the CDN globe bands, the
+  map-pin halos and the atmosphere ring bleed red.)
+- **`ImageMobject` is not a `VMobject`** — it can't go inside a `VGroup` (raises).
+  Use `Group(...)` to mix a baked image (e.g. a textured planet) with vector
+  mobjects, and use `Group(...)`—not `VGroup(...)`—in the scene-clearing `FadeOut`.
 - **`t2c` overlaps:** `Text(t2c=…)` raises if two colored substrings overlap — even
   when the color is equal (`setUser` ⊂ `setUserId`). Prune per line with a
   `_safe_t2c()` that drops any key that is a substring of another present key.
