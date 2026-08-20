@@ -1,0 +1,5 @@
+# Minimal deps for the "Kubernetes & Continuous Delivery" explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Code (Dockerfile / GitHub Actions YAML) is set in Menlo.
+manim
+numpy
