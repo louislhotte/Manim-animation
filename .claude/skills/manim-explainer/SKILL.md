@@ -6,9 +6,12 @@ description: >-
   render.sh). Use when creating, editing, reviewing or rendering any of these
   explainers. Covers the crisp-text spacing fix, layout / no-overlapping-text
   rules, pacing & "how long to wait", the required visual self-check (frame
-  extraction + edge-bleed detector), and the recurring Manim gotchas. Triggers:
-  "manim animation", "explainer", "render.sh", "new scene", "overlapping text",
-  "off-screen / cut off", "spacing looks wrong", "how long should the film be".
+  extraction + edge-bleed detector), and the recurring Manim gotchas. Also the
+  house intro / outro / rules card spec, shared with the sibling matplotlib
+  `Simulations/<Name>/` series. Triggers: "manim animation", "explainer",
+  "render.sh", "new scene", "overlapping text", "off-screen / cut off",
+  "spacing looks wrong", "how long should the film be", "intro / outro card",
+  "title card", "Created by Ptolémé", "Simulations/", "predator-prey sim".
 ---
 
 # Manim explainer — house style & standards
@@ -185,6 +188,37 @@ rendering, **look at the frames** — do not rely on the user to catch bugs.
 
 Quality: `-q l|m|h|k` = 480p15 / 720p30 / 1080p60 / 2160p60. Iterate at `l --quick`;
 only render `-q h` for the final deliverable.
+
+## 8. Intro / outro / rules cards (the house bookend)
+
+Every film — the Manim explainers **and** the matplotlib `Simulations/<Name>/`
+series — opens on a title card and closes on a thank-you card, in the shared dark
+house palette (`BG #0E1117`, `INK #F5F3EF` title, `MUTED #8A93A6` subtitle,
+`GOLD #FFD166` rule):
+
+- **Intro:** centred **bold** title (`INK`) with a **`GOLD` underline that runs
+  past both ends of the title**, a one-line `MUTED` subtitle, and the byline
+  **"Created by Ptolémé"**.
+- **Outro:** **"Thank you for watching!"** (same title + rule treatment) + the
+  byline; optionally a one-line recap.
+- **Rules / setup card (encouraged):** before the action, state the rules and the
+  agents' stats in two colour-coded panels, then the one-sentence law and a punchy
+  takeaway (e.g. *"This is math, not magic."*). Keeps the piece self-contained.
+  A persistent bottom "key" (colour-coded stats) can keep the rules on screen
+  throughout.
+
+Manim: implement as `introduction(title1, title2)` / `play_outro()` on the base
+class with thin `Intro` / `Outro` scenes (see `animations/Gravity/gravity.py`).
+
+matplotlib (`Simulations/PredatorPrey/`): render each card to a 1920×1080 PNG
+(`cards.py`), render the sim to mp4 (`viz.py`), and stitch
+`intro → rules → sim → outro` in **one ffmpeg `concat` pass** with a 0.4 s fade
+to/from black between pieces (`film.py`). Force every input to
+`scale=1920:1080,fps=30,format=yuv420p,setsar=1` so `concat` joins cleanly. Draw
+the "past both ends" underline by measuring the title with
+`text.get_window_extent()` after `fig.canvas.draw()`, then ruling `x0-pad → x1+pad`.
+**Render to local `/tmp` then `mv` into the (OneDrive-synced) repo** — writing the
+mp4 straight into the synced folder is I/O-bound (minutes of stalls).
 
 ## Definition of done
 
