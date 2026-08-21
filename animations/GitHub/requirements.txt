@@ -1,0 +1,4 @@
+# Minimal deps for the "Git & GitHub, Visually" explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+manim
+numpy
