@@ -22,6 +22,9 @@ The animations are created in Python, leveraging Manim's extensive capabilities 
 - [Fourier Drawing](https://youtu.be/HBkDNkCT0UY)
 - [Fractal Leaf Animation](https://youtu.be/-akETcacMAw)
 - [Convolutional Neural Networks](https://youtu.be/vdqbAum4fuo)
+- [Transformer](https://www.youtube.com/watch?v=g5r624CfeLE)
+- [Cross Validation](https://www.youtube.com/watch?v=SF5qYhyY_9A)
+- [Bias-Variance Tradeoff](https://www.youtube.com/watch?v=DZYCZg3mPtc)
 
 
 ## Repository structure
