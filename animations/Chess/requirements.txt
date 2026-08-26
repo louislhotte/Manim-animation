@@ -1,0 +1,6 @@
+# Minimal deps for "The Immortal Game" chess replay.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Chess pieces are Unicode glyphs drawn with a symbol font that carries them
+# ("Arial Unicode MS" / "Apple Symbols" on macOS) — no piece assets needed.
+manim
+numpy
