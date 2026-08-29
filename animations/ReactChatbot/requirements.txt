@@ -1,0 +1,6 @@
+# Minimal deps for the React.js & System-Design explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Everything on screen is drawn with Manim primitives — no numpy heavy lifting,
+# but numpy ships with manim anyway and a couple of helpers use it.
+manim
+numpy
