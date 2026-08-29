@@ -1,0 +1,5 @@
+# Minimal deps for the "Race Conditions in React" explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Code (JSX) is set in Menlo.
+manim
+numpy
