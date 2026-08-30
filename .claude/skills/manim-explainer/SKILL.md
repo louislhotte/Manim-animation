@@ -87,6 +87,14 @@ def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
   "AI tell" and dislikes it. Use a period, colon, or comma (or split into two
   sentences) instead. Grep `(txt\(|say\()[^)]*—` before shipping. (Docstrings /
   comments are fine — this is about rendered text only.)
+- **Write captions as complete, plain sentences, not terse fragments or bare
+  jargon.** The user flagged lines like *"A sequence of tokens. Exactly what a
+  Transformer eats."* and *"Prepend a learnable [CLS] token."* as hard to follow:
+  they read as an imperative/label, not an explanation. Prefer a full subject-verb
+  sentence (*"We also add one extra learnable token, called [CLS], at the front."*),
+  keep them in the order the viewer will read them (top → bottom = logical order),
+  and let the punch line state the takeaway plainly (*"The image is now a sequence
+  of tokens, which is exactly what a Transformer reads."*). Clear beats clever.
 - **Inline coloured word:** don't build `VGroup(txt("the"), txt("right", GOLD),
   txt("word")).arrange(RIGHT)` — `arrange` centres bounding boxes, so a word with
   a descender (the "g" in "right") sits visibly higher than its neighbours. Use a
@@ -175,6 +183,17 @@ END_HOLD  = 0.2 if QUICK else 2.2   # hold at the end of each scene before the w
   `LaggedStart(*[Anim(m) for m in group])`.
 - **Plain `VMobject` has no `add_tip`** — hand-build arrowheads (Polygon) for custom
   paths; use `Arrow`/`GrowArrow` for straight arrows.
+- **Loop-back / cycle edges: prefer an orthogonal elbow over a `CurvedArrow`.** A
+  `CurvedArrow` from a lower node back up to a higher one routinely bows the wrong way,
+  or lands its arrowhead in a corner at an odd angle — viewers read it as "curved the
+  wrong way," and it took two rounds of feedback on the LangGraph cycle edge. Route the
+  return as a clean right-angle elbow instead: out to the side, straight along, then an
+  `Arrow` back into the target's edge so the head enters head-on —
+  `VGroup(Line(a, side), Line(side, side2), arr(side2, target))`. Lay agent loops as a
+  **vertical spine** (`START↓agent↓router↓tools`, END branches to the side) so the
+  loop-back runs cleanly up one free side. If you must use a `CurvedArrow`, **verify the
+  bow in a rendered frame**: a negative `angle` bows right-of-travel (outward), positive
+  bows left (into the spine).
 - **`node_box`-style helpers:** a center passed as a 2-tuple throws — coerce to 3-D.
 - **`get_part_by_text` isn't real** (`__getattr__` lies via `hasattr`) — lay out
   tokens explicitly if you need per-token control.
@@ -205,8 +224,19 @@ rendering, **look at the frames** — do not rely on the user to catch bugs.
    To inspect a tight spot (a title bar, a box edge), crop + upscale:
    `-vf "crop=W:H:X:Y,scale=iw*3:ih*3:flags=neighbor"`.
 4. Check specifically for: text touching/exceeding edges; glyphs overlapping each
-   other or their box; arrows that look detached/weird; a title bar not spanning
-   its panel; captions colliding with a panel or the header.
+   other or their box; a title bar not spanning its panel; captions colliding with
+   a panel or the header.
+   **Arrow audit (do this every time — a bad arrow reads as "broken" instantly):**
+   trace every arrow in a still frame and confirm each one (a) starts and ends on
+   the right two things, (b) has its head *attached* and pointing the correct way,
+   and (c) **does not cross over any other mobject or land its head on top of an
+   image/box** — an arrow routed across the scene or stabbing into a picture is a
+   blocking bug (it cost a round of feedback on the Diffusion "reverse" loop). A
+   feedback/repeat edge does **not** have to be a scene-spanning arc: a compact
+   circular "repeat ×N" glyph (Arc + hand-built arrowhead, see `repeat_glyph` in
+   `animations/Diffusion`) in a free lane is clearer and can't collide. If you do
+   route a real return edge, give it its own empty lane (see the loop-back gotcha
+   in §5) and re-check the frame.
 5. Only after both the scan is clean **and** the frames look right, do the final
    full render and report the *measured* duration.
 
@@ -257,6 +287,8 @@ mp4 straight into the synced folder is I/O-bound (minutes of stalls).
 
 - [ ] Each scene renders alone and the full film renders end-to-end (exit 0).
 - [ ] `edgecheck.py` is clean on every scene (no edge bleed).
-- [ ] Key frames eyeballed: no overlaps, nothing cut off, boxes fit, arrows clean.
+- [ ] Key frames eyeballed: no overlaps, nothing cut off, boxes fit, arrows clean
+      (every arrow traced: heads attached & correct, none crossing content or
+      landing on an image — see §6 step 4).
 - [ ] Reading cadence is comfortable; every scene ends on a settle before the wipe.
 - [ ] README states what it teaches, the scene list, and the **measured** runtime.
