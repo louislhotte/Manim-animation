@@ -1,5 +1,9 @@
 # Manim Project - Making AI & Dev accessible for all
 ![Manim Animation Repository](assets/Manim.png)
+
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](http://choosealicense.com/licenses/mit/)
+[![Subscribe on YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?style=flat)](https://youtube.com/channel/UC_lqYWX_kD00D7yiZcrtBng/) 
+
 ## Overview
 
 This project is dedicated to creating animations using Manim, a mathematical engine. The main objective is to visually illustrate algorithms, statistical and AI concepts. 
