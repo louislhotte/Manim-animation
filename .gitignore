@@ -21,7 +21,14 @@ media/
 *.mov
 *.mkv
 
+# Generated images (Manim Tex/Text SVG cache, rendered frames, baked PNG assets).
+# Already-committed images stay tracked; force-add an intentional new one with
+# `git add -f <file>`.
+*.svg
+*.png
+
 # LaTeX / MetaFont intermediates (from Manim Tex rendering)
+*.tex
 *.log
 *.aux
 *.dvi

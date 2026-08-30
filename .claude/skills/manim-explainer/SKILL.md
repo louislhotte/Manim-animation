@@ -83,6 +83,15 @@ def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
   siblings with a real `buff≈0.2` in the `arrange`/`next_to`, never with pad spaces.
 - Code (Dockerfiles, YAML, JS) is set in **Menlo** via a `code_panel()` helper
   (see `animations/ReactHooks` / `animations/Kubernetes`).
+- **No em-dashes "—" in on-screen captions.** The user reads the em-dash as an
+  "AI tell" and dislikes it. Use a period, colon, or comma (or split into two
+  sentences) instead. Grep `(txt\(|say\()[^)]*—` before shipping. (Docstrings /
+  comments are fine — this is about rendered text only.)
+- **Inline coloured word:** don't build `VGroup(txt("the"), txt("right", GOLD),
+  txt("word")).arrange(RIGHT)` — `arrange` centres bounding boxes, so a word with
+  a descender (the "g" in "right") sits visibly higher than its neighbours. Use a
+  single `Text("the right word", t2c={"right": GOLD})` — one Text = correct
+  baselines. (`t2c` on the shadowed `Text` works; also `t2w` for per-word weight.)
 
 ## 3. Layout — nothing off-screen, nothing overlapping
 
