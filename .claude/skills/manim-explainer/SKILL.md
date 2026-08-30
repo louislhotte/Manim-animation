@@ -63,9 +63,24 @@ def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
     return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 ```
 
+- **The shadow is MANDATORY, not optional — `Text.set_default(font=…)` alone is
+  NOT enough.** This is the #1 way a film ships looking unprofessional: a
+  subscript/superscript renders in a *different (fallback) font* than the body
+  text. Why: super/subscript helpers (`mtext`) build the small piece at
+  `~0.6 × base`; at a base of 24 pt that piece is ~14 pt — under the ~20 pt floor —
+  so Pango mangles it and swaps the font. The shadow fixes every one of them at
+  once by rasterising at 60 pt and scaling down. If you skip it (or install it
+  after `mtext` is defined so `mtext` binds the real `Text`), the subscripts break.
+  **After rendering, zoom a frame that has a subscript/superscript and confirm the
+  small glyphs are the SAME font as the body** — this is a required check, users
+  notice instantly and hate it.
 - Use `Text`, never `Tex`/`MathTex` (keeps the repo LaTeX-free).
 - For "formulas" (r², xₜ, 10⁻¹¹) build inline from `Text` pieces with raised
   super/subscripts — see `mtext()` in `animations/Gravity/gravity.py`.
+- **Inline rows of `mtext`/`Text` pieces:** Pango *trims* leading/trailing spaces,
+  so padding a string with spaces to separate it from a neighbour does nothing —
+  the words jam together ("det DF" + "is a constant" → "det DFis"). Separate
+  siblings with a real `buff≈0.2` in the `arrange`/`next_to`, never with pad spaces.
 - Code (Dockerfiles, YAML, JS) is set in **Menlo** via a `code_panel()` helper
   (see `animations/ReactHooks` / `animations/Kubernetes`).
 
@@ -109,6 +124,15 @@ END_HOLD  = 0.2 if QUICK else 2.2   # hold at the end of each scene before the w
 
 - `self.beat(t)` == `self.wait(t * DELAY)` — every reading pause. Give the eye time:
   a fresh caption wants `beat(1.5–2.0)`; a quick reveal `beat(0.5)`.
+- **Err on the side of TOO SLOW — the most common viewer complaint is "no time to
+  read."** You wrote the text so you read it instantly; a first-time viewer does
+  not. Budget reading time by content, not vibes: **a line of prose ≈ 2 s on
+  screen; a formula, a matrix, a code panel, or anything with symbols ≈ 3–4 s**
+  (they parse far slower than prose). A dense screen the viewer must actually
+  *study* (the counterexample map, a confusion matrix) earns `beat(2.4+)` AFTER it
+  finishes drawing. `DELAY` ≈ **2.2–2.5** is a saner default than 2.0 for
+  formula-heavy films. When unsure, add a beat — a film that is 20 s too slow is
+  fine; one that flashes an equation for 0.8 s is not.
 - Slow motion by overriding `play()` to multiply `run_time` by `ANIM_SLOW`, but
   **guard `Wait`** (don't scale `self.wait`, which routes through `play(Wait(...))`).
 - End every scene with `self.settle()` (`wait(END_HOLD)`) **then** `self.wipe()`
