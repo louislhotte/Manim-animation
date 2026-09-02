@@ -22,6 +22,45 @@ Kubernetes, …). Follow these when building or editing any `animations/<Name>/`
 explainer. **A render finishing is not the bar — it must be verified to look
 right (see §6, which is mandatory).**
 
+## Content: real data beats a synthetic stand-in
+
+When the topic has real, fetchable data, use it — don't default to a small
+hand-rolled synthetic example "for simplicity." On GeoDetect, a user compared
+two cuts of the same film: v1 built from procedural stand-ins (a hand-coded
+"fishbone" pixel grid, a Gaussian-shaped NDVI curve) versus v2 built from real
+Sentinel-2/Landsat imagery pulled from a public API — same formula, same
+story, but v1 got called "lazy" and v2 "much better." That verdict generalizes:
+
+- **Reach for a real, open dataset/API before inventing one.** Government and
+  research open-data APIs are usually free, keyless, and one HTTP GET away
+  (e.g. Microsoft Planetary Computer's titiler for satellite imagery — it
+  computes band math like NDVI and renders a colormapped PNG server-side, so
+  you don't need GDAL/rasterio locally). Bake the result once into `assets/`
+  via a small `fetch_assets.py` (network-dependent, run manually, not at
+  render time) so the render itself stays offline and fast — see
+  `animations/GeoDetect/fetch_assets.py` and its `image_card()` /
+  `country_map()` helpers for the pattern (load a real photo as an
+  `ImageMobject`, load a real vector boundary as a `Polygon`).
+- **A real example with hundreds of data points beats a toy example with a
+  handful.** A real Sentinel-2 frame full of hundreds of real center-pivot
+  irrigation circles is a fundamentally more convincing "this is real" moment
+  than a hand-drawn 7×13 grid of eight pixels — scale itself is part of the
+  evidence, and it's the difference a viewer actually notices.
+- **Verify a highlighted data point against the source before shipping it.**
+  If you're going to circle or label "this one is the anomaly," open the
+  actual source image, find the real pixel coordinates, and confirm the claim
+  is true — don't eyeball a shrunk preview and guess. Overlay a coordinate
+  grid on the full-res source, read off `(px, py)`, then convert to scene
+  space (a small helper like GeoDetect's `image_point()`, mapping source
+  pixels to the `ImageMobject`'s current on-screen bounds).
+- **Synthetic is still fine when no real dataset exists**, or the point is a
+  pure algorithm/data structure (a sorted index, a B-tree, a loss surface)
+  rather than a real-world phenomenon — most of this repo's explainers are
+  exactly that, and procedurally generated numbers are "real" in the sense
+  that matters (computed and asserted, not vibes). The rule is to reach for
+  the real thing *when a real thing exists and is fetchable*, not to ban
+  synthetic data everywhere.
+
 ## 1. Project shape
 
 Each explainer is a self-contained folder `animations/<Name>/`:
@@ -292,3 +331,6 @@ mp4 straight into the synced folder is I/O-bound (minutes of stalls).
       landing on an image — see §6 step 4).
 - [ ] Reading cadence is comfortable; every scene ends on a settle before the wipe.
 - [ ] README states what it teaches, the scene list, and the **measured** runtime.
+- [ ] If a real open dataset/API exists for the topic, it was used (not a
+      synthetic stand-in) — see "Content: real data beats a synthetic
+      stand-in" above. README cites the exact source/scene IDs.
