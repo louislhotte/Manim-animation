@@ -1,0 +1,6 @@
+# Minimal deps for the "React Hooks & useEffect" explainer.
+# Uses Text (Pango) rather than Tex, so no LaTeX toolchain is required.
+# Code is set in Menlo; the mock app, spinner, cursor and profile cards are all
+# drawn Manim mobjects — no images, no browser, no extra libraries.
+manim
+numpy
