@@ -53,6 +53,28 @@ story, but v1 got called "lazy" and v2 "much better." That verdict generalizes:
   grid on the full-res source, read off `(px, py)`, then convert to scene
   space (a small helper like GeoDetect's `image_point()`, mapping source
   pixels to the `ImageMobject`'s current on-screen bounds).
+- **When explaining a specific paper and its table exists in the PDF, show the
+  real table as a screenshot — never hand-rebuild it as mobjects.** A user
+  rejected a from-scratch reconstruction of a paper's results table (built
+  cell-by-cell in a custom grid widget) explicitly as "not professional,"
+  even though every number was verbatim-accurate. Rebuilding invites subtle
+  formatting drift and reads as an approximation; a real screenshot IS the
+  source. Pattern (see `animations/PubTables` for the full version,
+  `animations/OmniDocBench` for a from-scratch worked example): crop the
+  table at high zoom with `pymupdf` (`page.get_pixmap(matrix=pymupdf.Matrix(5,5),
+  clip=rect)`), anchoring the clip `Rect` on the table's own header/caption
+  text via `page.search_for(...)` so nothing else on the page bleeds in (when
+  the same string appears in two tables on one page, filter matches by y-range,
+  not list index — `search_for` returns document order, and `[0]`/`[-1]` picks
+  the wrong one silently). Save as a quality-95 JPEG into `assets/`. Display
+  with `image_card()` (`ImageMobject` + border `SurroundingRectangle`) and
+  animate highlight boxes with `uv_rect()`/`uv_point()`, at *relative* image
+  coordinates in `[0,1]` — compute the exact `(u,v)` for a cell by searching
+  the same PDF page for that cell's text and converting its rect into the
+  clip's coordinate space (`u = (x-clip.x0)/(clip.x1-clip.x0)`, same for `v`),
+  then sanity-check every coordinate by rendering a 20×20 grid overlay on the
+  saved screenshot (red vertical / blue horizontal lines at each 0.05 step,
+  labelled) and reading the fractions off by eye before trusting the numbers.
 - **Synthetic is still fine when no real dataset exists**, or the point is a
   pure algorithm/data structure (a sorted index, a B-tree, a loss surface)
   rather than a real-world phenomenon — most of this repo's explainers are
@@ -202,6 +224,22 @@ END_HOLD  = 0.2 if QUICK else 2.2   # hold at the end of each scene before the w
 
 ## 5. Recurring Manim gotchas
 
+- **Never pass a compound Mobject (a chip/box `VGroup` of a shape + `Text`)
+  as `Arrow`'s/`Line`'s start or end — always pass an explicit point**
+  (`chip.get_right()`, not `chip`). A user flagged "arrows are not centered"
+  on a diagram whose chips were perfectly y-aligned; the arrow between the
+  first pair came out visibly diagonal. Root cause, confirmed by a minimal
+  repro: `Arrow(mobject, mobject)` resolves each endpoint via Manim's
+  `get_boundary_point(direction)`, which searches the mobject's raw bezier
+  point cloud for whatever point is farthest along that direction — for a
+  rectangle+text group this is **not** the clean mid-edge point and is not
+  symmetric between the two endpoints, so the line comes out diagonal or
+  vertically offset even though the two mobjects share the same y-center.
+  `.get_right()`/`.get_left()`/`.get_top()`/`.get_bottom()` are bounding-box
+  based instead and always give the correct, symmetric edge point — a small
+  `arr(a, b, ...)` wrapper should say so in its docstring so it isn't
+  reintroduced. Audit with `grep -n "arr(" <file>.py` before shipping: every
+  call should show a `.get_right()`/`.get_left()`/etc., never a bare name.
 - **`always_redraw`:** never `Create`/`FadeIn` an `always_redraw` mobject (strict-zip
   crash) — animate a *static copy*, then `add()` the live one and swap. Always
   `clear_updaters()` before wiping (the base `wipe()` does this).
