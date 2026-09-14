@@ -1,0 +1,374 @@
+---
+name: manim-explainer
+description: >-
+  House style, standards and the mandatory verification workflow for building the
+  no-voiceover Manim explainer animations in this repo (animations/<Name>/ with a
+  render.sh). Use when creating, editing, reviewing or rendering any of these
+  explainers. Covers the crisp-text spacing fix, layout / no-overlapping-text
+  rules, pacing & "how long to wait", the required visual self-check (frame
+  extraction + edge-bleed detector), and the recurring Manim gotchas. Also the
+  house intro / outro / rules card spec, shared with the sibling matplotlib
+  `Simulations/<Name>/` series. Triggers: "manim animation", "explainer",
+  "render.sh", "new scene", "overlapping text", "off-screen / cut off",
+  "spacing looks wrong", "how long should the film be", "intro / outro card",
+  "title card", "Created by Ptolémé", "Simulations/", "predator-prey sim".
+---
+
+# Manim explainer — house style & standards
+
+Hard-won standards from the validated animations (HarnessEngineering, Transformer,
+CrossValidation, BiasVariance, Gravity, EmbeddingRetrieval, ReactHooks,
+Kubernetes, …). Follow these when building or editing any `animations/<Name>/`
+explainer. **A render finishing is not the bar — it must be verified to look
+right (see §6, which is mandatory).**
+
+## Content: real data beats a synthetic stand-in
+
+When the topic has real, fetchable data, use it — don't default to a small
+hand-rolled synthetic example "for simplicity." On GeoDetect, a user compared
+two cuts of the same film: v1 built from procedural stand-ins (a hand-coded
+"fishbone" pixel grid, a Gaussian-shaped NDVI curve) versus v2 built from real
+Sentinel-2/Landsat imagery pulled from a public API — same formula, same
+story, but v1 got called "lazy" and v2 "much better." That verdict generalizes:
+
+- **Reach for a real, open dataset/API before inventing one.** Government and
+  research open-data APIs are usually free, keyless, and one HTTP GET away
+  (e.g. Microsoft Planetary Computer's titiler for satellite imagery — it
+  computes band math like NDVI and renders a colormapped PNG server-side, so
+  you don't need GDAL/rasterio locally). Bake the result once into `assets/`
+  via a small `fetch_assets.py` (network-dependent, run manually, not at
+  render time) so the render itself stays offline and fast — see
+  `animations/GeoDetect/fetch_assets.py` and its `image_card()` /
+  `country_map()` helpers for the pattern (load a real photo as an
+  `ImageMobject`, load a real vector boundary as a `Polygon`).
+- **A real example with hundreds of data points beats a toy example with a
+  handful.** A real Sentinel-2 frame full of hundreds of real center-pivot
+  irrigation circles is a fundamentally more convincing "this is real" moment
+  than a hand-drawn 7×13 grid of eight pixels — scale itself is part of the
+  evidence, and it's the difference a viewer actually notices.
+- **Verify a highlighted data point against the source before shipping it.**
+  If you're going to circle or label "this one is the anomaly," open the
+  actual source image, find the real pixel coordinates, and confirm the claim
+  is true — don't eyeball a shrunk preview and guess. Overlay a coordinate
+  grid on the full-res source, read off `(px, py)`, then convert to scene
+  space (a small helper like GeoDetect's `image_point()`, mapping source
+  pixels to the `ImageMobject`'s current on-screen bounds).
+- **When explaining a specific paper and its table exists in the PDF, show the
+  real table as a screenshot — never hand-rebuild it as mobjects.** A user
+  rejected a from-scratch reconstruction of a paper's results table (built
+  cell-by-cell in a custom grid widget) explicitly as "not professional,"
+  even though every number was verbatim-accurate. Rebuilding invites subtle
+  formatting drift and reads as an approximation; a real screenshot IS the
+  source. Pattern (see `animations/PubTables` for the full version,
+  `animations/OmniDocBench` for a from-scratch worked example): crop the
+  table at high zoom with `pymupdf` (`page.get_pixmap(matrix=pymupdf.Matrix(5,5),
+  clip=rect)`), anchoring the clip `Rect` on the table's own header/caption
+  text via `page.search_for(...)` so nothing else on the page bleeds in (when
+  the same string appears in two tables on one page, filter matches by y-range,
+  not list index — `search_for` returns document order, and `[0]`/`[-1]` picks
+  the wrong one silently). Save as a quality-95 JPEG into `assets/`. Display
+  with `image_card()` (`ImageMobject` + border `SurroundingRectangle`) and
+  animate highlight boxes with `uv_rect()`/`uv_point()`, at *relative* image
+  coordinates in `[0,1]` — compute the exact `(u,v)` for a cell by searching
+  the same PDF page for that cell's text and converting its rect into the
+  clip's coordinate space (`u = (x-clip.x0)/(clip.x1-clip.x0)`, same for `v`),
+  then sanity-check every coordinate by rendering a 20×20 grid overlay on the
+  saved screenshot (red vertical / blue horizontal lines at each 0.05 step,
+  labelled) and reading the fractions off by eye before trusting the numbers.
+- **Synthetic is still fine when no real dataset exists**, or the point is a
+  pure algorithm/data structure (a sorted index, a B-tree, a loss surface)
+  rather than a real-world phenomenon — most of this repo's explainers are
+  exactly that, and procedurally generated numbers are "real" in the sense
+  that matters (computed and asserted, not vibes). The rule is to reach for
+  the real thing *when a real thing exists and is fetchable*, not to ban
+  synthetic data everywhere.
+
+## 1. Project shape
+
+Each explainer is a self-contained folder `animations/<Name>/`:
+
+- `<name>.py` — all scenes in one file.
+- `render.sh` — bootstraps/reuses a venv and renders a scene or the whole film.
+- `requirements.txt` — just `manim` + `numpy` (no LaTeX).
+- `README.md` — what it teaches, the scene list, how to render.
+
+Copy `render.sh` from a recent sibling (e.g. `animations/Kubernetes/render.sh`)
+and change only: the header comment, `FILE=`, the `scene_class()` name→class map,
+the `STITCH` order, and the `*_QUICK` env var. `render.sh` reuses an existing
+Manim venv (`HarnessEngineering`, `Fourier` or `CNN`) if present, else bootstraps
+a local `.venv` — so you never re-install manim.
+
+Scene wiring in `<name>.py`:
+
+- One base class `_XxxBase(Scene)` with the helpers below.
+- One thin class per scene (`class Intro(_XxxBase): def construct(self): self.play_intro()`)
+  **and** one full-film class (`class TheName(_XxxBase)` running `play_all()`), so any
+  scene renders alone or the whole thing renders end-to-end.
+- Bookend every film with the house intro card and the "Thanks for watching!" /
+  "Created by Ptolémé" outro.
+
+## 2. Text & spacing — the #1 rule
+
+Manim's `Text` (Pango) **mangles letter/word spacing below ~20 pt** ("card iac ar
+rest"). Never render small text directly and never `.set_width()` / scale small
+text *up*. Instead shadow `Text` once, at the top of the module, so every call
+renders at a large base and scales *down*:
+
+```python
+_BaseText = Text
+_TEXT_BASE = 60
+
+def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
+    if font_size >= _TEXT_BASE:
+        return _BaseText(text, font_size=font_size, **kw)
+    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
+```
+
+- **The shadow is MANDATORY, not optional — `Text.set_default(font=…)` alone is
+  NOT enough.** This is the #1 way a film ships looking unprofessional: a
+  subscript/superscript renders in a *different (fallback) font* than the body
+  text. Why: super/subscript helpers (`mtext`) build the small piece at
+  `~0.6 × base`; at a base of 24 pt that piece is ~14 pt — under the ~20 pt floor —
+  so Pango mangles it and swaps the font. The shadow fixes every one of them at
+  once by rasterising at 60 pt and scaling down. If you skip it (or install it
+  after `mtext` is defined so `mtext` binds the real `Text`), the subscripts break.
+  **After rendering, zoom a frame that has a subscript/superscript and confirm the
+  small glyphs are the SAME font as the body** — this is a required check, users
+  notice instantly and hate it.
+- Use `Text`, never `Tex`/`MathTex` (keeps the repo LaTeX-free).
+- For "formulas" (r², xₜ, 10⁻¹¹) build inline from `Text` pieces with raised
+  super/subscripts — see `mtext()` in `animations/Gravity/gravity.py`.
+- **Inline rows of `mtext`/`Text` pieces:** Pango *trims* leading/trailing spaces,
+  so padding a string with spaces to separate it from a neighbour does nothing —
+  the words jam together ("det DF" + "is a constant" → "det DFis"). Separate
+  siblings with a real `buff≈0.2` in the `arrange`/`next_to`, never with pad spaces.
+- Code (Dockerfiles, YAML, JS) is set in **Menlo** via a `code_panel()` helper
+  (see `animations/ReactHooks` / `animations/Kubernetes`).
+- **No em-dashes "—" in on-screen captions.** The user reads the em-dash as an
+  "AI tell" and dislikes it. Use a period, colon, or comma (or split into two
+  sentences) instead. Grep `(txt\(|say\()[^)]*—` before shipping. (Docstrings /
+  comments are fine — this is about rendered text only.)
+- **Write captions as complete, plain sentences, not terse fragments or bare
+  jargon.** The user flagged lines like *"A sequence of tokens. Exactly what a
+  Transformer eats."* and *"Prepend a learnable [CLS] token."* as hard to follow:
+  they read as an imperative/label, not an explanation. Prefer a full subject-verb
+  sentence (*"We also add one extra learnable token, called [CLS], at the front."*),
+  keep them in the order the viewer will read them (top → bottom = logical order),
+  and let the punch line state the takeaway plainly (*"The image is now a sequence
+  of tokens, which is exactly what a Transformer reads."*). Clear beats clever.
+- **Inline coloured word:** don't build `VGroup(txt("the"), txt("right", GOLD),
+  txt("word")).arrange(RIGHT)` — `arrange` centres bounding boxes, so a word with
+  a descender (the "g" in "right") sits visibly higher than its neighbours. Use a
+  single `Text("the right word", t2c={"right": GOLD})` — one Text = correct
+  baselines. (`t2c` on the shadowed `Text` works; also `t2w` for per-word weight.)
+
+## 3. Layout — nothing off-screen, nothing overlapping
+
+Frame is `x ∈ [-7.11, 7.11]`, `y ∈ [-4, 4]` (use `config.frame_x_radius`, not a
+hard-coded 7.11). At 480p15 that's ~60 px per unit. Rules:
+
+- **Keep content ≥ ~0.35 u from every edge.** For any text that could be long
+  (side captions, notes), clamp it: build it, then
+  `if grp.width > avail: grp.scale(avail / grp.width, about_point=grp.get_left())`
+  where `avail = config.frame_x_radius - 0.35 - grp.get_left()[0]`. The running
+  bottom caption helper (`say`) should `scale_to_fit_width(~12.6)` itself.
+- **Things must fit their boxes.** When a box wraps a label grid, size the *box to
+  the content* (`width = inner.width + pad`), don't `scale_to_fit_width` the grid
+  into a fixed box — scaling a grid to a width also scales its **height** and it
+  spills out. (This bit the Control-Plane box.)
+- **Space siblings apart.** Repeated glyphs need center spacing ≥ their own width:
+  e.g. pods of radius r are `2r` wide, so node "slots" must be `> 2r` apart or the
+  pods overlap inside the node. Side-by-side schemas (a diagram next to a code
+  panel / a pipeline) must not collide — leave a real gap.
+- **Header clearance.** The section header sits top-left (`to_corner(UL, buff=0.5)`);
+  keep top-center content low enough to clear it (roughly `y ≤ 2.6`).
+- **code_panel title bar:** make the title bar full-width with
+  `bar.move_to(bg).align_to(bg, UP)` — `align_to(UP)` alone leaves it x-offset,
+  because the indent-shifted code re-centres the panel but not the bar (worst with
+  deep indentation). Left-align the filename after the traffic-light dots.
+- **Prefer full-screen "takeaway" cards** over cramming a recap box under a busy
+  diagram — fade the diagram, then land the one-line recap centered.
+
+## 4. Pacing & "how long to wait"
+
+Reading holds and animation speed are separate knobs. Standard base class:
+
+```python
+QUICK = os.environ.get("XX_QUICK") == "1"
+DELAY     = float(os.environ.get("XX_DELAY", "0.28" if QUICK else "2.0"))  # reading rhythm
+ANIM_SLOW = 1.0 if QUICK else 1.2   # stretch every played animation's run_time
+END_HOLD  = 0.2 if QUICK else 2.2   # hold at the end of each scene before the wipe
+```
+
+- `self.beat(t)` == `self.wait(t * DELAY)` — every reading pause. Give the eye time:
+  a fresh caption wants `beat(1.5–2.0)`; a quick reveal `beat(0.5)`.
+- **Err on the side of TOO SLOW — the most common viewer complaint is "no time to
+  read."** You wrote the text so you read it instantly; a first-time viewer does
+  not. Budget reading time by content, not vibes: **a line of prose ≈ 2 s on
+  screen; a formula, a matrix, a code panel, or anything with symbols ≈ 3–4 s**
+  (they parse far slower than prose). A dense screen the viewer must actually
+  *study* (the counterexample map, a confusion matrix) earns `beat(2.4+)` AFTER it
+  finishes drawing. `DELAY` ≈ **2.2–2.5** is a saner default than 2.0 for
+  formula-heavy films. When unsure, add a beat — a film that is 20 s too slow is
+  fine; one that flashes an equation for 0.8 s is not.
+- Slow motion by overriding `play()` to multiply `run_time` by `ANIM_SLOW`, but
+  **guard `Wait`** (don't scale `self.wait`, which routes through `play(Wait(...))`).
+- End every scene with `self.settle()` (`wait(END_HOLD)`) **then** `self.wipe()`
+  (clear updaters → `FadeOut` everything). Optionally hold a `SCENE_GAP` first.
+- `XX_QUICK=1` collapses all holds for fast iteration; the real cadence is the
+  non-QUICK values. Expose an `XX_DELAY` override.
+- Reality check on length: **fixed animation time ~= 90–110 s** for a 6-scene film;
+  reading holds add the rest. You can reach ~3–4 min comfortably; **don't claim
+  "5–6 min" and pad empty holds to get there** — add real content instead, and
+  state the *measured* runtime (`ffprobe … format=duration`) in the README.
+
+## 5. Recurring Manim gotchas
+
+- **Never pass a compound Mobject (a chip/box `VGroup` of a shape + `Text`)
+  as `Arrow`'s/`Line`'s start or end — always pass an explicit point**
+  (`chip.get_right()`, not `chip`). A user flagged "arrows are not centered"
+  on a diagram whose chips were perfectly y-aligned; the arrow between the
+  first pair came out visibly diagonal. Root cause, confirmed by a minimal
+  repro: `Arrow(mobject, mobject)` resolves each endpoint via Manim's
+  `get_boundary_point(direction)`, which searches the mobject's raw bezier
+  point cloud for whatever point is farthest along that direction — for a
+  rectangle+text group this is **not** the clean mid-edge point and is not
+  symmetric between the two endpoints, so the line comes out diagonal or
+  vertically offset even though the two mobjects share the same y-center.
+  `.get_right()`/`.get_left()`/`.get_top()`/`.get_bottom()` are bounding-box
+  based instead and always give the correct, symmetric edge point — a small
+  `arr(a, b, ...)` wrapper should say so in its docstring so it isn't
+  reintroduced. Audit with `grep -n "arr(" <file>.py` before shipping: every
+  call should show a `.get_right()`/`.get_left()`/etc., never a bare name.
+- **`always_redraw`:** never `Create`/`FadeIn` an `always_redraw` mobject (strict-zip
+  crash) — animate a *static copy*, then `add()` the live one and swap. Always
+  `clear_updaters()` before wiping (the base `wipe()` does this).
+- **`Circle`/`Ellipse`/`Arc` default to `color=RED`**, and `.set_opacity(x)` turns on
+  the *fill* (not just the stroke). So a "stroke-only" ring you dim with
+  `.set_opacity(x)` renders as a **red disc**. Only ever dim a stroked shape with
+  `stroke_opacity=`/`.set_stroke(opacity=…)` and keep `fill_opacity=0`, or pass an
+  explicit `color=`/`fill_color=`. (This is what made the CDN globe bands, the
+  map-pin halos and the atmosphere ring bleed red.)
+- **`ImageMobject` is not a `VMobject`** — it can't go inside a `VGroup` (raises).
+  Use `Group(...)` to mix a baked image (e.g. a textured planet) with vector
+  mobjects, and use `Group(...)`—not `VGroup(...)`—in the scene-clearing `FadeOut`.
+- **`t2c` overlaps:** `Text(t2c=…)` raises if two colored substrings overlap — even
+  when the color is equal (`setUser` ⊂ `setUserId`). Prune per line with a
+  `_safe_t2c()` that drops any key that is a substring of another present key.
+- **`DecimalNumber` rejects `weight=`** — style it after construction.
+- **`LaggedStartMap` unpacks each submobject as *args** → use
+  `LaggedStart(*[Anim(m) for m in group])`.
+- **Plain `VMobject` has no `add_tip`** — hand-build arrowheads (Polygon) for custom
+  paths; use `Arrow`/`GrowArrow` for straight arrows.
+- **Loop-back / cycle edges: prefer an orthogonal elbow over a `CurvedArrow`.** A
+  `CurvedArrow` from a lower node back up to a higher one routinely bows the wrong way,
+  or lands its arrowhead in a corner at an odd angle — viewers read it as "curved the
+  wrong way," and it took two rounds of feedback on the LangGraph cycle edge. Route the
+  return as a clean right-angle elbow instead: out to the side, straight along, then an
+  `Arrow` back into the target's edge so the head enters head-on —
+  `VGroup(Line(a, side), Line(side, side2), arr(side2, target))`. Lay agent loops as a
+  **vertical spine** (`START↓agent↓router↓tools`, END branches to the side) so the
+  loop-back runs cleanly up one free side. If you must use a `CurvedArrow`, **verify the
+  bow in a rendered frame**: a negative `angle` bows right-of-travel (outward), positive
+  bows left (into the spine).
+- **`node_box`-style helpers:** a center passed as a 2-tuple throws — coerce to 3-D.
+- **`get_part_by_text` isn't real** (`__getattr__` lies via `hasattr`) — lay out
+  tokens explicitly if you need per-token control.
+- Pass optional `font=`/`slant=` only when set (a `font=None` can choke Pango) — use
+  a small `txt()` wrapper that drops `None` kwargs.
+
+## 6. Visual verification — MANDATORY before "done"
+
+A clean exit code ships overlaps, off-screen text and misaligned boxes. After
+rendering, **look at the frames** — do not rely on the user to catch bugs.
+
+1. Render the changed scene(s): `./render.sh <scene> --quick -q l` (layout is
+   identical to the full quality; QUICK only changes hold length).
+2. **Automated cutoff scan** — run the bundled detector on each scene video; it
+   flags any content within ~9 px of a frame edge (i.e. text running off-screen):
+   ```bash
+   <venv>/bin/python .Codex/skills/manim-explainer/edgecheck.py <scene>.mp4 48
+   ```
+   It cannot see *overlaps* — only cutoffs — so still do step 3.
+3. **Eyeball key frames.** Extract with ffmpeg and read them as images. Sample at
+   the **end of each beat**, never mid-transition (a frozen fade always looks
+   "weird"):
+   ```bash
+   D=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 s.mp4)
+   ffmpeg -y -ss "$(awk "BEGIN{print $D*0.6}")" -i s.mp4 -frames:v 1 out.png
+   ```
+   Use explicit output filenames (bash assoc-arrays + globs have mangled these).
+   To inspect a tight spot (a title bar, a box edge), crop + upscale:
+   `-vf "crop=W:H:X:Y,scale=iw*3:ih*3:flags=neighbor"`.
+4. Check specifically for: text touching/exceeding edges; glyphs overlapping each
+   other or their box; a title bar not spanning its panel; captions colliding with
+   a panel or the header.
+   **Arrow audit (do this every time — a bad arrow reads as "broken" instantly):**
+   trace every arrow in a still frame and confirm each one (a) starts and ends on
+   the right two things, (b) has its head *attached* and pointing the correct way,
+   and (c) **does not cross over any other mobject or land its head on top of an
+   image/box** — an arrow routed across the scene or stabbing into a picture is a
+   blocking bug (it cost a round of feedback on the Diffusion "reverse" loop). A
+   feedback/repeat edge does **not** have to be a scene-spanning arc: a compact
+   circular "repeat ×N" glyph (Arc + hand-built arrowhead, see `repeat_glyph` in
+   `animations/Diffusion`) in a free lane is clearer and can't collide. If you do
+   route a real return edge, give it its own empty lane (see the loop-back gotcha
+   in §5) and re-check the frame.
+5. Only after both the scan is clean **and** the frames look right, do the final
+   full render and report the *measured* duration.
+
+## 7. Rendering cheatsheet
+
+```bash
+./render.sh <scene> --quick -q l   # fast layout check of one scene (480p15)
+./render.sh full                   # whole film, 480p (default)
+./render.sh full -q h              # final HD (1080p60) — slow; run in background
+./render.sh --stitch -q m          # render each scene and ffmpeg-concat to one file
+```
+
+Quality: `-q l|m|h|k` = 480p15 / 720p30 / 1080p60 / 2160p60. Iterate at `l --quick`;
+only render `-q h` for the final deliverable.
+
+## 8. Intro / outro / rules cards (the house bookend)
+
+Every film — the Manim explainers **and** the matplotlib `Simulations/<Name>/`
+series — opens on a title card and closes on a thank-you card, in the shared dark
+house palette (`BG #0E1117`, `INK #F5F3EF` title, `MUTED #8A93A6` subtitle,
+`GOLD #FFD166` rule):
+
+- **Intro:** centred **bold** title (`INK`) with a **`GOLD` underline that runs
+  past both ends of the title**, a one-line `MUTED` subtitle, and the byline
+  **"Created by Ptolémé"**.
+- **Outro:** **"Thank you for watching!"** (same title + rule treatment) + the
+  byline; optionally a one-line recap.
+- **Rules / setup card (encouraged):** before the action, state the rules and the
+  agents' stats in two colour-coded panels, then the one-sentence law and a punchy
+  takeaway (e.g. *"This is math, not magic."*). Keeps the piece self-contained.
+  A persistent bottom "key" (colour-coded stats) can keep the rules on screen
+  throughout.
+
+Manim: implement as `introduction(title1, title2)` / `play_outro()` on the base
+class with thin `Intro` / `Outro` scenes (see `animations/Gravity/gravity.py`).
+
+matplotlib (`Simulations/PredatorPrey/`): render each card to a 1920×1080 PNG
+(`cards.py`), render the sim to mp4 (`viz.py`), and stitch
+`intro → rules → sim → outro` in **one ffmpeg `concat` pass** with a 0.4 s fade
+to/from black between pieces (`film.py`). Force every input to
+`scale=1920:1080,fps=30,format=yuv420p,setsar=1` so `concat` joins cleanly. Draw
+the "past both ends" underline by measuring the title with
+`text.get_window_extent()` after `fig.canvas.draw()`, then ruling `x0-pad → x1+pad`.
+**Render to local `/tmp` then `mv` into the (OneDrive-synced) repo** — writing the
+mp4 straight into the synced folder is I/O-bound (minutes of stalls).
+
+## Definition of done
+
+- [ ] Each scene renders alone and the full film renders end-to-end (exit 0).
+- [ ] `edgecheck.py` is clean on every scene (no edge bleed).
+- [ ] Key frames eyeballed: no overlaps, nothing cut off, boxes fit, arrows clean
+      (every arrow traced: heads attached & correct, none crossing content or
+      landing on an image — see §6 step 4).
+- [ ] Reading cadence is comfortable; every scene ends on a settle before the wipe.
+- [ ] README states what it teaches, the scene list, and the **measured** runtime.
+- [ ] If a real open dataset/API exists for the topic, it was used (not a
+      synthetic stand-in) — see "Content: real data beats a synthetic
+      stand-in" above. README cites the exact source/scene IDs.
