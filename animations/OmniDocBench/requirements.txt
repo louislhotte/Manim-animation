@@ -1,0 +1,4 @@
+# OmniDocBench explainer — no LaTeX toolchain required.
+# Text is rendered with Pango (manim's Text); code snippets are set in Menlo.
+manim>=0.18
+numpy
