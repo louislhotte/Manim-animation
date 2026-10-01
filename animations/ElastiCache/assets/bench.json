@@ -1,0 +1,8 @@
+{
+  "n_rows": 200000,
+  "lookups": 300000,
+  "repeats": 5,
+  "ram_ns": 113.8,
+  "db_us": 2.3,
+  "speedup": 20.2
+}
