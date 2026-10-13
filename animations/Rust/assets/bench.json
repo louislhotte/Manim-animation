@@ -1,0 +1,11 @@
+{
+  "limit": 1000000,
+  "count": 78498,
+  "py_s": 2.4311,
+  "rs_s": 0.04507,
+  "speedup": 53.9,
+  "py_ver": "CPython 3.12.12",
+  "rs_ver": "rustc 1.93.0 (254b59607 2026-01-19)",
+  "chip": "Apple M4 Max",
+  "reps": 3
+}
