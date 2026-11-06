@@ -1,0 +1,43 @@
+{
+  "next_version": "16.4.3",
+  "node_version": "v25.6.0",
+  "build_table": [
+    "Route (app)",
+    "\u250c \u25cb /",
+    "\u251c \u25cb /_not-found",
+    "\u251c \u0192 /api/books",
+    "\u2514 \u0192 /books",
+    "",
+    "",
+    "\u25cb  (Static)   prerendered as static content",
+    "\u0192  (Dynamic)  server-rendered on demand"
+  ],
+  "home_rows": [
+    "<main>",
+    "<h1>The Library</h1>",
+    "<p>A tiny Next.js demo backed by SQLite.</p>",
+    "</main>"
+  ],
+  "home_scripts_dropped": 9,
+  "books_rows": [
+    "<main>",
+    "<h1>Books</h1>",
+    "<ul>",
+    "<li>The Mythical Man-Month (1975)</li>",
+    "<li>The C Programming Language (1978)</li>",
+    "<li>Structure and Interpretation of Computer Programs (1985)</li>",
+    "<li>Design Patterns (1994)</li>",
+    "<li>The Pragmatic Programmer (1999)</li>",
+    "</ul>",
+    "<p>rendered at 2026-10-26T14:10:20.827Z</p>",
+    "</main>"
+  ],
+  "books_scripts_dropped": 9,
+  "books_ts": [
+    "2026-10-26T14:10:20.827Z",
+    "2026-10-26T14:10:22.148Z"
+  ],
+  "api_status": "HTTP/1.1 200 OK",
+  "api_content_type": "application/json",
+  "api_body": "[{\"title\":\"The Mythical Man-Month\",\"year\":1975},{\"title\":\"The C Programming Language\",\"year\":1978},{\"title\":\"Structure and Interpretation of Computer Programs\",\"year\":1985},{\"title\":\"Design Patterns\",\"year\":1994},{\"title\":\"The Pragmatic Programmer\",\"year\":1999}]"
+}

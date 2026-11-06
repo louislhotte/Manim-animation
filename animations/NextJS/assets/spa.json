@@ -1,0 +1,4 @@
+{
+  "vite_version": "8.3.5",
+  "index_html": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>spa</title>\n    <script type=\"module\" crossorigin src=\"/assets/index-DSXtc1GT.js\"></script>\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/index-DykytF2W.css\">\n  </head>\n  <body>\n    <div id=\"root\"></div>\n  </body>\n</html>\n"
+}
