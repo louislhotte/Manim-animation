@@ -7,6 +7,8 @@ How the repository is laid out and how to run everything in it.
 ```
 Manim-animation/
 ├── animations/              # All Manim animation scenes
+│   ├── <Name>/              # One explainer film per folder (KVCache, Transformer, …):
+│   │                        #   <name>.py, a 10-line render.sh, README.md, assets/
 │   ├── 2024/                # 2024 series: DFS, pendulum, Galton board, Taylor,
 │   │   │                    #   KMeans, GMM, Koch curve, epidemic model, …
 │   │   └── Svg/             # SVG assets used by some scenes
@@ -14,6 +16,13 @@ Manim-animation/
 │   ├── CNN/                 # Convolutional Neural Network series, Parts 1–6
 │   │                        #   (adapted from a third-party project; uses voiceover)
 │   └── conv.py              # Standalone convolution scene (reads from ../images/)
+├── manimx/                 # Shared library of the explainer series (crisp text, palette,
+│                            #   pacing, captions, cards, glyphs, code panels, data visuals)
+├── tools/                   # render_lib.sh (the one render driver), new_film.py,
+│                            #   lint_film.py, edgecheck.py, contact_sheet.sh,
+│                            #   scene_fingerprint.py, requirements-render.txt
+├── Simulations/             # matplotlib simulations (same intro/outro house style)
+├── .claude/skills/          # manim-explainer: the house standards + workflow for Claude
 ├── projects/                # Non-Manim side projects
 │   ├── RL/                  # Pygame melee/genetic-algorithm simulation
 │   └── Sport Tracker/       # Swimming log spreadsheet
@@ -28,13 +37,44 @@ Manim-animation/
 └── .pre-commit-config.yaml  # Git pre-commit hooks
 ```
 
-## Prerequisites
+## The explainer series (`animations/<Name>/`)
+
+Every film imports the shared library (`from manimx import *`) and renders through its
+folder's `render.sh`, a thin wrapper over `tools/render_lib.sh`:
+
+```bash
+cd animations/KVCache
+./render.sh --list                   # scene names
+./render.sh cache --quick --check    # one scene, 480p, short holds + edge scan + contact sheet
+./render.sh                          # the whole film at 480p
+./render.sh full -q h                # final 1080p60 (slow: run it in the background)
+```
+
+- **Python**: on first use the driver creates one shared venv **outside OneDrive** at
+  `~/.cache/manimx/venv` (`tools/requirements-render.txt`, then each film's
+  `requirements.txt`). Venvs inside the OneDrive folder break: their symlinks become
+  text files that "run" and render nothing. Override with `MX_PYTHON` / `MX_VENV`.
+- **Knobs**: `MX_QUICK=1` (or `--quick`), `MX_DELAY`, `MX_READ`, `MX_MEDIA_DIR`, `MX_FONT`;
+  each film also honours its own `<PREFIX>_QUICK/_DELAY/_READ`.
+- **No LaTeX needed**: text is Pango (`manimx.Text`).
+
+New film: `python3 tools/new_film.py Name "Title" "One-line promise" --prefix NM`, then
+write the storyboard in the module docstring. Checks: `python3 tools/lint_film.py
+animations/Name/name.py`. The standards, quality bar and verification loop live in
+`.claude/skills/manim-explainer/SKILL.md`.
+
+Changing `manimx`? Prove no film changed: run
+`~/.cache/manimx/venv/bin/python tools/scene_fingerprint.py animations/<Name>/<file>.py`
+before and after and diff the digests (identical digests mean identical frames).
+
+## Prerequisites (legacy scenes)
 
 Manim renders LaTeX and encodes video, so besides Python you need:
 
 - **Python 3.11+**
 - **ffmpeg** — video encoding (`brew install ffmpeg`)
-- **A LaTeX distribution** — for `Tex`/`MathTex` (e.g. MacTeX, or `brew install --cask mactex-no-gui`)
+- **A LaTeX distribution**: only for the legacy `Tex`/`MathTex` scenes (2024 series, CNN,
+  Fourier); the explainer series does not need it
 
 See the [Manim installation guide](https://docs.manim.community/en/stable/installation.html) for platform details.
 
@@ -46,9 +86,9 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt    # add -r requirements-dev.txt for the tooling
 ```
 
-## Rendering an animation
+## Rendering a legacy scene
 
-Each `.py` file under `animations/` defines one or more `Scene` subclasses. Render a
+Each `.py` file under `animations/2024/` (and `conv.py`) defines one or more `Scene` subclasses. Render a
 scene by pointing the `manim` CLI at the file and naming the class:
 
 ```bash

@@ -51,10 +51,6 @@ MODEL_C = "#FFD166"     # the model core (gold)
 
 RNG = np.random.default_rng(7)
 
-# Use a clean, well-hinted sans-serif everywhere. Pango's serif default drops the
-# spaces between words at these sizes ("across tokens" -> "acrosstokens"); setting
-# a real font fixes the kerning and gives plain, standard-looking text.
-Text.set_default(font=FONT)
 
 
 # ---- small reusable pieces ------------------------------------------------ #

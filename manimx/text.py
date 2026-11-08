@@ -92,7 +92,9 @@ def safe_t2c(s, table):
     """
     present = {k: v for k, v in table.items() if k in s}
     keys = list(present)
-    return {k: v for k, v in present.items() if not any(k != o and k in o for o in keys)}
+    return {
+        k: v for k, v in present.items() if not any(k != o and k in o for o in keys)
+    }
 
 
 _safe_t2c = safe_t2c  # legacy name

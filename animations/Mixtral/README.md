@@ -64,9 +64,10 @@ shares their dark palette and Query/Key/Value colour language.
 ./render.sh --stitch -q h          # render each scene and ffmpeg-concat to one file
 ```
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo (HarnessEngineering
-/ Fourier / CNN) if present, otherwise bootstraps a local `.venv`. No LaTeX is
-required — everything is drawn with Pango `Text`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). No LaTeX is required — everything is drawn
+with Pango `Text`.
 
 Pacing knobs (generous by default so every line is readable):
 

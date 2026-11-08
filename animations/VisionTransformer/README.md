@@ -48,9 +48,9 @@ patches shown are real crops of that image.
 Scenes: `intro | idea | patchify | embed | encoder | attention | head | outro`,
 plus `full` (the whole film).
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo (HarnessEngineering
-/ Fourier / CNN) if present, so Manim is not reinstalled; otherwise it bootstraps a
-local `.venv` from `requirements.txt` (`manim` + `numpy`, no LaTeX).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ### Env knobs
 

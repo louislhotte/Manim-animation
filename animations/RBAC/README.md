@@ -48,8 +48,9 @@ Everything is drawn with Manim `Text` (Pango), never `Tex` — no LaTeX toolchai
 ./render.sh --stitch -q m         # render each scene and ffmpeg-concat (720p)
 ```
 
-`render.sh` reuses a sibling Manim venv (`HarnessEngineering`, `Fourier`, or
-`CNN`) if one exists, otherwise bootstraps a local `.venv`. Output lands under
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Output lands under
 `media/videos/rbac/<res>/`.
 
 Pacing knobs: `RBAC_QUICK=1` collapses every hold for a fast sanity render;

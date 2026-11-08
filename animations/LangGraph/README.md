@@ -46,9 +46,9 @@ The code panels use the real API: `StateGraph` / `MessagesState`,
 
 ## Rendering
 
-`render.sh` reuses an existing Manim venv in the repo (the HarnessEngineering
-series' `.venv`) if present, otherwise it bootstraps a local `.venv` from
-`requirements.txt` (just `manim` + `numpy`, no LaTeX).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ```bash
 ./render.sh team --quick -q l   # fast layout check of one scene (480p15)

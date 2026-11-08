@@ -33,27 +33,30 @@ The animations are created in Python, leveraging Manim's extensive capabilities 
 
 ## Repository structure
 
-- `animations/` — all Manim scenes
-  - `2024/` — 2024 series (DFS, pendulum, Galton board, Taylor series, KMeans, GMM, …)
-  - `Quant/` — quant-interview notebooks
-  - `CNN/` — Convolutional Neural Network series (Parts 1–6, with voiceover)
-  - `Fourier/` — Fourier-series ("epicycle") portrait drawing + theory (self-contained, see its `README.md`)
-  - `conv.py` — standalone convolution scene
-- `projects/` — non-Manim side projects (`RL/` pygame simulation, `Sport Tracker/`)
-- `images/` — input images used by some scenes
-- `assets/` — repository assets (banner)
-- `docs/` — documentation
+- `animations/<Name>/`: the explainer series, one film per folder (Transformer, KV Cache,
+  Mixtral, Neural Network, LangGraph, …): `<name>.py`, `render.sh`, `README.md`, `assets/`
+- `manimx/`: the shared library every film imports: crisp text and house font, palette,
+  pacing, captions, intro/outro cards, glyphs, code panels, data-as-picture primitives
+- `tools/`: `render_lib.sh` (the one render driver), `new_film.py` (scaffold a film),
+  `lint_film.py` (house-rule checks), `edgecheck.py` + `contact_sheet.sh` (visual checks),
+  `scene_fingerprint.py` (prove a refactor changed no frame)
+- `animations/2024/`, `animations/CNN/`, `animations/Quant/`: the earlier series and notebooks
+- `Simulations/`: matplotlib simulations in the same house style
+- `.claude/skills/manim-explainer/`: the standards, quality bar and workflow for Claude
+- `projects/`, `images/`, `assets/`, `docs/`: side projects, inputs, banner, documentation
 
 ## Getting started
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-manim -pqh animations/2024/galton.py GaltonBoard
+cd animations/KVCache
+./render.sh cache --quick --check   # first run creates the shared venv (~/.cache/manimx/venv)
+./render.sh full -q h               # final 1080p60
+python3 tools/new_film.py MyTopic "My Topic" "One-line promise"   # from the repo root
 ```
 
-See **[docs/README.md](docs/README.md)** for the full guide: prerequisites, rendering
-scenes, running the notebooks and the RL project, and the dev tooling.
+The explainers need Python 3.11+ and ffmpeg, no LaTeX. See **[docs/README.md](docs/README.md)**
+for the full guide: the render driver and its knobs, the legacy scenes, notebooks, the RL
+project and the dev tooling.
 
 ## Development
 

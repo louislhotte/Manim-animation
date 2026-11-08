@@ -59,5 +59,7 @@ Full film: `WhatIsNextJS` (**3:42 measured** on the 1080p60 deliverable,
 NX_MEDIA_DIR=/tmp/nx_media ./render.sh full -q h   # final 1080p60 (local dir, then copy back)
 ```
 
-Reuses the HarnessEngineering/Fourier/CNN venv if present. Pacing knobs:
-`NX_QUICK=1`, `NX_DELAY` (default 1.0), `NX_READ` (default 2.35).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Pacing knobs: `NX_QUICK=1`, `NX_DELAY`
+(default 1.0), `NX_READ` (default 2.35).

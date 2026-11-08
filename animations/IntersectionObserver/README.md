@@ -55,10 +55,11 @@ Full film class: `IntersectionObserverReact`.
 ./render.sh --stitch -q m        # render each scene and ffmpeg-concat (720p)
 ```
 
-`render.sh` reuses an existing repo Manim venv (HarnessEngineering / Fourier /
-CNN) if present, so Manim is not reinstalled. Pacing knobs: `IO_QUICK=1` collapses
-every reading hold; `IO_DELAY=<seconds>` overrides the reading-hold multiplier
-(default 2.2).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Pacing knobs: `IO_QUICK=1` collapses every
+reading hold; `IO_DELAY=<seconds>` overrides the reading-hold multiplier (default
+2.2).
 
 ## Measured runtime
 

@@ -58,9 +58,10 @@ The whole film is the `BitterLessonFilm` class.
 ./render.sh --stitch -q m        # render each scene and concat (720p30)
 ```
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo (the
-`HarnessEngineering`, `Fourier` or `CNN` series' `.venv`) if present, otherwise
-it bootstraps a local `.venv`. Everything is drawn with Pango `Text` — no LaTeX.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Everything is drawn with Pango `Text` — no
+LaTeX.
 
 ### Pacing knobs
 

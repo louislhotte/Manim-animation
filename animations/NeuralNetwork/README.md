@@ -55,8 +55,8 @@ Five ~2-minute scenes, bookended by the channel's intro/outro cards:
 ## Render
 
 ```bash
-./render.sh                 # whole film, 480p (default); bootstraps/reuses a venv
-                            # and generates assets/nn_learn.npz on first run
+./render.sh                 # whole film, 480p (default); bakes
+                            # assets/nn_learn.npz on first run
 ./render.sh train --quick   # fast layout check of one scene (480p15)
 ./render.sh full -q h       # final HD (1080p60) — slow; run in background
 ./render.sh --stitch -q m   # render each scene and ffmpeg-concat into one file

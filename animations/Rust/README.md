@@ -81,6 +81,8 @@ Discord is switching from Go to Rust"; Stack Overflow Developer Survey
 ./render.sh full -q h                # final 1080p60 (slow)
 ```
 
-Reuses the HarnessEngineering venv (manim 0.21) if present. Knobs:
-`RS_QUICK=1` collapses holds, `RS_DELAY` / `RS_READ` tune the reading rhythm,
-`RS_MEDIA_DIR=/tmp/rs_media` dodges OneDrive I/O stalls for HD renders.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Knobs: `RS_QUICK=1` collapses holds,
+`RS_DELAY` / `RS_READ` tune the reading rhythm, `RS_MEDIA_DIR=/tmp/rs_media` dodges
+OneDrive I/O stalls for HD renders.

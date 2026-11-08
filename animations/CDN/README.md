@@ -42,9 +42,9 @@ The whole film is the `CDN` class.
 ./render.sh --stitch -q m          # render each scene and ffmpeg-concat to one file
 ```
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) if present, otherwise bootstraps a local `.venv` from
-`requirements.txt` (manim 0.21.0 + numpy).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ### The globe
 

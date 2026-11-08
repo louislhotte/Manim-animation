@@ -59,12 +59,13 @@ computed and asserted at import time (there is no hand-typed "answer").
 ./render.sh full -q h              # final 1080p60 (slow; run in background)
 ```
 
-The film mixes 2D `Scene` classes and one 3D `ThreeDScene` (`Space`), so `full`
-always renders each scene and stitches them with ffmpeg (there is no single
-all-in-one class). `render.sh` reuses an existing Manim venv
-(`HarnessEngineering` / `Fourier` / `CNN`) if present, else bootstraps a local
-`.venv`. The 3D scene's partial-movie writes stall on the OneDrive mount, so the
-media dir defaults to `/private/tmp/ptol-media` (override with `PTOL_MEDIA_DIR`).
+The film mixes 2D `Scene` classes and one 3D `ThreeDScene` (`Space`), so `full` always
+renders each scene and stitches them with ffmpeg (there is no single all-in-one
+class). `render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the
+shared Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx`
+library (`./render.sh --help` lists every option). The 3D scene's partial-movie writes
+stall on the OneDrive mount, so the media dir defaults to `/private/tmp/ptol-media`
+(override with `PTOL_MEDIA_DIR`).
 
 Env knobs: `PTOL_QUICK=1` collapses the reading holds; `PTOL_DELAY=x` overrides
 the reading-hold multiplier.

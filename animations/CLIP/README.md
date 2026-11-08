@@ -51,10 +51,10 @@ The whole film is the `WhatIsCLIP` class.
 ./render.sh --stitch -q m           # render each scene and concat (720p30)
 ```
 
-`render.sh` reuses an existing repo Manim venv (HarnessEngineering / Fourier /
-CNN, manim 0.21.0) if present, otherwise bootstraps a local `.venv`. No LaTeX:
-everything is `Text` (Pango), and all the images are hand-drawn vector glyphs
-(no baked assets).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). No LaTeX: everything is `Text` (Pango), and
+all the images are hand-drawn vector glyphs (no baked assets).
 
 Pacing knobs: `CLIP_QUICK=1` collapses every hold for fast iteration;
 `CLIP_DELAY=<sec>` overrides the reading-hold multiplier (default 2.0).

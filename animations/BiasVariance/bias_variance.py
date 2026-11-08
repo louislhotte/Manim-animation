@@ -374,6 +374,7 @@ class _BVBase(ExplainerScene):
             bullet("High bias — wrong in a consistent way.", color=UNDER_C, dot=UNDER_C),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         pts.next_to([4.2, -1.4, 0], ORIGIN)
+        keep_inside(clamp_width(pts, 5.4))  # wider sans font: stay on screen
         for b in pts:
             self.play(FadeIn(b, shift=RIGHT * 0.15), run_time=0.55)
             self.beat(0.7)
@@ -420,6 +421,7 @@ class _BVBase(ExplainerScene):
             bullet("Low bias and low variance.", color=GOOD_C, dot=GOOD_C),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         pts.next_to([4.2, -1.9, 0], ORIGIN)
+        keep_inside(clamp_width(pts, 5.4))  # wider sans font: stay on screen
         for b in pts:
             self.play(FadeIn(b, shift=RIGHT * 0.15), run_time=0.55)
             self.beat(0.6)

@@ -35,7 +35,11 @@ def fit_in_frame(mob, margin=SAFE):
     """Scale ``mob`` down (never up) to fit the safe area, then keep it inside."""
     max_w = config.frame_width - 2 * margin
     max_h = config.frame_height - 2 * margin
-    f = min(1.0, max_w / mob.width if mob.width else 1.0, max_h / mob.height if mob.height else 1.0)
+    f = min(
+        1.0,
+        max_w / mob.width if mob.width else 1.0,
+        max_h / mob.height if mob.height else 1.0,
+    )
     if f < 1.0:
         mob.scale(f)
     return keep_inside(mob, margin)

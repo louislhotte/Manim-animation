@@ -33,12 +33,6 @@ import tempfile
 import time
 from pathlib import Path
 
-# Python's per-process hash salt changes set/dict-of-str iteration order, which can
-# change mobject order and therefore the fingerprint. Pin it by re-exec'ing once.
-if os.environ.get("PYTHONHASHSEED") != "0":
-    os.environ["PYTHONHASHSEED"] = "0"
-    os.execv(sys.executable, [sys.executable, *sys.argv])
-
 REPO = Path(__file__).resolve().parents[1]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))  # so films can `from manimx import *`
@@ -67,7 +61,7 @@ def _ignore_function_source() -> None:
     original = hashing._CustomEncoder.default
 
     def default(self, obj):
-        if isinstance(obj, (types.MethodType, types.FunctionType)):
+        if isinstance(obj, types.MethodType | types.FunctionType):
             return f"<fn {getattr(obj, '__qualname__', getattr(obj, '__name__', '?'))}>"
         return original(self, obj)
 
@@ -119,7 +113,19 @@ def fingerprint(path: Path, classes: list[str], verbose: bool = False) -> dict:
     return results
 
 
+def _pin_hash_seed() -> None:
+    """Re-exec once with PYTHONHASHSEED=0.
+
+    Python's per-process hash salt changes set/dict-of-str iteration order, which
+    can change mobject order and therefore the fingerprint.
+    """
+    if os.environ.get("PYTHONHASHSEED") != "0":
+        os.environ["PYTHONHASHSEED"] = "0"
+        os.execv(sys.executable, [sys.executable, *sys.argv])
+
+
 def main() -> int:
+    _pin_hash_seed()
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("file", type=Path, help="film .py file")
     ap.add_argument("classes", nargs="*", help="scene classes (default: all public)")

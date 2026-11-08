@@ -42,8 +42,8 @@ with three minor pieces:
 ./render.sh intro               # a single part (intro | game | outro)
 ```
 
-The first run bootstraps a local `.venv` (or reuses another series' Manim venv
-in this repo). Quality flags: `l`=480p15 (default), `m`=720p30, `h`=1080p60,
+The first run creates the shared Manim venv (`~/.cache/manimx/venv`, see
+`tools/render_lib.sh`). Quality flags: `l`=480p15 (default), `m`=720p30, `h`=1080p60,
 `k`=2160p60. Add `-p` to preview when done.
 
 ### Scenes / classes

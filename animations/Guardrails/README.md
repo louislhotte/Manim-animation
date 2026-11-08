@@ -60,9 +60,9 @@ request and on the response. The film builds that from the threat up:
 ./render.sh --stitch -q m        # render each scene and ffmpeg-concat to one file
 ```
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo
-(`HarnessEngineering`, `Fourier` or `CNN`) if present, otherwise bootstraps a
-local `.venv` from `requirements.txt` (just `manim` + `numpy`, no LaTeX).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 Pacing knobs: `GR_QUICK=1` collapses every hold for fast iteration; `GR_DELAY`
 tunes the motion rhythm; `GR_READ` sets the per-caption reading hold.

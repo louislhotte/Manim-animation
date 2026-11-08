@@ -620,7 +620,7 @@ class _CDNBase(ExplainerScene):
         litems.next_to(lt, DOWN, aligned_edge=LEFT, buff=0.3)
         lgroup = VGroup(lt, litems)
         lbox = self.card_box(lgroup, EDGE_C, pad=0.36)
-        left = VGroup(lbox, lgroup).move_to([-3.55, 0.45, 0])
+        left = VGroup(lbox, lgroup)
 
         # ---- right card: when ----
         rt = Text("Reach for a CDN when…", font_size=25, color=USER_C, weight="BOLD")
@@ -633,7 +633,10 @@ class _CDNBase(ExplainerScene):
         ritems.next_to(rt, DOWN, aligned_edge=LEFT, buff=0.3)
         rgroup = VGroup(rt, ritems)
         rbox = self.card_box(rgroup, USER_C, pad=0.36)
-        right = VGroup(rbox, rgroup).move_to([3.55, 0.45, 0])
+        right = VGroup(rbox, rgroup)
+        # side by side with a real gap, scaled to the safe area (never collide)
+        fit_in_frame(VGroup(left, right).arrange(RIGHT, buff=0.5, aligned_edge=UP)
+                     .move_to([0, 0.45, 0]))
 
         self.play(FadeIn(left, shift=RIGHT * 0.15), run_time=0.7)
         self.play(LaggedStart(*[FadeIn(m, shift=RIGHT * 0.1) for m in litems],

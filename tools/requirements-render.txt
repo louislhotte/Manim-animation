@@ -4,5 +4,5 @@
 # No LaTeX: the series renders all text with Pango (manim.Text) via manimx.
 manim==0.21.0
 numpy>=1.26
-pillow>=10.0
+pillow>=10.0,<13  # Pillow 13 rejects the mode= that manim 0.21 passes for ImageMobject
 scipy>=1.11

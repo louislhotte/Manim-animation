@@ -48,9 +48,10 @@ $$ f(t) = \sum_{k} c_k\, e^{2\pi i k t}, \qquad
 ./render.sh FourierPortrait -q h  # final 1080p
 ```
 
-`render.sh` reuses the CNN series' `.venv` if it finds one (so Manim isn't
-reinstalled), otherwise it bootstraps a local `.venv` from `requirements.txt`.
-Scenes: `FourierPortrait` (default) · `Intro` · `Drawing` · `Theory`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Scenes: `FourierPortrait` (default) ·
+`Intro` · `Drawing` · `Theory`.
 
 To draw a **different image**, drop it in and regenerate the path:
 

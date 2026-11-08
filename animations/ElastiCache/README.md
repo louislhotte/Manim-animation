@@ -82,5 +82,6 @@ EC_MEDIA_DIR=/tmp/ec_media ./render.sh full -q h
 Pacing knobs: `EC_QUICK=1` collapses all reading holds; `EC_DELAY` and `EC_READ`
 tune the inter-step and per-caption reading rhythm.
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering / Fourier
-/ CNN) if present, else bootstraps a local `.venv` from `requirements.txt`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).

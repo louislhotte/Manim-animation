@@ -59,8 +59,9 @@ bias demo are all Manim mobjects.
 ./render.sh --stitch -q m          # render each scene and ffmpeg-concat
 ```
 
-Reuses the shared `HarnessEngineering/.venv` Manim environment — no local
-install needed. Env knobs: `LLMJ_QUICK=1` (collapse holds for a fast test),
-`LLMJ_DELAY=<seconds>` (override the reading-hold multiplier).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Env knobs: `LLMJ_QUICK=1` (collapse holds
+for a fast test), `LLMJ_DELAY=<seconds>` (override the reading-hold multiplier).
 
 **Measured runtime:** 2:44 (164s) at the default pacing, 1080p60.

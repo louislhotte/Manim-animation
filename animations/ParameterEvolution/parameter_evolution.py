@@ -465,6 +465,7 @@ class _PEBase(ExplainerScene):
             n.clear_updaters()
         conv = chip(f"converged:  w ≈ {WTR[-1]:.2f},  b ≈ {BTR[-1]:.2f},  loss ≈ {LTR[-1]:.2f}",
                     GOOD, fs=23).next_to(axL, DOWN, buff=0.25)
+        keep_inside(conv)  # the sans font is wider: keep the chip off the left edge
         self.play(ReplacementTransform(note2, conv), run_time=0.6)
         self.play(Indicate(g_loss, color=GOOD, scale_factor=1.1), run_time=0.7)
         self.beat(0.6)

@@ -74,9 +74,13 @@ def prob_bars(items, unit=3.2, fs=22, color=AMBER, gap=0.52, fmt="{:.2f}"):
         lab = Text(name, font_size=fs, color=INK)
         lab.move_to([-lab.width / 2 - 0.2, y, 0])
         bw = max(0.03, unit * p)
-        bar = Rectangle(width=bw, height=0.36, stroke_width=0, fill_color=color, fill_opacity=0.9)
+        bar = Rectangle(
+            width=bw, height=0.36, stroke_width=0, fill_color=color, fill_opacity=0.9
+        )
         bar.move_to([0.2 + bw / 2, y, 0])
-        val = Text(fmt.format(p), font_size=fs - 5, color=MUTED).next_to(bar, RIGHT, buff=0.15)
+        val = Text(fmt.format(p), font_size=fs - 5, color=MUTED).next_to(
+            bar, RIGHT, buff=0.15
+        )
         grp.add(VGroup(lab, bar, val))
     return grp
 

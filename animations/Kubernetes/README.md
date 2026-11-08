@@ -73,9 +73,9 @@ the "Thanks for watching!" outro, six scenes in build-up order:
 Scenes: `intro · why · containers · cluster · replicas · pipeline · checklist · outro`
 (or `full` for the whole thing). Quality: `-q l|m|h|k` (480p / 720p / 1080p / 2160p).
 
-On first run `render.sh` reuses an existing Manim virtualenv from a neighbouring
-series (`HarnessEngineering`, `Fourier` or `CNN`) if one is present, otherwise it
-bootstraps a local `.venv` from `requirements.txt`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ### Env knobs
 

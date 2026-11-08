@@ -58,12 +58,12 @@ control is reserved for real 3D geometry, never for flat text or diagrams).
 ./render.sh --stitch -q m            # render each scene and concat (720p30)
 ```
 
-Scene names: `intro problem container layers commands network vms kube outro`
-(plus `full`). `render.sh` reuses an existing repo Manim venv
-(HarnessEngineering / Fourier / CNN) if present, else bootstraps a local
-`.venv`. It renders into `/private/tmp/dk-media` by default (writing Manim's many
-partial-movie files into the OneDrive-synced repo stalls on I/O); override with
-`DK_MEDIA_DIR=…`.
+Scene names: `intro problem container layers commands network vms kube outro` (plus
+`full`). `render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the
+shared Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx`
+library (`./render.sh --help` lists every option). It renders into
+`/private/tmp/dk-media` by default (writing Manim's many partial-movie files into the
+OneDrive-synced repo stalls on I/O); override with `DK_MEDIA_DIR=…`.
 
 Pacing knobs: `DK_QUICK=1` collapses every reading hold for a fast iteration;
 `DK_DELAY=<seconds>` overrides the reading-rhythm multiplier (default 2.3).

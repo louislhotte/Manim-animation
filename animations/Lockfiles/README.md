@@ -45,10 +45,10 @@ Each renders on its own; `LockfilesFilm` renders the whole thing end to end.
 ./render.sh --stitch -q m       # render each scene and concat (720p30)
 ```
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) if present, otherwise bootstraps a local `.venv`. No LaTeX — all
-text is Pango `Text`; the JSON/TOML is set in Menlo with a quote-precise syntax
-highlighter.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). No LaTeX — all text is Pango `Text`; the
+JSON/TOML is set in Menlo with a quote-precise syntax highlighter.
 
 Pacing knobs: `PL_QUICK=1` collapses the reading holds for fast iteration;
 `PL_DELAY` / `PL_READ` fine-tune the cadence.

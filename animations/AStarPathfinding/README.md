@@ -74,9 +74,9 @@ Everything uses `Text` (Pango), not `Tex`, so no LaTeX toolchain is needed.
 ```
 
 Scenes: `intro | map | search | explain | examples | final | outro` (or `full`).
-(`examples` is only in the 3D `--city` version.)
-`render.sh` reuses an existing Manim venv from the repo (HarnessEngineering /
-CNN / Fourier); only if none is found does it bootstrap a local `.venv`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ### Pacing
 

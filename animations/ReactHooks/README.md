@@ -46,8 +46,9 @@ every screen holds long enough to read.
 ./render.sh --stitch -q m      # render each scene and stitch (720p)
 ```
 
-`render.sh` bootstraps a local `.venv` on first run, or reuses the
-HarnessEngineering / Fourier / CNN venv if one already exists.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 Scenes render individually too: `intro · hooks · state · effects · anatomy ·
 example · cycle · recap · outro`.

@@ -36,15 +36,15 @@ smoothly into one another with `Transform` — that's what powers the angle swee
 ## Render
 
 ```bash
-./render.sh              # full animation, 480p (fast), reuses the CNN venv
+./render.sh              # full animation, 480p (fast)
 ./render.sh -p           # ... and open it when done
 ./render.sh -q h -p      # 1080p
 ./render.sh LeafStill -s # a quick PNG still to eyeball the shape
 ```
 
-`render.sh` reuses the manim `.venv` from the CNN series if it exists; otherwise
-it bootstraps a local `.venv` from `requirements.txt`. Output lands in `media/`
-(git-ignored).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Output lands in `media/` (git-ignored).
 
 ## Tuning
 

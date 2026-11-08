@@ -46,8 +46,9 @@ the field animates without any vector geometry.
 ./render.sh -q h -p        # 1080p60 final, then open it
 ```
 
-First run reuses a sibling series' Manim venv (HarnessEngineering / Fourier /
-CNN) or bootstraps a local `.venv`. Output lands in
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Output lands in
 `media/videos/moire_of_life/<res>/MoireOfLife.mp4`.
 
 > Heads-up: the field is computed in numpy every frame, so a full 1080p60 render

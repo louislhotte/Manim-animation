@@ -62,12 +62,13 @@ them (`./render.sh full` does this automatically).
 ./render.sh full -q h              # final 1080p60 (slow; run in background)
 ```
 
-Quality: `-q l|m|h|k` = 480p15 / 720p30 / 1080p60 / 2160p60. `--quick`
-(`XCE_QUICK=1`) collapses the reading holds; `XCE_DELAY=x` overrides the
-reading-hold multiplier. For long HD renders, set `XCE_MEDIA_DIR=/private/tmp/…`
-to render to a local dir and avoid OneDrive I/O stalls, then copy the stitched
-mp4 back. `render.sh` reuses an existing Manim venv (HarnessEngineering / Fourier
-/ CNN) if present, else bootstraps a local `.venv`.
+Quality: `-q l|m|h|k` = 480p15 / 720p30 / 1080p60 / 2160p60. `--quick` (`XCE_QUICK=1`)
+collapses the reading holds; `XCE_DELAY=x` overrides the reading-hold multiplier. For
+long HD renders, set `XCE_MEDIA_DIR=/private/tmp/…` to render to a local dir and avoid
+OneDrive I/O stalls, then copy the stitched mp4 back. `render.sh` is a thin wrapper
+over `tools/render_lib.sh`: it renders with the shared Manim venv in
+`~/.cache/manimx/venv` (created on first run) and the `manimx` library (`./render.sh
+--help` lists every option).
 
 ## Measured runtime
 

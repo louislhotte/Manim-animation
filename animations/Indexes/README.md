@@ -61,8 +61,9 @@ Bookended by the channel's intro / outro cards, matching the sibling explainers
 Scenes: `full` (default) · `intro` · `scan` · `index` · `seek` · `composite` ·
 `recap` · `outro`.
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo
-(HarnessEngineering / Fourier / CNN), else bootstraps a local `.venv`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 Env knobs: `IDX_QUICK=1` shortens every hold for a fast sanity render;
 `IDX_DELAY=x` overrides the reading-hold multiplier.

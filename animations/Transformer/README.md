@@ -45,9 +45,9 @@ six scenes walk the full forward path:
 ./render.sh --stitch -q m       # render each scene and join into one 720p film
 ```
 
-`render.sh` reuses the HarnessEngineering / Fourier / CNN series' `.venv` if it
-finds one (so Manim isn't reinstalled), otherwise it bootstraps a local `.venv`
-from `requirements.txt`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 Individually renderable scenes: `intro` · `task` · `embed` · `arch` ·
 `attention` · `sample` · `generate` · `outro` (or `full`, the default).

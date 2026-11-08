@@ -59,9 +59,9 @@ assets (the images, cube and channels are all drawn from primitives).
 Env knobs: `TN_QUICK=1` collapses the reading holds; `TN_DELAY=<s>` overrides the
 reading rhythm.
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo (the
-HarnessEngineering / Fourier / CNN `.venv`, Manim 0.21.0) and only bootstraps a
-local `.venv` if none is found.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ## Measured runtime
 

@@ -103,7 +103,9 @@ class ExplainerMixin:
             if not p.quick and anims and not is_wait:
                 rt = kwargs.get("run_time")
                 if rt is None:
-                    rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
+                    rts = [
+                        r for r in (getattr(a, "run_time", None) for a in anims) if r
+                    ]
                     rt = max(rts) if rts else 1.0
                 kwargs["run_time"] = rt * p.anim_slow
         return super().play(*anims, **kwargs)
@@ -163,7 +165,11 @@ class ExplainerMixin:
         """Replace the running bottom caption, then hold ``read(hold)``."""
         new = self.say(text, **kw)
         if self._cap is not None and self._cap in self.mobjects:
-            self.play(FadeOut(self._cap, shift=UP * 0.1), FadeIn(new, shift=UP * 0.1), run_time=rt)
+            self.play(
+                FadeOut(self._cap, shift=UP * 0.1),
+                FadeIn(new, shift=UP * 0.1),
+                run_time=rt,
+            )
         else:
             self.play(FadeIn(new, shift=UP * 0.1), run_time=rt)
         self._cap = new
@@ -205,8 +211,12 @@ class ExplainerMixin:
         self.read(1.4)
 
     # ---- code panels -------------------------------------------------------- #
-    def hl_lines(self, panel, lines, idxs, color=GOLD, opacity=0.16, pad=0.05, xpad=0.34):
-        return hl_lines(panel, lines, idxs, color=color, opacity=opacity, pad=pad, xpad=xpad)
+    def hl_lines(
+        self, panel, lines, idxs, color=GOLD, opacity=0.16, pad=0.05, xpad=0.34
+    ):
+        return hl_lines(
+            panel, lines, idxs, color=color, opacity=opacity, pad=pad, xpad=xpad
+        )
 
     def focus(self, panel, lines, idxs, color=GOLD, rt=0.4):
         """Move the single code-line highlight to ``lines[idxs]``."""
@@ -247,7 +257,9 @@ class ExplainerMixin:
         self.play(FadeIn(byline, shift=UP * 0.3), run_time=0.9)
         card = VGroup(header, line, byline)
         if self.TAGLINE:
-            tag = Text(self.TAGLINE, font_size=22, color=MUTED).next_to(byline, DOWN, buff=0.4)
+            tag = Text(self.TAGLINE, font_size=22, color=MUTED).next_to(
+                byline, DOWN, buff=0.4
+            )
             self.play(FadeIn(tag), run_time=0.8)
             card.add(tag)
         self.read(1.4)
@@ -255,7 +267,7 @@ class ExplainerMixin:
         self.card_wait(0.3)
 
     def play_outro(self):
-        """"Thank you for watching!" + rule, byline, optional one-line recap."""
+        """ "Thank you for watching!" + rule, byline, optional one-line recap."""
         self.card_wait(0.5)
         header = Text("Thank you for watching!", font_size=48, color=INK, weight="BOLD")
         line = rule_under(header, color=self.RULE_COLOR)

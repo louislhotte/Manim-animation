@@ -50,8 +50,10 @@ Each renders alone; `JWTAuthFilm` is the whole thing end-to-end.
 ./render.sh --stitch -q m          # render each scene and ffmpeg-concat
 ```
 
-Everything uses `Text` (Pango), no LaTeX. `render.sh` reuses a sibling Manim venv
-(HarnessEngineering / Fourier / CNN) if present.
+Everything uses `Text` (Pango), no LaTeX. `render.sh` is a thin wrapper over
+`tools/render_lib.sh`: it renders with the shared Manim venv in `~/.cache/manimx/venv`
+(created on first run) and the `manimx` library (`./render.sh --help` lists every
+option).
 
 Pacing knobs (tuned for readable, no-voiceover subtitles):
 - `JWT_READ`  — absolute reading hold after each block of text (default **2.6 s**).

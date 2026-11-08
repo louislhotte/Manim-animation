@@ -48,9 +48,9 @@ Bookended by the channel's intro card and the "Thank you for watching!" outro.
 ./render.sh --stitch -q m        # render each scene and concat to one file (720p)
 ```
 
-`render.sh` reuses an existing Manim venv elsewhere in the repo (Harness­Engineering /
-Fourier / CNN) if present, otherwise bootstraps a local `.venv`. No LaTeX — every
-label is Pango `Text`.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). No LaTeX — every label is Pango `Text`.
 
 ### Pacing knobs
 

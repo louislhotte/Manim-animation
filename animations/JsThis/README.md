@@ -39,9 +39,9 @@ Concrete over metaphor: every beat is real JS you can paste into a console.
 ./render.sh --stitch -q m      # render each scene and concat (720p30)
 ```
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) if present, otherwise bootstraps a local `.venv`. Env knobs:
-`THIS_QUICK=1` collapses the reading holds, `THIS_DELAY` / `THIS_READ` tune the
-cadence.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Env knobs: `THIS_QUICK=1` collapses the
+reading holds, `THIS_DELAY` / `THIS_READ` tune the cadence.
 
 Measured runtime: **2 m 39 s** (130 animations, real cadence).

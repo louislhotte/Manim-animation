@@ -56,9 +56,9 @@ Bookended by the house intro card ("How SSO Actually Works") and the
 
 Scenes: `intro problem players dance token magic world recap outro` (or `full`).
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) if present, otherwise bootstraps a local `.venv` from
-`requirements.txt` (`manim` + `numpy`).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 ### Pacing knobs
 

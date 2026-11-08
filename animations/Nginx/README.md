@@ -48,10 +48,10 @@ The whole film is the `HowNginxWorks` class.
 Quality: `-q l|m|h|k` = 480p15 / 720p30 / 1080p60 / 2160p60. Scene names:
 `intro`, `frontdoor`, `eventloop`, `balance`, `edge`, `outro`, `full`.
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) if present, else bootstraps a local `.venv` — so Manim isn't
-reinstalled. Pacing knobs: `NGINX_QUICK=1` collapses every hold; `NGINX_DELAY` /
-`NGINX_READ` tune the reading rhythm.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Pacing knobs: `NGINX_QUICK=1` collapses
+every hold; `NGINX_DELAY` / `NGINX_READ` tune the reading rhythm.
 
 ## Notes
 

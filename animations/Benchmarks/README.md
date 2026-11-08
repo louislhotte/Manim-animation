@@ -59,9 +59,10 @@ bookend, "Created by Ptolémé").
 ./render.sh --stitch -q m   # render each scene and ffmpeg-concat them
 ```
 
-`render.sh` reuses an existing repo Manim venv (HarnessEngineering / Fourier /
-CNN) if present, otherwise bootstraps a local `.venv`. Pacing knobs: `BM_QUICK=1`
-collapses the reading holds; `BM_DELAY=x` overrides the hold multiplier.
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option). Pacing knobs: `BM_QUICK=1` collapses the
+reading holds; `BM_DELAY=x` overrides the hold multiplier.
 
 Scene names: `intro whatis tour grading swebench passk arena progress catch outro`
 (or `full` for the whole film).

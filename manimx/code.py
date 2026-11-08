@@ -9,7 +9,17 @@ one highlight from line to line.
 
 from __future__ import annotations
 
-from manim import DOWN, ITALIC, LEFT, RIGHT, UP, Dot, Rectangle, RoundedRectangle, VGroup
+from manim import (
+    DOWN,
+    ITALIC,
+    LEFT,
+    RIGHT,
+    UP,
+    Dot,
+    Rectangle,
+    RoundedRectangle,
+    VGroup,
+)
 
 from .palette import CODE_BAR, CODE_BG, FAINT, GOLD, MONO, MUTED
 from .text import Text, safe_t2c, txt
@@ -61,13 +71,22 @@ def code_panel(
         code.scale(f)
 
     bg = RoundedRectangle(
-        width=code.width + 0.9, height=code.height + 1.15, corner_radius=0.16,
-        stroke_color=FAINT, stroke_width=2, fill_color=CODE_BG, fill_opacity=1.0,
+        width=code.width + 0.9,
+        height=code.height + 1.15,
+        corner_radius=0.16,
+        stroke_color=FAINT,
+        stroke_width=2,
+        fill_color=CODE_BG,
+        fill_opacity=1.0,
     )
     bg.move_to(code)
     bar = RoundedRectangle(
-        width=bg.width, height=0.5, corner_radius=0.16,
-        stroke_width=0, fill_color=CODE_BAR, fill_opacity=1.0,
+        width=bg.width,
+        height=0.5,
+        corner_radius=0.16,
+        stroke_width=0,
+        fill_color=CODE_BAR,
+        fill_opacity=1.0,
     )
     # centre first: the indent-shifted code re-centres bg, so align_to(UP)
     # alone would leave the title bar offset in x.
@@ -92,8 +111,12 @@ def hl_lines(panel, lines, idxs, color=GOLD, opacity=0.16, pad=0.05, xpad=0.34):
     bots = [lines[i].get_bottom()[1] for i in idxs]
     y_hi, y_lo = max(tops) + pad, min(bots) - pad
     rect = RoundedRectangle(
-        width=panel[0].width - xpad, height=y_hi - y_lo, corner_radius=0.08,
-        stroke_width=0, fill_color=color, fill_opacity=opacity,
+        width=panel[0].width - xpad,
+        height=y_hi - y_lo,
+        corner_radius=0.08,
+        stroke_width=0,
+        fill_color=color,
+        fill_opacity=opacity,
     )
     rect.move_to([panel[0].get_center()[0], (y_hi + y_lo) / 2, 0])
     return rect

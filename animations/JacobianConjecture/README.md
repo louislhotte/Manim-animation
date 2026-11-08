@@ -68,9 +68,9 @@ Each renders alone; `JacobianConjecture` is the whole film.
 ./render.sh --stitch -q m            # render each scene and concat (720p)
 ```
 
-`render.sh` reuses an existing Manim venv in the repo (HarnessEngineering /
-Fourier / CNN) or bootstraps a local `.venv` from `requirements.txt`
-(Manim 0.21, no LaTeX — all "formulas" are built from `Text`).
+`render.sh` is a thin wrapper over `tools/render_lib.sh`: it renders with the shared
+Manim venv in `~/.cache/manimx/venv` (created on first run) and the `manimx` library
+(`./render.sh --help` lists every option).
 
 Pacing: `JC_QUICK=1` (or `--quick`) collapses the reading holds; `JC_DELAY=<s>`
 overrides the reading rhythm (default `2.4` — generous, so formula screens have
