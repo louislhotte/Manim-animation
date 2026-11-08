@@ -28,48 +28,26 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("DK_QUICK") == "1"
+QUICK = quick_mode("DK")
 # Reading rhythm. 2.3 so the captions / code panels read comfortably.
 DELAY = float(os.environ.get("DK_DELAY", 0.28 if QUICK else 2.3))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared with the Kubernetes / Quantization series) ----------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text
-FAINT = "#3A4152"       # hairlines, faint structure
 SLAB = "#212C40"        # the host slab fill
 DOCKER = "#2496ED"      # Docker blue (the hero container colour)
 WEB = "#5B8DEF"         # web tier (blue)
 API = "#2EC4B6"         # api tier (teal)
 DB = "#FF9F45"          # database tier (orange)
 WRITE = "#FFD166"       # writable layer / gold accent
-GOOD = "#3DD68C"        # green / healthy
-GOLD = "#FFD166"        # accent / gold
-BAD = "#FF5C5C"         # red / stop
 PANEL = "#141C29"       # HUD / panel fill
 K8S = "#326CE5"         # Kubernetes blue (the handoff)
 POD_C = "#5B8DEF"       # pods (blue)
 NODE_C = "#2EC4B6"      # nodes (teal)
 CTRL_C = "#C792EA"      # control plane (purple)
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-
-# ---- crisp small text ----------------------------------------------------- #
-# Pango mangles glyphs/spacing below ~20 pt (small text comes out in a fallback
-# font). Shadow Text so every call rasterises at a large base and is scaled DOWN.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=28, color=INK, font=None, slant=None, weight=None, **extra):
@@ -157,13 +135,6 @@ DOCKER_T2C = {
     "python:3.12-slim": VAL, "requirements.txt": STR, "app.py": STR,
     "pip": FN, "8080": VAL,
 }
-
-
-def _safe_t2c(s, table):
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
 
 
 def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NORMAL"):
@@ -266,27 +237,16 @@ def whale(scale=1.0, color=DOCKER):
 # =========================================================================== #
 # Base scene
 # =========================================================================== #
-class _DockerBase(ThreeDScene):
+class _DockerBase(Explainer3DScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self._orbiting = False
         self._cap = None
-
-    # slow every played animation slightly; never scale a bare wait
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
 
     # ---- camera ----------------------------------------------------------- #
     def go_3d(self, phi=66, theta=-62, zoom=0.9, rate=0.045, focal=None):
@@ -376,7 +336,7 @@ class _DockerBase(ThreeDScene):
         for m in self.mobjects:
             m.clear_updaters()
         if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+            self.play_unstretched(*[FadeOut(m) for m in self.mobjects], run_time=rt)
         self._cap = None
 
     def _rule_under(self, header, pad=1.0, color=GOLD, drop=0.45):

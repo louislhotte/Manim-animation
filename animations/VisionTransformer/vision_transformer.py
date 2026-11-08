@@ -38,20 +38,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text: render big, scale down (Pango mangles small sizes) --------- #
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("VIT_QUICK") == "1"
+QUICK = quick_mode("VIT")
 # One reading-rhythm knob. Every on-screen "hold" is scaled by DELAY; QUICK
 # collapses the holds for fast iteration. Formula/diagram screens earn longer
 # beats than prose, so DELAY sits a touch above 2.0.
@@ -59,10 +49,6 @@ DELAY = float(os.environ.get("VIT_DELAY", 0.28 if QUICK else 2.1))
 END_HOLD = 0.2 if QUICK else 2.3  # settle held on a finished scene before it wipes
 
 # ---- palette (shared with the Transformer / KV-cache films for continuity) - #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines
 PATCH = "#C792EA"       # patches / tokens / embeddings (violet)
 POS = "#8A7CFF"         # positional embeddings (indigo)
 CLS_C = "#FF8C42"       # the [CLS] token (orange)
@@ -71,15 +57,8 @@ K_C = "#2EC4B6"         # keys (teal)
 V_C = "#FFD166"         # values (gold)
 ATTN = "#FF8C42"        # attention / ViT (orange)
 MODEL_C = "#FFD166"     # model core (gold)
-GOOD = "#3DD68C"        # chosen / pass (green)
-BAD = "#FF5C5C"         # blocked / stop (red)
-ACCENT = "#FFD166"      # gold rule
 
 RNG = np.random.default_rng(7)
-
-# A clean, well-hinted sans-serif everywhere (set on the *real* Text, shadowed).
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 
 # ======================================================================== #
@@ -200,12 +179,6 @@ def dot_label(text, color, fs=22):
     return VGroup(d, t)
 
 
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
-
-
 def vec_col(vals, color=V_C, cw=0.3, stroke=FAINT):
     cells = VGroup()
     for v in vals:
@@ -235,47 +208,12 @@ def prob_bars(items, unit=3.4, fs=22, color=ATTN, gap=0.56):
     return grp
 
 
-def mtext(parts, base_fs=32):
-    """Inline 'formula' from Text pieces. Each part is (s, role[, color]) with
-    role in {"b" base, "^" super, "_" sub}. Supers/subs attach to the last base."""
-    grp = VGroup()
-    last_base = None
-    for p in parts:
-        s, role = p[0], p[1]
-        col = p[2] if len(p) > 2 else INK
-        if role == "b":
-            m = Text(s, font_size=base_fs, color=col)
-            if len(grp) > 0:
-                m.next_to(grp, RIGHT, buff=0.05, aligned_edge=DOWN)
-            grp.add(m)
-            last_base = m
-        else:
-            m = Text(s, font_size=int(base_fs * 0.6), color=col)
-            anchor = last_base if last_base is not None else grp
-            m.next_to(anchor, RIGHT, buff=0.02)
-            m.align_to(anchor, UP if role == "^" else DOWN)
-            grp.add(m)
-    return grp
-
-
 # ========================================================================== #
-class _ViTBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
-
-    def wipe(self, rt=0.7):
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _ViTBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
+    WIPE_SETTLES = True
 
     def section_header(self, label, color):
         t = txt(label, fs=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

@@ -34,22 +34,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix) ----------------------------------------- #
-# Manim's ``Text`` quantises glyph positions badly below ~20 pt. Render every
-# glyph at a large base size and scale the mobject *down* — spacing stays crisp.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("K8S_QUICK") == "1"
+QUICK = quick_mode("K8S")
 # Reading rhythm: every hold is self.beat(t) == wait(t * DELAY). This is a
 # teaching piece, so DELAY is generous — captions linger long enough to read.
 # QUICK collapses every hold for a fast sanity render.
@@ -61,14 +49,7 @@ END_HOLD = 0.2 if QUICK else 2.5
 ANIM_SLOW = 1.0 if QUICK else 1.2
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"        # dark slate background
-PANEL = "#151A23"     # panel fill
-INK = "#F5F3EF"       # warm white text
-MUTED = "#8A93A6"     # secondary text / arrows
 FAINT = "#2A3140"     # gridlines / tracks
-ACCENT = "#FFD166"    # highlight (gold)
-GOOD = "#3DD68C"      # healthy / pass (green)
-BAD = "#FF5C5C"       # failing / error (red)
 WARN = "#FFC24B"      # warning (amber)
 
 K8S = "#326CE5"       # Kubernetes blue (brand)
@@ -80,7 +61,6 @@ SVC_C = "#FF9F45"     # service (orange)
 GH = "#A371F7"        # GitHub Actions (purple)
 
 # ---- code (Night-Owl-ish) palette ----------------------------------------- #
-MONO = "Menlo"
 CODE_FS = 20
 PLAIN = "#D6DEEB"     # default code text
 COMMENT = "#5F6B7E"   # comments (grey-blue)
@@ -103,32 +83,6 @@ YAML_T2C = {
 }
 
 
-def _safe_t2c(s, table):
-    """Per-line text→colour map, pruned so no key overlaps another.
-
-    Manim's ``t2c`` raises on overlapping colour ranges — even for the same
-    colour (e.g. ``run`` sitting inside ``runs-on``). Keep only keys present in
-    this line, then drop any key that is a substring of another present key.
-    """
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
-
-
-# ========================================================================== #
-# small reusable pieces
-# ========================================================================== #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    return Text(text, **kw)
-
-
 def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NORMAL"):
     label = txt(text, fs=fs, color=tcolor or INK, weight=weight)
     width = (label.width + 0.5) if w is None else w
@@ -142,13 +96,6 @@ def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NOR
 def arr(a, b, color=MUTED, sw=4, buff=0.14, tip=0.22):
     return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.35, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
 
 
 def make_cross(color=BAD, sw=7, scale=1.0):
@@ -267,43 +214,12 @@ def helm_wheel(r=1.0, color=K8S, spokes=7):
 
 
 # ========================================================================== #
-class _K8sBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-        self.hlrect = None
-
-    # Slow every animation uniformly by stretching its run time (see ANIM_SLOW).
-    # Works whether the run time is passed to .play() or carried on the animation
-    # itself (e.g. Circumscribe(..., run_time=…)). self.wait() routes through
-    # self.play(Wait(...)), so we must NOT scale those — holds are set by DELAY.
-    def play(self, *anims, **kwargs):
-        is_wait = any(type(a).__name__ == "Wait" for a in anims)
-        if not QUICK and anims and not is_wait:
-            rt = kwargs.get("run_time")
-            if rt is None:
-                rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
-                rt = max(rts) if rts else 1.0
-            kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.6):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
-        self.hlrect = None
+class _K8sBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.25, 1.0), stretch="infer",
+    )
+    WIPE_RT = 0.6
 
     # ---- headers & captions ---------------------------------------------- #
     def section_header(self, part, label, color):
@@ -427,25 +343,6 @@ class _K8sBase(Scene):
         panel = VGroup(bg, bar, dots, ttl, code)
         panel.code = code
         return panel, lines
-
-    def hl_lines(self, panel, lines, idxs, color=ACCENT, opacity=0.16, pad=0.05, xpad=0.34):
-        tops = [lines[i].get_top()[1] for i in idxs]
-        bots = [lines[i].get_bottom()[1] for i in idxs]
-        y_hi, y_lo = max(tops) + pad, min(bots) - pad
-        rect = RoundedRectangle(width=panel[0].width - xpad, height=(y_hi - y_lo),
-                                corner_radius=0.08, stroke_width=0,
-                                fill_color=color, fill_opacity=opacity)
-        rect.move_to([panel[0].get_center()[0], (y_hi + y_lo) / 2, 0])
-        return rect
-
-    def focus(self, panel, lines, idxs, color=ACCENT, rt=0.4):
-        new = self.hl_lines(panel, lines, idxs, color)
-        if self.hlrect is None:
-            self.hlrect = new
-            self.play(FadeIn(new), run_time=rt)
-        else:
-            self.play(Transform(self.hlrect, new), run_time=rt)
-        return self.hlrect
 
     # ====================================================================== #
     # Scene 1 — Why Kubernetes?

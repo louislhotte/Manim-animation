@@ -22,7 +22,7 @@ Quick still to eyeball the shape:
     manim -sql fractal_leaf.py LeafStill
 """
 
-from manim import *
+from manimx import *
 import numpy as np
 
 # --------------------------------------------------------------------------- #

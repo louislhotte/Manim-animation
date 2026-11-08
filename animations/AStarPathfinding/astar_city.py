@@ -19,7 +19,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 import numpy as np
-from manim import *
+from manimx import *
 
 from astar_pathfinding import (
     ANIM_SLOW,
@@ -226,27 +226,17 @@ CAM_ZOOM = 1.05
 # ========================================================================== #
 # Base 3D scene
 # ========================================================================== #
-class _CityBase(ThreeDScene):
+class _CityBase(Explainer3DScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, card=(0.3, 1.0),
+        stretch="infer",
+    )
+    background = BG
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self._cap = None
         self.pins = None
-
-    def play(self, *anims, **kwargs):
-        is_wait = any(type(a).__name__ == "Wait" for a in anims)
-        if not QUICK and anims and not is_wait:
-            rt = kwargs.get("run_time")
-            if rt is None:
-                rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
-                rt = max(rts) if rts else 1.0
-            kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
 
     # ---- build the city + mobjects (no path/endpoints baked) -------------- #
     def _build(self):

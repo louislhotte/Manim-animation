@@ -32,24 +32,20 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("BV_QUICK") == "1"
+QUICK = quick_mode("BV")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses
 # the holds for fast iteration; otherwise it sets a snappy ~30 s/scene rhythm.
 DELAY = 0.3 if QUICK else 1.15
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 GRID = "#232A38"        # faint gridlines
 DATA_C = "#5B8DEF"      # observed data points (blue)
 TRUE_C = "#7CC6B5"      # the hidden true pattern (faint teal, dashed)
 UNDER_C = "#FF8C42"     # underfit  (amber)
 GOOD_C = "#3DD68C"      # just-right (green)
 OVER_C = "#FF5C5C"      # overfit   (red)
-GOLD = "#FFD166"        # sweet spot / new data / highlight
 RESID_C = "#6B7280"     # residual sticks
 
 # ========================================================================== #
@@ -179,20 +175,8 @@ def bullet(text, color=INK, fs=25, dot=GOLD):
 
 
 # ========================================================================== #
-class _BVBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def wipe(self, rt=0.7):
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _BVBase(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.3, 1.0), stretch=None)
 
     def section_header(self, label, color):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

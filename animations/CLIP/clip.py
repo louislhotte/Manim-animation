@@ -32,25 +32,19 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("CLIP_QUICK") == "1"
+QUICK = quick_mode("CLIP")
 # Single pacing knob: every on-screen "hold" is scaled by DELAY. QUICK collapses
 # the holds for fast iteration; otherwise it sets the reading rhythm.
 DELAY = float(os.environ.get("CLIP_DELAY", 0.28 if QUICK else 2.0))
 END_HOLD = 0.2 if QUICK else 2.0
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
 FAINT = "#3A4251"       # hairlines
 PANEL = "#161B26"       # panel fill
 IMG_C = "#2EC4B6"       # the image modality (teal)
 TXT_C = "#C792EA"       # the text modality (violet)
-GOOD = "#3DD68C"        # a match / chosen (green)
-BAD = "#FF5C5C"         # a mismatch / rejected (red)
-GOLD = "#FFD166"        # accent
 BLUE = "#5B8DEF"        # byline
 
 # distinct colours for the five example concepts (kept clear of the modality
@@ -64,22 +58,6 @@ CONCEPT_COLORS = {
 }
 
 RNG = np.random.default_rng(7)
-
-FONT = "Helvetica Neue"
-
-# ---- crisp text (MANDATORY house shim) ------------------------------------ #
-# Pango mangles letter/word spacing below ~20 pt. Render every ``Text`` at a
-# large base size and scale the mobject DOWN so spacing stays crisp and any
-# small piece (sub/superscript) keeps the body font.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 # ========================================================================== #
@@ -95,20 +73,6 @@ def txt(text, fs=26, color=INK, weight="NORMAL", slant=None, **extra):
 def arr(a, b, color=MUTED, sw=4, buff=0.15, tip=0.2):
     return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.32, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def chip(text, color, w=None, h=0.6, fs=24, fill=0.14, tcolor=None, radius=0.14):
@@ -264,27 +228,10 @@ def encoder_block(color, w=1.9, h=2.3, narrow=0.46):
 
 
 # ========================================================================== #
-class _ClipBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
+class _ClipBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.0), stretch=None,
+    )
 
     # ---- chrome ----------------------------------------------------------- #
     def section_header(self, label, color=GOLD):

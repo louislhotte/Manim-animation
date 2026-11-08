@@ -31,49 +31,25 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix) ----------------------------------------- #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Render every glyph
-# at a large base size and scale the mobject *down* — spacing stays crisp. This
-# shadow is MANDATORY (it also fixes super/subscripts rendered by helpers).
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("ALB_QUICK") == "1"
+QUICK = quick_mode("ALB")
 DELAY = float(os.environ.get("ALB_DELAY", 0.28 if QUICK else 1.0))
 READ = float(os.environ.get("ALB_READ", 0.32 if QUICK else 2.35))
 ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.1  # settle held on a finished scene before it wipes
 
 # ---- palette (dark house style, shared across the series) ----------------- #
-BG = "#0E1117"          # dark slate background
-PANEL = "#151A23"       # panel fill
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
 FAINT = "#2A3140"       # gridlines / faint wires
-GOLD = "#FFD166"        # accent / rules
 
 ALB_C = "#FF9900"       # the ALB — AWS orange — HERO
 CLIENT_C = "#5B8DEF"    # clients / browsers (indigo blue)
 WEB_C = "#38BDF8"       # web target group / NLB (sky cyan)
 API_C = "#C792EA"       # api target group (violet)
 ADMIN_C = GOLD          # admin target group (gold)
-GOOD = "#3DD68C"        # healthy / passing checks (green)
-BAD = "#FF5C5C"         # failing / unhealthy (red) — used sparingly
 WARN = "#FF8C42"        # load / warnings (orange)
-ACCENT = GOLD
 
-MONO = "Menlo"          # code / addresses / HTTP
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 # ---- code-panel syntax colours (AWS CLI) ----------------------------------- #
 CODE_FS = 19
@@ -90,14 +66,6 @@ CLI_T2C = {
     "$LISTENER": CLIENT_C,
     "$API_TG": API_C,
 }
-
-
-def _safe_t2c(s, table):
-    """Per-line text->colour map, pruned so no key overlaps another."""
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
 
 
 # ========================================================================== #
@@ -117,63 +85,11 @@ def mono(text, fs=18, color=INK):
     return Text(text, font_size=fs, color=color, font=MONO)
 
 
-def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NORMAL", radius=0.12):
-    label = txt(text, fs=fs, color=tcolor or INK, weight=weight)
-    width = (label.width + 0.5) if w is None else w
-    if label.width > width - 0.3:
-        label.scale((width - 0.3) / label.width)
-    box = RoundedRectangle(width=width, height=h, corner_radius=radius,
-                           stroke_color=color, stroke_width=2.5,
-                           fill_color=color, fill_opacity=fill)
-    label.move_to(box)
-    g = VGroup(box, label)
-    g.box = box
-    g.label = label
-    return g
-
-
-def pill(text, color, fs=22, fill=0.16, weight="BOLD"):
-    t = txt(text, fs=fs, color=color, weight=weight)
-    box = RoundedRectangle(width=t.width + 0.44, height=t.height + 0.26,
-                           corner_radius=0.13, stroke_color=color, stroke_width=2,
-                           fill_color=color, fill_opacity=fill)
-    box.move_to(t)
-    return VGroup(box, t)
-
-
-def plate(mob, pad_x=0.14, pad_y=0.09, op=0.72):
-    """A translucent dark plate behind a label so it reads over anything."""
-    bg = RoundedRectangle(width=mob.width + 2 * pad_x, height=mob.height + 2 * pad_y,
-                          corner_radius=0.08, stroke_width=0,
-                          fill_color=BG, fill_opacity=op).move_to(mob)
-    return VGroup(bg, mob)
-
-
-def arr(a, b, color=MUTED, sw=4, buff=0.12, tip=0.2):
-    """Arrow between two EXPLICIT points (pass .get_right()/.get_left(), never a
-    bare Mobject — get_boundary_point on a compound glyph renders diagonally)."""
-    return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
-                 max_tip_length_to_length_ratio=0.35, tip_length=tip)
-
-
 def wire(a, b, color=MUTED, sw=2.0, op=0.75):
     """A thin connecting line that sits behind the glyphs."""
     ln = Line(a, b, stroke_color=color, stroke_width=sw, stroke_opacity=op)
     ln.set_z_index(-1)
     return ln
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 # ---- glyphs (all hand-drawn Manim mobjects, no image assets) -------------- #
@@ -410,37 +326,11 @@ def letter_card(w=2.55, h=1.35):
 
 
 # ========================================================================== #
-class _ALBBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self.hlrect = None
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self.hlrect = None
+class _ALBBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     # ---- text helpers ----------------------------------------------------- #
     def section_header(self, label, color):
@@ -456,28 +346,6 @@ class _ALBBase(Scene):
             m.scale_to_fit_width(12.7)
         m.move_to([0, y, 0])
         return m
-
-    def swap_cap(self, old, new_text, **kw):
-        """Replace the current bottom caption with a new one; return it."""
-        new = self.say(new_text, **kw)
-        if old is None:
-            self.play(FadeIn(new), run_time=0.5)
-        else:
-            self.play(ReplacementTransform(old, new), run_time=0.5)
-        return new
-
-    def takeaway(self, line1, line2, c2=GOLD):
-        """Fade to a clean frame, land a two-line takeaway centred."""
-        k1 = Text(line1, font_size=36, color=INK, weight="BOLD")
-        k2 = Text(line2, font_size=27, color=c2, weight="BOLD")
-        if k1.width > 12.8:
-            k1.scale_to_fit_width(12.8)
-        if k2.width > 12.8:
-            k2.scale_to_fit_width(12.8)
-        VGroup(k1, k2).arrange(DOWN, buff=0.36).move_to(ORIGIN)
-        self.play(FadeIn(k1, shift=UP * 0.1), run_time=0.7)
-        self.play(FadeIn(k2, shift=UP * 0.1), run_time=0.6)
-        self.read(1.4)
 
     # ---- code panel ------------------------------------------------------- #
     def code_panel(self, spec, table=CLI_T2C, title="terminal", fs=CODE_FS,
@@ -519,25 +387,6 @@ class _ALBBase(Scene):
         panel = VGroup(bg, bar, dots, ttl, code)
         panel.code = code
         return panel, lines
-
-    def hl_lines(self, panel, lines, idxs, color=ACCENT, opacity=0.16, pad=0.05, xpad=0.34):
-        tops = [lines[i].get_top()[1] for i in idxs]
-        bots = [lines[i].get_bottom()[1] for i in idxs]
-        y_hi, y_lo = max(tops) + pad, min(bots) - pad
-        rect = RoundedRectangle(width=panel[0].width - xpad, height=(y_hi - y_lo),
-                                corner_radius=0.08, stroke_width=0,
-                                fill_color=color, fill_opacity=opacity)
-        rect.move_to([panel[0].get_center()[0], (y_hi + y_lo) / 2, 0])
-        return rect
-
-    def focus(self, panel, lines, idxs, color=ACCENT, rt=0.4):
-        new = self.hl_lines(panel, lines, idxs, color)
-        if self.hlrect is None:
-            self.hlrect = new
-            self.play(FadeIn(new), run_time=rt)
-        else:
-            self.play(Transform(self.hlrect, new), run_time=rt)
-        return self.hlrect
 
     # ---- house-style intro / outro cards ---------------------------------- #
     def play_intro(self):

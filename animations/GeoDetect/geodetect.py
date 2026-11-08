@@ -46,42 +46,22 @@ import math
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
-QUICK = os.environ.get("GD_QUICK") == "1"
+QUICK = quick_mode("GD")
 DELAY = float(os.environ.get("GD_DELAY", "0.28" if QUICK else "2.2"))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared house style + domain colours) ------------------------ #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 FAINT = "#2A3446"       # hairlines, pixel-grid strokes
 PANEL = "#141C29"       # card fill
-GOLD = "#FFD166"        # accent / formula highlight
-GOOD = "#3DD68C"        # healthy vegetation / high NDVI
-BAD = "#FF5C5C"         # alert / flagged pixel
 BARE = "#C08A52"        # bare soil / cleared ground
 REDBAND = "#FF6B6B"     # the satellite's Red band
 NIRBAND = "#5B8DEF"     # the satellite's near-infrared band
 CROP = "#E3B341"        # agriculture accent
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-
-# ---- crisp small text: Pango mangles glyphs/spacing below ~20pt ----------- #
-# Shadow Text so every call rasterises at a large base size and scales DOWN.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=26, color=INK, font=None, slant=None, weight=None):
@@ -223,30 +203,12 @@ def country_map(name, marker_lonlat, height=1.4, color=MUTED, marker_color=BAD):
 
 
 # ========================================================================== #
-class _GeoBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ------------------------------------------------------------
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _GeoBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+    WIPE_STRETCH = False
 
     # ---- chrome --------------------------------------------------------------
     def section_header(self, label, color=GOLD):

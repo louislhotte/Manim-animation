@@ -26,40 +26,18 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("QZ_QUICK") == "1"
+QUICK = quick_mode("QZ")
 # Reading rhythm. 2.3 so the formulas / HUD read comfortably.
 DELAY = float(os.environ.get("QZ_DELAY", 0.28 if QUICK else 2.3))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared with the Transformer / KV-cache / Tensors series) ---- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text
-FAINT = "#3A4152"       # hairlines, faint structure
 BAR = "#43C6E8"         # the glowing bars (bright cyan-blue)
 AX1 = "#5B8DEF"         # blue
-GOOD = "#3DD68C"        # green
-GOLD = "#FFD166"        # accent / gold
-BAD = "#FF5C5C"         # red / stop
 PANEL = "#141C29"       # HUD panel fill
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-
-# ---- crisp small text ----------------------------------------------------- #
-# Pango mangles glyphs/spacing below ~20 pt (subscripts come out in a fallback
-# font). Shadow Text so every call rasterises at a large base and is scaled DOWN.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=28, color=INK, font=None, slant=None, weight=None, **extra):
@@ -217,29 +195,18 @@ def mini_ground(center, half, color=FAINT, n=7):
 # =========================================================================== #
 # Base scene
 # =========================================================================== #
-class _QuantBase(ThreeDScene):
+class _QuantBase(Explainer3DScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self._orbiting = False
         self.bars = {}          # (i,j) -> Prism currently on screen
         self.field_group = None
         self.ground = None
-
-    # slow every played animation slightly; never scale a bare wait
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
 
     # ---- camera ----------------------------------------------------------- #
     def go_3d(self, phi=66, theta=-58, zoom=0.85, rate=0.045, focal=None):
@@ -344,7 +311,7 @@ class _QuantBase(ThreeDScene):
         for m in self.mobjects:
             m.clear_updaters()
         if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+            self.play_unstretched(*[FadeOut(m) for m in self.mobjects], run_time=rt)
         self.bars = {}
         self.field_group = None
         self.ground = None

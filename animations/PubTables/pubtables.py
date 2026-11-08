@@ -31,40 +31,23 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
-QUICK = os.environ.get("PT_QUICK") == "1"
+QUICK = quick_mode("PT")
 DELAY = float(os.environ.get("PT_DELAY", "0.28" if QUICK else "2.2"))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (house style + this film's accents) --------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text
 FAINT = "#2A3446"       # hairlines, card borders
 PANEL = "#141C29"       # card fill
-GOLD = "#FFD166"        # accent / payoff
 CYAN = "#55C1E7"        # table detection
 VIOLET = "#B388EB"      # structure recognition
 GREEN = "#7AE582"       # functional analysis
 RED = "#FF6B6B"         # the flaw / oversegmentation
 STEEL = "#4C5A75"       # baseline bars
-FONT = "Helvetica Neue"
-
-# ---- crisp small text: Pango mangles glyphs/spacing below ~20pt ----------- #
-# Shadow Text so every call rasterises at a large base size and scales DOWN.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=26, color=INK, font=None, slant=None, weight=None, t2c=None):
@@ -151,30 +134,12 @@ def credit(card, label, fs=15):
 
 
 # ========================================================================== #
-class _PTBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ------------------------------------------------------------
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _PTBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+    WIPE_STRETCH = False
 
     # ---- chrome --------------------------------------------------------------
     def section_header(self, label, color=GOLD):

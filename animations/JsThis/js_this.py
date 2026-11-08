@@ -34,23 +34,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down* to the requested
-# size. This shadows manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("THIS_QUICK") == "1"
+QUICK = quick_mode("THIS")
 # Two separate pacing knobs so nothing feels rushed:
 #   DELAY  scales the small pauses *between* animation steps (motion rhythm).
 #   READ   is the absolute hold after any block of text lands, so there is always
@@ -63,14 +50,6 @@ END_HOLD = 0.2 if QUICK else 2.1  # settle held on a finished scene before it wi
 SCENE_GAP = 0.0 if QUICK else 0.3
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines / inert strokes
-GOLD = "#FFD166"        # accent
-GOOD = "#3DD68C"        # correct / bound / ok
-BAD = "#FF5C5C"         # broken / undefined / danger
-ACCENT = "#FFD166"
 BYLINE = "#5B8DEF"      # the byline blue
 PANEL = "#1B2130"       # code-panel title bar
 
@@ -84,27 +63,8 @@ THISC = "#FFD166"       # this (the star) — gold, pops everywhere
 COM = "#6B7A99"         # comments
 CYAN = "#4CC9F0"        # a fourth distinct result colour
 
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 _NBSP = chr(160)
-
-
-# ---- small reusable pieces ------------------------------------------------ #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    kw.update(extra)
-    return Text(text, **kw)
-
-
-def mono(text, fs=22, color=INK, **kw):
-    return txt(text, fs=fs, color=color, font=MONO, **kw)
 
 
 def _safe_t2c(d):
@@ -152,20 +112,6 @@ def chip(text, color, fs=22, w=None, h=0.62, fill=0.14, tcolor=None, weight="NOR
 def harrow(start, end, color=MUTED, sw=4, tip=0.22):
     return Arrow(start, end, buff=0.12, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.4, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def stamp(text="TypeError", color=BAD):
@@ -256,32 +202,11 @@ def tok_point(line, token, dy=0.0):
 
 
 # ========================================================================== #
-class _ThisBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        # stretch every real animation so transitions aren't abrupt, but never
-        # scale a bare Wait (that is a reading hold, handled by read()/beat()).
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
+class _ThisBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     def wipe(self, rt=0.7):
         for m in self.mobjects:

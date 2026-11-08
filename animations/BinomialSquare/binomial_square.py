@@ -35,40 +35,20 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` quantises glyph positions badly at small font sizes, so body
-# text below ~20 pt comes out with uneven letter/word spacing. Work around it
-# once, here: always render glyphs at a large, crisp base size and scale the
-# mobject *down* to the requested size. This shadows manim's ``Text`` so every
-# call in this module benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("PS_QUICK") == "1"
+QUICK = quick_mode("PS")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses
 # the holds for fast iteration; otherwise it sets a calm, readable ~2-min rhythm
 # (tuned so viewers have time to read every panel before it moves on).
 DELAY = 0.3 if QUICK else 1.5
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"       # dark slate background
-INK = "#F5F3EF"      # warm white text
-MUTED = "#8A93A6"    # secondary text / axes
 GRID = "#2A3242"     # faint gridlines
 A_C = "#5B8DEF"      # the length a, and the a² block   (blue)
 B_C = "#3DD68C"      # the length b, and the b² block   (green)
 AB_C = "#FF9F45"     # the two a·b blocks               (amber)
-GOLD = "#FFD166"     # totals / highlights
-BAD = "#FF5C5C"      # the "wrong" guess
 
 # ---- the master square: side S = a + b, drawn from bottom-left ORIG -------- #
 S = 5.0                                   # a + b for the symbolic / Vary scenes
@@ -118,23 +98,8 @@ def identity_row(fs=40, buff=0.2):
 
 
 # ========================================================================== #
-class _Base(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def wipe(self, rt=0.7):
-        movers = [m for m in self.mobjects]
-        for m in movers:
-            m.clear_updaters()
-        if movers:
-            self.play(*[FadeOut(m) for m in movers], run_time=rt)
+class _Base(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.3, 1.0), stretch=None)
 
     def section_header(self, label, color):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

@@ -21,42 +21,16 @@ Command(goto=..., update=...), Send, and ChatAnthropic(model="claude-opus-4-8").
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
 # --------------------------------------------------------------------------- #
 # Fonts + crisp text                                                          #
 # --------------------------------------------------------------------------- #
-FONT = "Helvetica Neue"
-MONO = "Menlo"
 try:
     Text.set_default(font=FONT)
 except Exception:
     pass
 
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Render every glyph at
-# a large base size and scale the mobject *down*. Shadows manim's ``Text`` so every
-# call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-# --------------------------------------------------------------------------- #
-# Palette (house core + Transformer-series accents + agent roles)             #
-# --------------------------------------------------------------------------- #
-BG = "#0E1117"       # dark slate background
-INK = "#F5F3EF"      # warm white text
-MUTED = "#8A93A6"    # secondary text / inert edges
-FAINT = "#3A4152"    # gridlines / panel strokes
-GOLD = "#FFD166"     # accent / the coordinator
-GOOD = "#3DD68C"     # pass / START
-BAD = "#FF5C5C"      # danger / stress
-ACCENT = GOLD
 
 # agent / node roles
 SUPER = "#FFD166"        # supervisor  (gold)
@@ -84,31 +58,6 @@ LG_T2C = {
     "def": WRITER, "return": WRITER, "for": WRITER, "import": MUTED, "from": MUTED,
     "claude-opus-4-8": GOOD,
 }
-
-
-# --------------------------------------------------------------------------- #
-# Text helpers                                                                #
-# --------------------------------------------------------------------------- #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra):
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    kw.update(extra)
-    return Text(text, **kw)
-
-
-def mono(text, fs=22, color=INK, **kw):
-    return txt(text, fs=fs, color=color, font=MONO, **kw)
-
-
-def _safe_t2c(s, table):
-    """Per-line text->colour map, pruned so no key overlaps another present key."""
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
 
 
 def P(x, y):
@@ -208,44 +157,18 @@ def token(color=GOLD, r=0.14):
 # --------------------------------------------------------------------------- #
 # Base scene                                                                   #
 # --------------------------------------------------------------------------- #
-QUICK = os.environ.get("LG_QUICK") == "1"
+QUICK = quick_mode("LG")
 DELAY = float(os.environ.get("LG_DELAY", 0.28 if QUICK else 1.0))
 READ = float(os.environ.get("LG_READ", 0.35 if QUICK else 2.4))
 ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.0
 
 
-class _LGBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    # ---- timing ----------------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
+class _LGBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     def flash_red(self, opacity=0.20):
         veil = Rectangle(width=config.frame_width - 0.5, height=config.frame_height - 0.5,

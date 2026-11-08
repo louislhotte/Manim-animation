@@ -45,30 +45,15 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# ---- crisp text: render big, scale down (Pango mangles small sizes) ------- #
-# MANDATORY shadow (manim-explainer SKILL 2).
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("MOM_QUICK") == "1"
+QUICK = quick_mode("MOM")
 DELAY = float(os.environ.get("MOM_DELAY", "0.3" if QUICK else "2.2"))
 END_HOLD = 0.2 if QUICK else 1.9
 
 # ---- palette (shared house style + momentum roles) ----------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 GRID = "#232A38"        # faint gridlines / panel fills
-FAINT = "#3A4152"       # guides
 
 GD_C = "#FF7A5C"        # plain gradient descent (coral, the plodder)
 MOM_C = "#43E08A"       # momentum (green, the hero)
@@ -208,12 +193,10 @@ def piece_row(pieces, buff=0.16):
 # ========================================================================== #
 # Shared helpers (no camera control -- that lives only in the 3D scene)
 # ========================================================================== #
-class _Common:
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
+class _Common(ExplainerMixin):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
 
     def section_header(self, label, color):
         t = Text(label, font_size=33, color=INK, weight="BOLD").to_corner(UL, buff=0.5)
@@ -237,16 +220,7 @@ class _Common:
 # ========================================================================== #
 class _MoBase(_Common, Scene):
     """Base for every 2D scene. Static camera by design."""
-
-    def setup(self):
-        self.camera.background_color = BG
-
-    def wipe(self, rt=0.7):
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+    WIPE_SETTLES = True
 
     # ---- house-style intro / outro cards ---------------------------------- #
     def _rule_under(self, header, color=GOLD, pad=1.0, drop=0.45):

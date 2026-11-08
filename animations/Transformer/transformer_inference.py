@@ -31,9 +31,9 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("TF_QUICK") == "1"
+QUICK = quick_mode("TF")
 # Single pacing knob: every on-screen "hold" is scaled by DELAY. QUICK collapses
 # the holds for fast iteration; otherwise it sets the reading rhythm so the whole
 # film lands near three minutes. Intro/outro cards use their own fixed rhythm.
@@ -41,9 +41,6 @@ QUICK = os.environ.get("TF_QUICK") == "1"
 DELAY = float(os.environ.get("TF_DELAY", 0.28 if QUICK else 1.8))
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
 TOK = "#C792EA"         # tokens / embeddings (violet)
 POS = "#8A7CFF"         # positional encoding (indigo)
 Q_C = "#5B8DEF"         # queries (blue)
@@ -51,16 +48,12 @@ K_C = "#2EC4B6"         # keys (teal)
 V_C = "#FFD166"         # values (gold)
 ATTN = "#FF8C42"        # attention weights / logits (orange)
 MODEL_C = "#FFD166"     # the model core (gold)
-GOOD = "#3DD68C"        # pass / chosen (green)
-BAD = "#FF5C5C"         # masked / stop (red)
-ACCENT = "#FFD166"
 
 RNG = np.random.default_rng(7)
 
 # Use a clean, well-hinted sans-serif everywhere. Pango's serif default drops the
 # spaces between words at these sizes ("across tokens" -> "acrosstokens"); setting
 # a real font fixes the kerning and gives plain, standard-looking text.
-FONT = "Helvetica Neue"
 Text.set_default(font=FONT)
 
 
@@ -84,21 +77,6 @@ def harrow(start, end, color=MUTED, sw=4):
         start, end, buff=0.12, stroke_width=sw, color=color,
         max_tip_length_to_length_ratio=0.18, tip_length=0.2,
     )
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])]
-    )
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def dot_label(text, color, fs=24):
@@ -172,25 +150,13 @@ def prob_bars(items, unit=4.0, fs=22, color=ATTN, gap=0.52):
 
 
 # ========================================================================== #
-class _TfBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
+class _TfBase(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.3, 1.0), stretch=None)
 
     def reveal(self, items, hold=1.4, run_time=0.5, shift=RIGHT * 0.2):
         for m in items:
             self.play(FadeIn(m, shift=shift), run_time=run_time)
             self.beat(hold)
-
-    def wipe(self, rt=0.7):
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
 
     def section_header(self, label, color=INK):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

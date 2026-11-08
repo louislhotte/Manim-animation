@@ -29,38 +29,19 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("SQ_QUICK") == "1"
+QUICK = quick_mode("SQ")
 DELAY = float(os.environ.get("SQ_DELAY", 0.28 if QUICK else 2.3))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (house) ------------------------------------------------------- #
-BG = "#0E1117"
-INK = "#F5F3EF"
-MUTED = "#8A93A6"
-FAINT = "#3A4152"
-GOLD = "#FFD166"
 AX1 = "#5B8DEF"          # blue  (the +39.8 degree family)
 AX2 = "#2EC4B6"          # teal
-GOOD = "#3DD68C"
 BAD = "#FF6B6B"          # red   (the -36.6 degree square)
 SQ_FILL = "#4E5866"      # the meme-gray squares
 SQ_EDGE = "#AEB6C2"
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-
-# --- crisp small text: render large, scale down (MANDATORY house shadow) ---- #
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=28, color=INK, font=None, slant=None, weight=None, t2c=None):
@@ -277,29 +258,12 @@ def code_panel(lines, title="search.py", fs=17, t2c_map=None, pad=0.45):
 # =========================================================================== #
 # base scene
 # =========================================================================== #
-class _SqBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _SqBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+    WIPE_STRETCH = False
 
     def section_header(self, label, color=GOLD):
         t = Text(label, font_size=33, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

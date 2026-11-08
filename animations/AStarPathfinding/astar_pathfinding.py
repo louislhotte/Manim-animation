@@ -47,25 +47,10 @@ import os
 from collections import defaultdict
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` quantises glyph positions badly at small font sizes, so body
-# text below ~20 pt comes out with uneven letter/word spacing. Work around it
-# once, here: always render glyphs at a large, crisp base size and scale the
-# mobject *down* to the requested size. This shadows manim's ``Text`` so every
-# call in this module benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("ASTAR_QUICK") == "1"
+QUICK = quick_mode("ASTAR")
 # Single knob for pacing: every on-screen "hold" is scaled by this. QUICK
 # collapses the holds for fast iteration; otherwise it sets the reading rhythm.
 DELAY = 0.25 if QUICK else 1.4
@@ -78,8 +63,6 @@ SCENE_GAP = 0.0 if QUICK else 2.0
 BG = "#12121F"  # dark background
 STREET = "#3A3F55"  # street lines, thin grey
 STREET_HI = "#5C6486"  # brighter street (Broadway)
-INK = "#F5F3EF"  # warm white text
-MUTED = "#8A93A6"  # secondary text
 FAINT = "#2A2E40"  # very faint lines / land
 PANEL = "#0C0C16"  # info-panel fill
 START_C = "#00CC44"  # start green
@@ -253,26 +236,12 @@ def astar(adj, pos, start, goal):
 # ========================================================================== #
 # Base scene: house-style timing, cards, palette.
 # ========================================================================== #
-class _AStarBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # Slow every played animation uniformly (see ANIM_SLOW); never scale waits.
-    def play(self, *anims, **kwargs):
-        is_wait = any(type(a).__name__ == "Wait" for a in anims)
-        if not QUICK and anims and not is_wait:
-            rt = kwargs.get("run_time")
-            if rt is None:
-                rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
-                rt = max(rts) if rts else 1.0
-            kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
+class _AStarBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, card=(0.3, 1.0),
+        stretch="infer",
+    )
+    background = BG
 
     def wipe(self, rt=0.7, gap=True):
         if gap and SCENE_GAP:

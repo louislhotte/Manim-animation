@@ -37,9 +37,9 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("IDX_QUICK") == "1"
+QUICK = quick_mode("IDX")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses the
 # holds for fast iteration; otherwise it sets a comfortable reading rhythm.
 DELAY = float(os.environ.get("IDX_DELAY", "0.3" if QUICK else "1.6"))
@@ -47,9 +47,6 @@ DELAY = float(os.environ.get("IDX_DELAY", "0.3" if QUICK else "1.6"))
 END_HOLD = 0.2 if QUICK else 1.5
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 FAINT = "#2A3446"       # panel strokes / gridlines
 PANEL = "#0A0E15"       # code / query panel fill
 HEAD_BG = "#1C2536"     # table header band
@@ -63,7 +60,6 @@ KEY1 = "#5B8DEF"        # last_name column (blue)
 KEY2 = "#C77DFF"        # city column (violet)
 
 # ---- code (Night-Owl-ish) palette for SQL --------------------------------- #
-MONO = "Menlo"
 PLAIN = "#D6DEEB"
 KW = "#C792EA"          # SQL keywords
 STR = "#7FDBCA"         # string literals
@@ -91,37 +87,6 @@ ROWS = [
     (8, "Patel",   "Denver"),
 ]
 N_TOTAL = 10_000_000    # the pretend row count (only 8 are drawn)
-
-
-# ---- crisp text: render big, scale down (Pango mangles small sizes) -------- #
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    kw.update(extra)
-    return Text(text, **kw)
-
-
-def _safe_t2c(s, table):
-    """Per-line text->colour map, pruned so no key overlaps another (manim raises
-    on overlapping ``t2c`` ranges, even for the same colour)."""
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
 
 
 def hrow(*mobs, buff=0.14, aligned_edge=DOWN):
@@ -220,23 +185,11 @@ def row_highlight(table, i, color, opacity=0.0, sw=4):
 
 
 # ========================================================================== #
-class _IdxBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
-
-    def wipe(self, rt=0.7):
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _IdxBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
+    WIPE_SETTLES = True
 
     def section_header(self, label, color):
         t = txt(label, fs=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

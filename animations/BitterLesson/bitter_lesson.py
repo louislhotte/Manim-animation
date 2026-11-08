@@ -30,23 +30,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down* to the requested
-# size. This shadows manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("BL_QUICK") == "1"
+QUICK = quick_mode("BL")
 # Two separate pacing knobs so nothing feels rushed:
 #   DELAY scales the small pauses *between* animation steps (motion rhythm).
 #   READ  is the absolute hold after a block of text lands, so there is always
@@ -58,24 +45,11 @@ ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.2  # settle held on a finished scene before it wipes
 
 # ---- palette (shared with the Transformer / KV-cache / Mixtral films) ------ #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines / dimmed
 HUMAN = "#FF8C42"       # human knowledge (warm orange — hand-crafted, tempting)
 COMPUTE = "#5B8DEF"     # computation / general methods (cool blue — it scales)
 SEARCH = "#5B8DEF"      # search (blue, compute family)
 LEARN = "#2EC4B6"       # learning (teal, compute family)
-GOOD = "#3DD68C"        # wins / breakthrough (green)
-BAD = "#FF5C5C"         # plateaued / lost (red)
-GOLD = "#FFD166"        # accent (rules, thesis, key lines)
-ACCENT = GOLD
 PANEL = "#151A22"       # card fill
-
-# A clean, well-hinted sans everywhere (Pango's serif default drops spaces at
-# these sizes). Set on the *real* Text (we shadowed it above).
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 
 # ---- small reusable pieces ------------------------------------------------ #
@@ -99,21 +73,6 @@ def harrow(start, end, color=MUTED, sw=4, tip=0.2, buff=0.12):
         start, end, buff=buff, stroke_width=sw, color=color,
         max_tip_length_to_length_ratio=0.4, tip_length=tip,
     )
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])]
-    )
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def rules_glyph(color=HUMAN, w=0.66, h=0.82):
@@ -187,37 +146,11 @@ def learn_curve(color=LEARN, w=1.05, h=0.78, top=1.0):
 
 
 # ========================================================================== #
-class _BLBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        # stretch every real animation so transitions aren't abrupt, but never
-        # scale a bare Wait (reading holds are handled by read()/beat()).
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _BLBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     def section_header(self, label, color=GOLD):
         txt = Text(label, font_size=32, color=INK, weight="BOLD").to_corner(UL, buff=0.5)
@@ -231,9 +164,6 @@ class _BLBase(Scene):
             t.scale_to_fit_width(12.9)
         t.to_edge(DOWN, buff=buff)
         return t
-
-    def cite(self, s):
-        return Text(s, font_size=15, color=MUTED, slant=ITALIC).to_edge(DOWN, buff=0.16)
 
     def set_cap(self, s, color=INK, fs=23):
         """Transform the persistent bottom caption to new text (creates it lazily).

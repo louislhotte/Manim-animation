@@ -40,24 +40,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down* to the requested
-# size (scaling a correctly-spaced render down stays crisp; rendering small does
-# not). This shadows manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("RL_QUICK") == "1"
+QUICK = quick_mode("RL")
 # Two separate pacing knobs so nothing feels rushed:
 #   DELAY  scales the small pauses *between* animation steps (motion rhythm).
 #   READ   is the absolute hold after a block of text lands, so there is always
@@ -69,12 +55,7 @@ ANIM_SLOW = 1.0 if QUICK else 1.28
 END_HOLD = 0.2 if QUICK else 2.4  # settle held on a finished scene before it wipes
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
 PANEL = "#161B26"       # server chassis / card fill
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
-FAINT = "#3A4152"       # gridlines / guides
-GOLD = "#FFD166"        # highlight / headings accent / tokens
 REQ_C = "#4CC9F0"       # request packet (cyan)
 OK_C = "#3DD68C"        # allowed / 200 OK (green)
 DENY_C = "#FF5C5C"      # rejected / 429 / overload (red)
@@ -90,9 +71,6 @@ GOOD = OK_C
 WARN = DENY_C
 
 FRAME_R = config.frame_x_radius   # 7.111…
-
-FONT = "Helvetica Neue"           # clean, well-hinted sans everywhere
-_BaseText.set_default(font=FONT)
 
 
 # ========================================================================== #
@@ -232,37 +210,11 @@ def code_panel(lines, title="", fs=20, pad=0.34, min_w=0.0):
 
 
 # ========================================================================== #
-class _RLBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        # stretch every real animation so transitions aren't abrupt, but never
-        # scale a bare Wait (that is a reading hold, handled by read()/beat()).
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _RLBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     # ---- text helpers ----------------------------------------------------- #
     def section_header(self, label, color=INK):

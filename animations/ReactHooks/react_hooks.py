@@ -36,22 +36,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix) ----------------------------------------- #
-# Manim's ``Text`` quantises glyph positions badly below ~20 pt. Render every
-# glyph at a large base size and scale the mobject *down* — spacing stays crisp.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("RX_QUICK") == "1"
+QUICK = quick_mode("RX")
 # Single pacing knob: every reading "hold" is self.beat(t) == wait(t * DELAY).
 # Animation run-times are NOT scaled, so the piece stays dynamic — DELAY only
 # sets how long text lingers. Each scene ends on a short hold (self.settle).
@@ -59,19 +47,12 @@ DELAY = float(os.environ.get("RX_DELAY", "0.28" if QUICK else "2.3"))
 END_HOLD = 0.2 if QUICK else 2.5
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"        # dark slate background
-INK = "#F5F3EF"       # warm white text
-MUTED = "#8A93A6"     # secondary text / axes
 FAINT = "#2A3140"     # gridlines / tracks
-ACCENT = "#FFD166"    # highlight (gold)
-GOOD = "#3DD68C"      # good / pass (green)
-BAD = "#FF5C5C"       # bad / error (red)
 REACT = "#61DAFB"     # React cyan — brand accent
 STATE_C = "#C792EA"   # state (purple)
 EFFECT_C = "#FFCB6B"  # effects (gold)
 
 # ---- code (Night-Owl-ish) palette ----------------------------------------- #
-MONO = "Menlo"
 CODE_FS = 19
 PLAIN = "#D6DEEB"     # default code text
 COMMENT = "#5F6B7E"   # comments (grey-blue)
@@ -105,16 +86,6 @@ def _safe_t2c(s):
     keys = list(present)
     return {k: v for k, v in present.items()
             if not any(k != o and k in o for o in keys)}
-
-
-# ========================================================================== #
-# small reusable pieces
-# ========================================================================== #
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
 
 
 def chip(text, color, fs=22, fill=0.14, w=None, h=0.6, tcolor=None, font=None):
@@ -198,22 +169,16 @@ USERS = [
 
 
 # ========================================================================== #
-class _RXBase(Scene):
+class _RXBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.25, 1.0), stretch=None,
+    )
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self._cap = None
         self.hlrect = None
         self.dev_content = None
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
 
     def wipe(self, rt=0.6):
         for m in self.mobjects:
@@ -344,25 +309,6 @@ class _RXBase(Scene):
         code.shift(DOWN * 0.24)  # nudge below the header band
         panel = VGroup(bg, header, divider, dots, ttl, code)
         return panel, lines
-
-    def hl_lines(self, panel, lines, idxs, color=ACCENT, opacity=0.16, pad=0.05, xpad=0.34):
-        tops = [lines[i].get_top()[1] for i in idxs]
-        bots = [lines[i].get_bottom()[1] for i in idxs]
-        y_hi, y_lo = max(tops) + pad, min(bots) - pad
-        rect = RoundedRectangle(width=panel[0].width - xpad, height=(y_hi - y_lo),
-                                corner_radius=0.08, stroke_width=0,
-                                fill_color=color, fill_opacity=opacity)
-        rect.move_to([panel[0].get_center()[0], (y_hi + y_lo) / 2, 0])
-        return rect
-
-    def focus(self, panel, lines, idxs, color=ACCENT, rt=0.4):
-        new = self.hl_lines(panel, lines, idxs, color)
-        if self.hlrect is None:
-            self.hlrect = new
-            self.play(FadeIn(new), run_time=rt)
-        else:
-            self.play(Transform(self.hlrect, new), run_time=rt)
-        return self.hlrect
 
     def unfocus(self, rt=0.3):
         if self.hlrect is not None:

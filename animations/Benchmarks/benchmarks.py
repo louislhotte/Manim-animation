@@ -45,9 +45,9 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("BM_QUICK") == "1"
+QUICK = quick_mode("BM")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses
 # the holds for fast iteration; otherwise it sets a comfortable reading rhythm.
 DELAY = float(os.environ.get("BM_DELAY", "0.3" if QUICK else "2.2"))
@@ -55,13 +55,9 @@ DELAY = float(os.environ.get("BM_DELAY", "0.3" if QUICK else "2.2"))
 END_HOLD = 0.2 if QUICK else 2.0
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 GRID = "#232A38"        # faint gridlines / panel fills
 PANEL = "#0B0E14"       # code-panel fill (a touch darker than BG)
 
-GOLD = "#FFD166"        # rules / underlines / the score
 OK_C = "#3DD68C"        # pass / correct  (green)
 BAD_C = "#FF5C5C"       # fail / wrong    (red)
 
@@ -77,17 +73,6 @@ SWE_N = 500                                 # SWE-bench Verified task count
 # SWE-bench Verified, best published score over time (see README for sources).
 PROGRESS = [("Jun 2024", 33), ("Oct 2024", 49), ("2025", 72), ("2026", 93)]
 assert [v for _, v in PROGRESS] == sorted(v for _, v in PROGRESS)
-
-
-# ---- crisp text: render big, scale down (Pango mangles small sizes) ------- #
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def mono(text, font_size=20, color=INK, **kw):
@@ -136,23 +121,11 @@ def pill(text, color, fs=18):
 
 
 # ========================================================================== #
-class _BMBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
-
-    def wipe(self, rt=0.7):
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _BMBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
+    WIPE_SETTLES = True
 
     def section_header(self, label, color):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

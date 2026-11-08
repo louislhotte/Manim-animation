@@ -36,34 +36,16 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix) ----------------------------------------- #
-# Manim's ``Text`` quantises glyph positions badly below ~20 pt. Render every
-# glyph at a large base size and scale the mobject *down* — spacing stays crisp.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("SEM_QUICK") == "1"
+QUICK = quick_mode("SEM")
 DELAY = float(os.environ.get("SEM_DELAY", "0.28" if QUICK else "2.0"))
 END_HOLD = 0.2 if QUICK else 2.3
 ANIM_SLOW = 1.0 if QUICK else 1.2
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"
-INK = "#F5F3EF"
-MUTED = "#8A93A6"
 FAINT = "#2A3140"
-ACCENT = "#FFD166"
-GOOD = "#3DD68C"
-BAD = "#FF5C5C"
 WARN = "#FFC24B"
 
 SRC_C = "#2EC4B6"    # sources (teal)
@@ -71,7 +53,6 @@ WH_C = "#5B8DEF"     # storage / warehouse (blue)
 SEM_C = ACCENT       # the semantic layer itself (gold) — the star of the film
 CONS_C = "#FF9F45"   # consumption tools (orange)
 
-MONO = "Menlo"
 PLAIN = "#D6DEEB"
 KW = "#C792EA"
 FN = "#82AAFF"
@@ -82,25 +63,6 @@ SQL_T2C = {
     "orders.amount": FN, "orders.status": FN,
     "'completed'": VAL, "Revenue": ACCENT,
 }
-
-
-def _safe_t2c(s, table):
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
-
-
-# ========================================================================== #
-# small reusable pieces
-# ========================================================================== #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None):
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    return Text(text, **kw)
 
 
 def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NORMAL"):
@@ -116,13 +78,6 @@ def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NOR
 def arr(a, b, color=MUTED, sw=4, buff=0.1, tip=0.2):
     return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.35, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
 
 
 def make_cross(color=BAD, sw=7, scale=1.0):
@@ -286,36 +241,12 @@ def metric_card(title, formula, table, color=SEM_C, fs=17):
 
 
 # ========================================================================== #
-class _SemBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    def play(self, *anims, **kwargs):
-        is_wait = any(type(a).__name__ == "Wait" for a in anims)
-        if not QUICK and anims and not is_wait:
-            rt = kwargs.get("run_time")
-            if rt is None:
-                rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
-                rt = max(rts) if rts else 1.0
-            kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.6):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
+class _SemBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.25, 1.0), stretch="infer",
+    )
+    WIPE_RT = 0.6
 
     def section_header(self, part, label, color):
         tag = txt(part, fs=20, color=color, weight="BOLD")

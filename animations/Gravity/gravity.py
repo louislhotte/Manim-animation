@@ -32,36 +32,16 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` quantises glyph positions badly at small font sizes, so body
-# text below ~20 pt comes out with uneven letter/word spacing. Work around it
-# once, here: always render glyphs at a large, crisp base size and scale the
-# mobject *down* to the requested size. This shadows manim's ``Text`` so every
-# call in this module benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("GRAV_QUICK") == "1"
+QUICK = quick_mode("GRAV")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses
 # the holds for a fast iteration render; otherwise it sets a relaxed, readable
 # rhythm (~2 s per line) that still keeps the whole film under three minutes.
 DELAY = 0.3 if QUICK else 1.6
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
-FAINT = "#3A4152"       # gridlines / guides
-GOLD = "#FFD166"        # highlight / the force / the equation
 APPLE = "#FF5C5C"       # the apple / heavy accents (red)
 LEAF = "#3DD68C"        # apple leaf / "correct" green
 STEM = "#8A6A44"        # apple stem / tree trunk (brown)
@@ -70,8 +50,6 @@ LAND_C = "#3DA35D"      # Earth's land
 MOON_C = "#C7CBD1"      # the Moon (grey)
 SUN_C = "#FFB703"       # the Sun (amber)
 FORCE_C = "#FF6FB5"     # the gravitational force (pink)
-GOOD = "#3DD68C"        # ✓ green
-BAD = "#FF5C5C"         # ✗ red
 M1_C = "#5B8DEF"        # mass 1 (blue)
 M2_C = "#FF8C42"        # mass 2 (orange)
 
@@ -188,20 +166,8 @@ def gravity_formula(base_fs=52):
 
 
 # ========================================================================== #
-class _GravBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def wipe(self, rt=0.7):
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _GravBase(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.3, 1.0), stretch=None)
 
     def section_header(self, label, color):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

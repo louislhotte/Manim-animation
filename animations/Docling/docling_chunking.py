@@ -26,23 +26,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down* to the requested
-# size. This shadows manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("DL_QUICK") == "1"
+QUICK = quick_mode("DL")
 # Two separate pacing knobs so nothing feels rushed:
 #   DELAY scales the small pauses *between* animation steps (motion rhythm).
 #   READ  is the absolute hold after a block of text lands, so there is always
@@ -54,10 +41,6 @@ ANIM_SLOW = 1.0 if QUICK else 1.3
 END_HOLD = 0.2 if QUICK else 2.4
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines / rails
 PAPER = "#F4F1EA"       # a document page (light)
 PAPER_INK = "#2A2E37"   # ink printed on the page
 PAPER_EDGE = "#C9C4B6"  # page border
@@ -73,13 +56,9 @@ OCR_C = "#FF8C42"       # orange — OCR
 PATH_C = "#FF5DA2"      # pink   — the reading-order path
 CHUNK_C = "#F78C6C"     # salmon — chunk cards
 
-GOOD = "#3DD68C"
-BAD = "#FF5C5C"
-ACCENT = "#FFD166"
 BYLINE = "#5B8DEF"
 
 # ---- code (Night-Owl-ish) palette ----------------------------------------- #
-MONO = "Menlo"
 PLAIN = "#D6DEEB"
 COMMENT = "#5F6B7E"
 KW = "#C792EA"          # keywords
@@ -88,30 +67,6 @@ VAL = "#F78C6C"         # literals
 STR = "#7FDBCA"         # strings / paths
 
 RNG = np.random.default_rng(7)
-
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
-
-
-# ========================================================================== #
-# small reusable pieces
-# ========================================================================== #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    return Text(text, **kw)
-
-
-def _safe_t2c(s, table):
-    """Per-line text->colour map, pruned so no key overlaps another (manim raises)."""
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
 
 
 def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NORMAL", radius=0.12):
@@ -129,13 +84,6 @@ def chip(text, color, fs=20, fill=0.14, w=None, h=0.56, tcolor=None, weight="NOR
 def arr(a, b, color=MUTED, sw=4, buff=0.14, tip=0.22):
     return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.35, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
 
 
 def make_cross(color=BAD, sw=7, scale=1.0):
@@ -374,37 +322,11 @@ def db_cyl(w=1.5, h=1.7, color=TABLE_C):
 
 
 # ========================================================================== #
-class _DoclingBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
+class _DoclingBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     # ---- text furniture --------------------------------------------------- #
     def section_header(self, label, color=ACCENT):
@@ -429,9 +351,6 @@ class _DoclingBase(Scene):
         else:
             self.play(Transform(self._cap, new), run_time=rt)
         return self._cap
-
-    def cite(self, s):
-        return Text(s, font_size=15, color=MUTED, slant=ITALIC).to_edge(DOWN, buff=0.16)
 
     def _rule(self, m, color=ACCENT, pad=1.0, drop=0.45, sw=3):
         return Line([m.get_left()[0] - pad, m.get_bottom()[1] - drop, 0],

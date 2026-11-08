@@ -42,35 +42,17 @@ import os
 from pathlib import Path
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down*. Shadowing
-# ``Text`` this way is mandatory so every subscript/superscript stays in-font.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("DIFF_QUICK") == "1"
+QUICK = quick_mode("DIFF")
 DELAY = float(os.environ.get("DIFF_DELAY", 0.28 if QUICK else 1.15))
 READ = float(os.environ.get("DIFF_READ", 0.35 if QUICK else 2.9))
 ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"
 PANEL = "#161B26"
-INK = "#F5F3EF"
-MUTED = "#8A93A6"
-FAINT = "#3A4152"
-GOLD = "#FFD166"
 NOISE_C = "#7C8AA6"     # "static" grey-blue
 SIGNAL_C = "#3DD68C"    # clean signal / image (green)
 MODEL_C = "#FFB703"     # the denoiser / network (amber)
@@ -79,8 +61,6 @@ CYAN = "#4CC9F0"        # accents / latent
 RED = "#FF5C5C"
 
 FRAME_R = config.frame_x_radius   # 7.111…
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 # ---- baked trajectories --------------------------------------------------- #
 ROOT = Path(__file__).resolve().parent
@@ -226,35 +206,11 @@ def repeat_glyph(r=0.32, color=GOLD):
 
 
 # ========================================================================== #
-class _DiffBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing ----------------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _DiffBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     # ---- text helpers ----------------------------------------------------- #
     def section_header(self, label, color=GOLD):

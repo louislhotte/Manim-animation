@@ -36,52 +36,27 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("JC_QUICK") == "1"
+QUICK = quick_mode("JC")
 # Reading rhythm. Bumped to 2.4 so formula-heavy screens have real time to read.
 DELAY = float(os.environ.get("JC_DELAY", 0.28 if QUICK else 2.4))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.4
 
 # ---- palette (shared with the Transformer / KV-cache series) -------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # hairlines, faint structure
 AX1 = "#5B8DEF"         # first axis / coordinate z1 (blue)
 AX2 = "#2EC4B6"         # second axis / coordinate z2 (teal)
 AX3 = "#FFD166"         # third axis / coordinate z3 (gold)
 PA = "#C792EA"          # point a (violet)
 PB = "#FF8C42"          # point b (orange)
 PC = "#3DD68C"          # point c (green)
-GOLD = "#FFD166"        # the map F / accent
-ACCENT = "#FFD166"
-GOOD = "#3DD68C"        # pass / verified
-BAD = "#FF5C5C"         # false / stop
 CODE_FS = 21
-MONO = "Menlo"
 
 # 'C' for the complex numbers.  Blackboard-bold U+2102 is not in Helvetica Neue,
 # so we render a bold serif capital C and italicise it slightly to read as a
 # math symbol.  (Verified against a glyph probe render.)
 CSYM = "C"
-
-FONT = "Helvetica Neue"
-
-# --- crisp small text -------------------------------------------------------
-# Pango mangles glyphs/spacing below ~20 pt (subscripts came out in a fallback
-# font). Shadow Text so every call rasterises at a large base size and is scaled
-# DOWN geometrically — same visual size, correct font, crisp at any size.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 # ---- small text helper: drop None kwargs Pango dislikes ------------------- #
@@ -124,21 +99,6 @@ def harrow(start, end, color=MUTED, sw=4):
                  max_tip_length_to_length_ratio=0.2, tip_length=0.22)
 
 
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners([np.array([-0.2, 0.0, 0]),
-                             np.array([-0.05, -0.18, 0]),
-                             np.array([0.24, 0.22, 0])])
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
-
-
 def mtext(parts, base_fs=32):
     """Inline 'formula' from Text pieces. Each part: (s, role[, color]),
     role in {"b" base, "^" super, "_" sub}. Supers/subs attach to prev base."""
@@ -179,31 +139,12 @@ def iso(p, center, s=1.0):
 
 
 # ========================================================================== #
-class _JacBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # slow every played animation slightly; never scale a bare wait
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _JacBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+    WIPE_STRETCH = False
 
     # ---- chrome ----------------------------------------------------------- #
     def section_header(self, label, color=ACCENT):
@@ -748,7 +689,6 @@ class _JacBase(Scene):
         self.settle()
         self.wipe()
 
-
     # ====================================================================== #
     # Scene 5 — how it was found (Anthropic / Tao / what's left)
     # ====================================================================== #
@@ -853,7 +793,6 @@ class _JacBase(Scene):
         xlogo = txt("X", fs=24, color=MUTED, weight="BOLD")
         xlogo.move_to([bg.get_right()[0] - 0.38, bg.get_top()[1] - 0.36, 0])
         return VGroup(bg, inner, xlogo)
-
 
     # ====================================================================== #
     def play_all(self):

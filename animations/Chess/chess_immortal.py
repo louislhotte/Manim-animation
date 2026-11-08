@@ -40,23 +40,7 @@ import os
 
 import numpy as np
 import manimpango
-from manim import *
-
-# --------------------------------------------------------------------------- #
-# Crisp text — Manim quantises glyph positions badly below ~20 pt, giving uneven
-# letter/word spacing. Render at a large base size and scale the mobject *down*.
-# Shadows manim's ``Text`` so every call in this module benefits automatically.
-# (Single-glyph chess pieces are built from ``_BaseText`` directly, since a lone
-# glyph has no inter-letter spacing to mangle and needs the symbol font.)
-# --------------------------------------------------------------------------- #
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
+from manimx import *
 
 
 # ---- pick a font that actually carries the chess glyphs -------------------- #
@@ -74,7 +58,7 @@ SYMFONT = _pick_symbol_font()
 # Filled glyph set, used for *both* colours (recoloured per side).
 GLYPH = {"K": "♚", "Q": "♛", "R": "♜", "B": "♝", "N": "♞", "P": "♟"}
 
-QUICK = os.environ.get("CHESS_QUICK") == "1"
+QUICK = quick_mode("CHESS")
 PLIES_CAP = int(os.environ.get("CHESS_PLIES", "999"))
 # One knob for pacing. Every reading "hold" is scaled by DELAY; QUICK collapses
 # them for a fast iteration render. At the default it's a relaxed rhythm that
@@ -82,9 +66,6 @@ PLIES_CAP = int(os.environ.get("CHESS_PLIES", "999"))
 DELAY = 0.32 if QUICK else 1.15
 
 # ---- palette (house style, chess-flavoured) ------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text
 FAINT = "#39404E"       # dividers / guides
 GOLD = "#FFC94D"        # highlights / the brilliancies
 RED = "#E5484D"         # check / mate / danger
@@ -188,9 +169,11 @@ MATE_GUARDS = {'c7': 'd5', 'e7': 'd5', 'e8': 'g7'}   # who covers each
 # ========================================================================== #
 # Base scene — shared helpers, board, move engine, intro / outro
 # ========================================================================== #
-class _Base(Scene):
+class _Base(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.3, 1.0), stretch=None)
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self.pieces = {}     # square -> piece mobject
         self.codes = {}      # square -> code like 'wK'
         self.king = {}       # 'w'/'b' -> square
@@ -204,13 +187,6 @@ class _Base(Scene):
     # ---- timing ----------------------------------------------------------- #
     def hold(self, t=1.0):
         self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def wipe(self, rt=0.7):
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
 
     # ---- geometry --------------------------------------------------------- #
     def sq_center(self, s):

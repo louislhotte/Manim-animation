@@ -72,7 +72,7 @@ RES = int(os.environ.get("MOIRE_RES", "720"))          # field height, px
 FREQ = float(os.environ.get("MOIRE_FREQ", "26"))       # sine cycles / frame-height
 ZOOM_MAX = float(os.environ.get("MOIRE_ZOOM", "11"))   # final dive magnification
 SYM = int(os.environ.get("MOIRE_SYM", "6"))            # gratings per grid (fold)
-QUICK = os.environ.get("MOIRE_QUICK", "0") == "1"
+QUICK = os.environ.get("MOIRE_QUICK", os.environ.get("MX_QUICK", "0")) == "1"
 
 SPEED = 0.30 if QUICK else 1.0                          # global time compression
 

@@ -32,26 +32,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` quantises glyph positions badly at small font sizes, so body
-# text below ~20 pt comes out with uneven letter/word spacing ("card iac ar rest").
-# Work around it once, here: always render glyphs at a large, crisp base size and
-# scale the mobject *down* to the requested size (scaling a large, correctly-spaced
-# render down stays crisp; rendering small does not). This shadows manim's ``Text``
-# so every call in this module benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("EMB_QUICK") == "1"
+QUICK = quick_mode("EMB")
 # Single knob for pacing: every on-screen "hold" is scaled by this. QUICK
 # collapses the holds for fast iteration; otherwise it sets the reading rhythm.
 # The intro/outro cards use a fixed rhythm (card_wait) so they stay crisp.
@@ -64,20 +48,12 @@ ANIM_SLOW = 1.0 if QUICK else 1.25
 SCENE_GAP = 0.0 if QUICK else 5.0
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"  # dark slate background
-PANEL = "#151A23"  # latent-space panel fill
-INK = "#F5F3EF"  # warm white text
-MUTED = "#8A93A6"  # secondary text / arrows
-FAINT = "#3A4152"  # gridlines
 MODEL_C = "#FFD166"  # the embedding model (gold)
 VEC_C = "#FFD166"  # a vector (gold)
 QUERY_C = "#FF6FB5"  # the query (pink)
 MED_C = "#2EC4B6"  # topic cluster: medical (teal)
 FIN_C = "#5B8DEF"  # topic cluster: finance (blue)
 COOK_C = "#FF8C42"  # topic cluster: cooking (orange)
-GOOD = "#3DD68C"  # match / green
-BAD = "#FF5C5C"  # miss / red
-ACCENT = "#FFD166"
 
 # ---- the tiny corpus used across scenes ----------------------------------- #
 # (text, topic, normalised [-1,1]^2 position). Positions are hand-placed so the
@@ -146,25 +122,6 @@ def harrow(start, end, color=MUTED, sw=4):
         max_tip_length_to_length_ratio=0.16,
         tip_length=0.22,
     )
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [
-            np.array([-0.2, 0.0, 0]),
-            np.array([-0.05, -0.18, 0]),
-            np.array([0.24, 0.22, 0]),
-        ]
-    )
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def dot_label(text, color, fs=25):
@@ -281,31 +238,11 @@ def angle_arc(pc, p1, p2, radius=0.9, color=INK, sw=3):
 
 
 # ========================================================================== #
-class _EmbBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # Slow every animation uniformly by stretching its run time (see ANIM_SLOW).
-    # Works whether the run time is passed to .play() or carried on the animation
-    # itself (e.g. LaggedStart(..., run_time=…), Circumscribe(..., run_time=…)).
-    # NB: self.wait() routes through self.play(Wait(...)), so we must NOT scale
-    # those — beats/holds are governed by DELAY, not by the animation slowdown.
-    def play(self, *anims, **kwargs):
-        is_wait = any(type(a).__name__ == "Wait" for a in anims)
-        if not QUICK and anims and not is_wait:
-            rt = kwargs.get("run_time")
-            if rt is None:
-                rts = [r for r in (getattr(a, "run_time", None) for a in anims) if r]
-                rt = max(rts) if rts else 1.0
-            kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
+class _EmbBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, card=(0.3, 1.0),
+        stretch="infer",
+    )
 
     def reveal(self, items, hold=1.5, run_time=0.5, shift=RIGHT * 0.2):
         for m in items:

@@ -38,9 +38,9 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("PRF_QUICK") == "1"
+QUICK = quick_mode("PRF")
 # One knob for pacing: every reading "hold" is scaled by this. QUICK collapses
 # the holds for fast iteration; otherwise it sets a comfortable reading rhythm
 # (give the eye time to finish the text before anything moves on).
@@ -50,9 +50,6 @@ DELAY = float(os.environ.get("PRF_DELAY", "0.3" if QUICK else "1.7"))
 END_HOLD = 0.2 if QUICK else 1.6
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 GRID = "#232A38"        # faint gridlines / panel fills
 
 REL_C = "#FFD166"       # truly relevant / positive item (gold)
@@ -74,17 +71,6 @@ N_RELEVANT = TP + FN         # 8   (the "truly relevant" / actual-positive row)
 PRECISION = TP / N_FLAGGED   # 0.60
 RECALL = TP / N_RELEVANT     # 0.75
 F1 = 2 * PRECISION * RECALL / (PRECISION + RECALL)   # 0.667
-
-
-# ---- crisp text: render big, scale down (Pango mangles small sizes) ------- #
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def pct(x):
@@ -121,25 +107,11 @@ def fraction(num_pieces, den_pieces, fs=30, bar_color=INK):
 
 
 # ========================================================================== #
-class _PRBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
-
-    def wipe(self, rt=0.7):
-        # hold the finished scene a beat longer so the last line can be read,
-        # then clear updaters and fade everything out.
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _PRBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
+    WIPE_SETTLES = True
 
     def section_header(self, label, color):
         txt = Text(label, font_size=34, color=INK, weight="BOLD").to_corner(UL, buff=0.5)

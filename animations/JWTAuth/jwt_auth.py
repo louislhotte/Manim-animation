@@ -42,23 +42,10 @@ import json
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Fix it once: render
-# every glyph at a large base size and scale the mobject *down* to the requested
-# size. This shadows manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("JWT_QUICK") == "1"
+QUICK = quick_mode("JWT")
 # Two separate pacing knobs so nothing feels rushed:
 #   DELAY  scales the small pauses *between* animation steps (motion rhythm).
 #   READ   is the absolute hold after any block of text lands, so there is always
@@ -69,15 +56,6 @@ READ = float(os.environ.get("JWT_READ", 0.35 if QUICK else 2.6))
 ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.2  # settle held on a finished scene before it wipes
 
-# ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines / inert strokes
-GOLD = "#FFD166"        # the secret key / accent
-GOOD = "#3DD68C"        # verified / OK / trusted
-BAD = "#FF5C5C"         # rejected / tampered / danger
-ACCENT = "#FFD166"
 
 # JWT's three iconic segments (jwt.io colour language)
 HDR = "#FF6B9D"         # header   (pink)
@@ -92,9 +70,6 @@ J_KEY = "#82AAFF"
 J_STR = "#C3E88D"
 J_NUM = "#F78C6C"
 
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 # ---- a real HS256 token (so the base64 & the tamper mismatch are genuine) -- #
 _SECRET = b"a-string-secret-at-least-256-bits-long"
@@ -126,22 +101,6 @@ def _trunc(s: str, n: int = 20) -> str:
     return s if len(s) <= n else s[:n] + "…"
 
 
-# ---- small reusable pieces ------------------------------------------------ #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    kw.update(extra)
-    return Text(text, **kw)
-
-
-def mono(text, fs=22, color=INK, **kw):
-    return txt(text, fs=fs, color=color, font=MONO, **kw)
-
-
 def chip(text, color, fs=22, w=None, h=0.62, fill=0.14, tcolor=None, weight="NORMAL",
          radius=0.12, font=None):
     """A rounded, tinted box with a centered auto-fitting label. grp[0] is the box."""
@@ -159,20 +118,6 @@ def chip(text, color, fs=22, w=None, h=0.62, fill=0.14, tcolor=None, weight="NOR
 def harrow(start, end, color=MUTED, sw=4, tip=0.22):
     return Arrow(start, end, buff=0.12, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.4, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 # ---- glyphs (built by hand — no emoji, no assets) ------------------------- #
@@ -316,37 +261,11 @@ def stamp(text="REJECTED", color=BAD):
 
 
 # ========================================================================== #
-class _JWTBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        # stretch every real animation so transitions aren't abrupt, but never
-        # scale a bare Wait (that is a reading hold, handled by read()/beat()).
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _JWTBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     def flash_red(self, opacity=0.22):
         veil = Rectangle(width=config.frame_width, height=config.frame_height,
@@ -386,9 +305,6 @@ class _JWTBase(Scene):
             self._cap = new
             self.play(FadeIn(new, shift=UP * 0.1), run_time=0.5)
         return self._cap
-
-    def cite(self, s):
-        return txt(s, fs=15, color=MUTED, slant=ITALIC).to_edge(DOWN, buff=0.16)
 
     # ---- house-style intro / outro cards ---------------------------------- #
     def _rule_under(self, header, color=GOLD, pad=1.0, drop=0.45):

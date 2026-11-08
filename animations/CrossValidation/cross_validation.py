@@ -27,9 +27,9 @@ import os
 import warnings
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("CV_QUICK") == "1"
+QUICK = quick_mode("CV")
 # Single pacing knob: every reading hold is self.beat(t) == self.wait(t * DELAY).
 # Animation run-times are NOT scaled by it, so the piece still feels dynamic —
 # DELAY only sets how long text lingers so you can read it. QUICK collapses the
@@ -37,12 +37,6 @@ QUICK = os.environ.get("CV_QUICK") == "1"
 DELAY = 0.25 if QUICK else 1.5
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
-GOOD = "#3DD68C"        # generalising model / pass (green)
-BAD = "#FF5C5C"         # overfit model / errors (red)
-ACCENT = "#FFD166"      # highlights / CV result (gold)
 TRAIN_C = "#5B8DEF"     # training folds (blue)
 VAL_C = "#FF8C42"       # validation fold (orange)
 
@@ -99,22 +93,6 @@ CV_MEAN = float(np.mean(FOLD_SCORES))
 CV_STD = float(np.std(FOLD_SCORES))
 
 
-# ---- small reusable pieces ------------------------------------------------ #
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])]
-    )
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
-
-
 def line_swatch(color, text, fs=22):
     ln = Line(LEFT * 0.24, RIGHT * 0.24, color=color, stroke_width=6)
     t = Text(text, font_size=fs, color=INK).next_to(ln, RIGHT, buff=0.18)
@@ -134,20 +112,9 @@ def chip(text, color, fs=24, fill=0.14, w=None, h=0.6, tcolor=None):
 
 
 # ========================================================================== #
-class _CVBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def wipe(self, rt=0.6):
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _CVBase(ExplainerScene):
+    pace = Pace(quick=QUICK, delay=DELAY, card=(0.25, 1.0), stretch=None)
+    WIPE_RT = 0.6
 
     def section_header(self, index, label, color):
         tag = Text(f"{index}", font_size=30, color=color, weight="BOLD")

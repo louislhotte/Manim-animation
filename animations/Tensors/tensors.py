@@ -26,47 +26,22 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("TN_QUICK") == "1"
+QUICK = quick_mode("TN")
 # Reading rhythm. 2.3 so the matrices / shape tuples get real time to read.
 DELAY = float(os.environ.get("TN_DELAY", 0.28 if QUICK else 2.3))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared with the Transformer / KV-cache series) -------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # hairlines, faint structure
 AX1 = "#5B8DEF"         # first axis  (columns / width)  blue
 AX2 = "#2EC4B6"         # second axis (rows / height)    teal
 AX3 = "#FFD166"         # third axis  (depth / channels) gold
-GOLD = "#FFD166"        # accent
-ACCENT = "#FFD166"
-GOOD = "#3DD68C"        # green
-BAD = "#FF5C5C"         # red / stop
 RCOL = "#FF6B6B"        # colour channel R
 GCOL = "#3DD68C"        # colour channel G
 BCOL = "#5B8DEF"        # colour channel B
 CODE_FS = 21
-MONO = "Menlo"
-
-FONT = "Helvetica Neue"
-
-# --- crisp small text -------------------------------------------------------
-# Pango mangles glyphs/spacing below ~20 pt (subscripts come out in a fallback
-# font). Shadow Text so every call rasterises at a large base size and is scaled
-# DOWN geometrically — same visual size, correct font, crisp at any size.
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 # ---- small text helper: drop None kwargs Pango dislikes ------------------- #
@@ -107,12 +82,6 @@ def chip(text, color, w=2.3, h=0.95, fs=26, fill=0.14, tcolor=None, radius=0.14)
 def harrow(start, end, color=MUTED, sw=4, tip=0.22):
     return Arrow(start, end, buff=0.0, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.28, tip_length=tip)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 # ---- the tensor primitive: a numbered cell -------------------------------- #
@@ -279,31 +248,12 @@ def coord_frame(origin, xr=4, yr=3, unit=0.62, grid_color=FAINT, axis_color=MUTE
 
 
 # ========================================================================== #
-class _TensorBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # slow every played animation slightly; never scale a bare wait
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _TensorBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+    WIPE_STRETCH = False
 
     # ---- chrome ----------------------------------------------------------- #
     def section_header(self, label, color=ACCENT):

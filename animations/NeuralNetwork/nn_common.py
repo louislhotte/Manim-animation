@@ -31,24 +31,11 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix, MANDATORY) ------------------------------ #
-# Manim's ``Text`` quantises glyph positions badly below ~20 pt. Render every
-# glyph at a large base size and scale the mobject *down* — spacing stays crisp,
-# and super/subscripts never fall back to a different font.
-_BaseText = Text
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
+from manimx import *
 
 
 # --- pacing ---------------------------------------------------------------- #
-QUICK = os.environ.get("NN_QUICK") == "1"
+QUICK = quick_mode("NN")
 # self.beat(t) == wait(t * DELAY): the reading rhythm. Animations keep explicit
 # run_times (not scaled) so the film stays dynamic. Each scene ends on a settle.
 # Paced generously (a dense technical caption wants 3-4 s) so the ~2-min-per-scene
@@ -58,14 +45,7 @@ READ = float(os.environ.get("NN_READ", 0.3 if QUICK else 3.1))   # hold after a 
 END_HOLD = 0.2 if QUICK else 3.0
 
 # ---- palette (dark house style) ------------------------------------------- #
-BG = "#0E1117"       # dark slate background
-PANEL = "#151A23"    # panel fill
-INK = "#F5F3EF"      # warm white text
-MUTED = "#8A93A6"    # secondary text / axes / edges
 FAINT = "#2A3140"    # gridlines / faint wires
-GOLD = "#FFD166"     # accent / rules / the model
-GOOD = "#3DD68C"     # correct / pass (green)
-BAD = "#FF5C5C"      # wrong / miss (red)
 WARN = "#FF8C42"     # loss / error signal (orange)
 
 # the three classes — one colour each, the film's through-line
@@ -76,10 +56,6 @@ CLASS_COLORS = [CAR_C, PLANE_C, SHIP_C]
 
 WPOS = "#5B8DEF"     # positive weight (blue)
 WNEG = "#FF7A7A"     # negative weight (red)
-
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 
 # ========================================================================== #
@@ -155,19 +131,6 @@ def plate(mob, pad_x=0.16, pad_y=0.1, op=0.75):
 def arr(a, b, color=MUTED, sw=4, buff=0.14, tip=0.2):
     return Arrow(a, b, buff=buff, stroke_width=sw, color=color,
                  max_tip_length_to_length_ratio=0.32, tip_length=tip)
-
-
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
-
-
-def make_cross(color=BAD, sw=7, scale=1.0):
-    a = Line([-0.18, -0.18, 0], [0.18, 0.18, 0])
-    b = Line([-0.18, 0.18, 0], [0.18, -0.18, 0])
-    return VGroup(a, b).set_stroke(color=color, width=sw).scale(scale)
 
 
 def check_badge(color=GOOD, r=0.22):
@@ -431,23 +394,14 @@ def build_network(sizes, shown=None, width=6.2, height=4.3, node_r=0.11,
 
 
 # ========================================================================== #
-class NNBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-        self._cap = None
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
+class NNBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, end_hold=END_HOLD, card=(0.25, 1.0),
+        stretch=None,
+    )
 
     def read(self, t=1.0):
         self.wait(t * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
 
     def wipe(self, rt=0.6):
         for m in self.mobjects:

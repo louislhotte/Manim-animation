@@ -39,22 +39,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text (shared house fix) ----------------------------------------- #
-# Manim's ``Text`` quantises glyph positions badly below ~20 pt. Render every
-# glyph at a large base size and scale the mobject *down* — spacing stays crisp.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("PE_QUICK") == "1"
+QUICK = quick_mode("PE")
 # Single pacing knob: every reading "hold" is self.beat(t) == wait(t * DELAY).
 # Animation run-times are NOT scaled, so the piece stays dynamic — DELAY only
 # sets how long text lingers. Each scene also ends on a fixed >=5 s hold
@@ -63,18 +51,12 @@ DELAY = 0.25 if QUICK else 1.8
 END_HOLD = 0.2 if QUICK else 5.0
 
 # ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"       # dark slate background
-INK = "#F5F3EF"      # warm white text
-MUTED = "#8A93A6"    # secondary text / axes
 FAINT = "#2A3140"    # gridlines / contours
 DATA_C = "#5B8DEF"   # data points (blue)
 W_C = "#5B8DEF"      # the slope parameter w (blue)
 B_C = "#2EC4B6"      # the intercept parameter b (teal)
 MODEL_C = "#FFD166"  # the fitted model / line (gold)
 LOSS_C = "#FFD166"   # loss readout (gold)
-GOOD = "#3DD68C"     # good / train / pass (green)
-BAD = "#FF5C5C"      # bad / overfit / miss (red)
-ACCENT = "#FFD166"   # highlight (gold)
 TRAIN_C = "#5B8DEF"  # training loss (blue)
 VAL_C = "#FF8C42"    # validation loss (orange)
 
@@ -219,16 +201,6 @@ CURVE_YLO = max(0.0, _ylo - 0.06)
 CURVE_YHI = _yhi + 0.05
 
 
-# ========================================================================== #
-# small reusable pieces
-# ========================================================================== #
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    return v.set_stroke(color=color, width=sw).scale(scale)
-
-
 def chip(text, color, fs=24, fill=0.14, w=None, h=0.62, tcolor=None):
     label = Text(text, font_size=fs, color=tcolor or INK)
     width = (label.width + 0.5) if w is None else w
@@ -252,26 +224,11 @@ def clamp(v, lo, hi):
 
 
 # ========================================================================== #
-class _PEBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.25 if QUICK else 1.0))
-
-    def settle(self):
-        """The mandatory >=5 s hold on the finished scene before it wipes."""
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.6):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+class _PEBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.25, 1.0), stretch=None,
+    )
+    WIPE_RT = 0.6
 
     def section_header(self, part, label, color):
         tag = Text(part, font_size=20, color=color, weight="BOLD")

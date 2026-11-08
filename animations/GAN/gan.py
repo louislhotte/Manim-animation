@@ -31,41 +31,22 @@ import os
 from pathlib import Path
 
 import numpy as np
-from manim import *
+from manimx import *
 
-QUICK = os.environ.get("GAN_QUICK") == "1"
+QUICK = quick_mode("GAN")
 DELAY = float(os.environ.get("GAN_DELAY", 0.28 if QUICK else 2.3))
 ANIM_SLOW = 1.0 if QUICK else 1.15
 END_HOLD = 0.2 if QUICK else 2.2
 
 # ---- palette (shared with the Transformer / Quantization / Tensors series) --- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text
-FAINT = "#3A4152"       # hairlines, faint structure
 GEN = "#43C6E8"         # the generator + its fake samples (bright cyan)
 REAL = "#FFD166"        # real data (warm gold)
 DISC = "#A78BFA"        # the discriminator (violet)
-GOOD = "#3DD68C"        # green (verdict: real / correct)
-BAD = "#FF5C5C"         # red (verdict: fake / caught)
 PANEL = "#141C29"       # HUD / box fill
 EDGE = "#CDEEFF"        # neon edge on the bars
-MONO = "Menlo"
-FONT = "Helvetica Neue"
 
 # The discriminator "realness" ramp: deep indigo (looks fake) -> gold (looks real).
 TERRAIN_RAMP = ["#26305E", "#3E6FB0", "#6FA8DC", "#F5C25B"]
-
-# ---- crisp small text (mandatory shadow: rasterise big, scale down) ---------- #
-_BaseText = Text
-_BaseText.set_default(font=FONT)
-_TEXT_BASE = 60
-
-
-def Text(text, font_size=48, **kw):  # noqa: F811 (intentional shadow)
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
 
 
 def txt(s, fs=28, color=INK, font=None, slant=None, weight=None, **extra):
@@ -196,28 +177,18 @@ def cloud(points, color, r=0.036, op=0.9, zlift=0.0):
 # =========================================================================== #
 # Base scene
 # =========================================================================== #
-class _GANBase(ThreeDScene):
+class _GANBase(Explainer3DScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
+
     def setup(self):
-        self.camera.background_color = BG
+        super().setup()
         self._orbiting = False
         self.bars = {}
         self.field_group = None
         self.ground = None
-
-    def play(self, *anims, **kw):
-        if "run_time" in kw:
-            kw["run_time"] *= ANIM_SLOW
-        super().play(*anims, **kw)
-
-    # ---- timing ----------------------------------------------------------- #
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
 
     # ---- camera ----------------------------------------------------------- #
     def go_3d(self, phi=64, theta=-64, zoom=0.9, rate=0.045, focal=None):
@@ -303,7 +274,7 @@ class _GANBase(ThreeDScene):
         for m in self.mobjects:
             m.clear_updaters()
         if self.mobjects:
-            super().play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+            self.play_unstretched(*[FadeOut(m) for m in self.mobjects], run_time=rt)
         self.bars = {}
         self.field_group = None
         self.ground = None

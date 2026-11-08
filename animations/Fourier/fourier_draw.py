@@ -22,13 +22,13 @@ import os
 from pathlib import Path
 
 import numpy as np
-from manim import *
+from manimx import *
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data" / "louis_path.npy"
 IMG = HERE / "assets" / "louis.png"
 
-QUICK = os.environ.get("FOURIER_QUICK") == "1"
+QUICK = quick_mode("FOURIER")
 NUM_VECTORS = 90 if QUICK else 200     # epicycles drawn during the performance
 CIRCLE_COUNT = 28 if QUICK else 50     # how many of them also show their circle
 DRAW_TIME = 9 if QUICK else 24         # seconds for the pen to close the loop

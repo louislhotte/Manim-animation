@@ -31,23 +31,10 @@ from __future__ import annotations
 import os
 
 import numpy as np
-from manim import *
-
-# --- crisp text ------------------------------------------------------------ #
-# Manim's ``Text`` mangles letter/word spacing below ~20 pt. Render every glyph at
-# a large base size and scale the mobject *down* to the requested size. Shadows
-# manim's ``Text`` so every call benefits automatically.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("PL_QUICK") == "1"
+QUICK = quick_mode("PL")
 # Two pacing knobs: DELAY scales the small motion pauses; READ is the absolute hold
 # after a block of text lands. ANIM_SLOW stretches every played animation.
 DELAY = float(os.environ.get("PL_DELAY", 0.28 if QUICK else 1.0))
@@ -55,15 +42,6 @@ READ = float(os.environ.get("PL_READ", 0.35 if QUICK else 2.4))
 ANIM_SLOW = 1.0 if QUICK else 1.25
 END_HOLD = 0.2 if QUICK else 2.0
 
-# ---- palette -------------------------------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / arrows
-FAINT = "#3A4152"       # gridlines / inert strokes
-GOLD = "#FFD166"        # accent / the packages you name
-GOOD = "#3DD68C"        # match / reproducible / green
-BAD = "#FF5C5C"         # drift / mismatch / red
-ACCENT = "#FFD166"
 
 ARR_C = "#5B8DEF"       # byline / arrows (blue)
 
@@ -75,9 +53,6 @@ NAMEC = GOLD            # package names — the stars
 STRV = "#C3E88D"        # string / version values
 HASHC = MUTED           # urls and integrity hashes (noise)
 
-MONO = "Menlo"
-FONT = "Helvetica Neue"
-_BaseText.set_default(font=FONT)
 
 CODE_FS = 24
 
@@ -108,35 +83,6 @@ TOML_T2C = {
     '"^2.31.0"': STRV, '"2.31.0"': STRV, '"^3.11"': STRV,
     '"sha256:9908…"': HASHC,
 }
-
-
-def _safe_t2c(s, table):
-    """Per-line text→colour map, pruned so no key overlaps another present key.
-
-    Manim's ``t2c`` raises on overlapping ranges — even same-colour ones. Keep only
-    keys present in the line, then drop any that is a substring of another present
-    key (e.g. bare ``requests`` inside quoted ``"requests"``).
-    """
-    present = {k: v for k, v in table.items() if k in s}
-    keys = list(present)
-    return {k: v for k, v in present.items()
-            if not any(k != o and k in o for o in keys)}
-
-
-# ---- small reusable pieces ------------------------------------------------ #
-def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra):
-    """``Text`` with optional kwargs, skipping None so Pango never chokes."""
-    kw = {"font_size": fs, "color": color, "weight": weight}
-    if font:
-        kw["font"] = font
-    if slant:
-        kw["slant"] = slant
-    kw.update(extra)
-    return Text(text, **kw)
-
-
-def mono(text, fs=22, color=INK, **kw):
-    return txt(text, fs=fs, color=color, font=MONO, **kw)
 
 
 def chip(text, color, fs=22, w=None, h=0.6, fill=0.14, tcolor=None, weight="NORMAL",
@@ -170,14 +116,6 @@ def arr(a, b, color=MUTED, sw=4, buff=0.14, tip=0.22):
                  max_tip_length_to_length_ratio=0.4, tip_length=tip)
 
 
-def make_tick(color=GOOD, sw=7, scale=1.0):
-    v = VMobject()
-    v.set_points_as_corners(
-        [np.array([-0.2, 0.0, 0]), np.array([-0.05, -0.18, 0]), np.array([0.24, 0.22, 0])])
-    v.set_stroke(color=color, width=sw)
-    return v.scale(scale)
-
-
 def make_cross(color=BAD, sw=7, scale=1.0):
     a = Line([-0.16, -0.16, 0], [0.16, 0.16, 0])
     b = Line([-0.16, 0.16, 0], [0.16, -0.16, 0])
@@ -209,36 +147,11 @@ def machine_glyph(color=MUTED, s=1.0):
 
 
 # ========================================================================== #
-class _PLBase(Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    # ---- timing helpers --------------------------------------------------- #
-    def play(self, *anims, **kwargs):
-        if not (len(anims) == 1 and isinstance(anims[0], Wait)):
-            rt = kwargs.get("run_time")
-            if rt is not None:
-                kwargs["run_time"] = rt * ANIM_SLOW
-        return super().play(*anims, **kwargs)
-
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def read(self, k=1.0):
-        self.wait(k * READ)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.0))
-
-    def settle(self):
-        self.wait(END_HOLD)
-
-    def wipe(self, rt=0.7):
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
-        self._cap = None
+class _PLBase(ExplainerScene):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, read=READ, anim_slow=ANIM_SLOW, end_hold=END_HOLD,
+        card=(0.3, 1.0), stretch="given",
+    )
 
     def flash_red(self, opacity=0.20):
         # inset from the frame edge so the transient veil never trips the

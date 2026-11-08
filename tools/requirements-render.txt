@@ -1,0 +1,8 @@
+# The shared render environment for every animations/<Name>/ film.
+# tools/render_lib.sh installs this into ${MX_VENV:-~/.cache/manimx/venv} (outside
+# OneDrive) on first use, then each film's own requirements.txt on top.
+# No LaTeX: the series renders all text with Pango (manim.Text) via manimx.
+manim==0.21.0
+numpy>=1.26
+pillow>=10.0
+scipy>=1.11

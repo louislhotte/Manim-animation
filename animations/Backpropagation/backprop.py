@@ -43,37 +43,19 @@ import os
 from pathlib import Path
 
 import numpy as np
-from manim import *
-
-# ---- crisp text: render big, scale down (Pango mangles small sizes) ------- #
-# MANDATORY shadow (manim-explainer SKILL §2). Must be defined before any use.
-_BaseText = Text
-_TEXT_BASE = 60
+from manimx import *
 
 
-def Text(text, font_size=DEFAULT_FONT_SIZE, **kw):  # noqa: F811
-    if font_size >= _TEXT_BASE:
-        return _BaseText(text, font_size=font_size, **kw)
-    return _BaseText(text, font_size=_TEXT_BASE, **kw).scale(font_size / _TEXT_BASE)
-
-
-QUICK = os.environ.get("BP_QUICK") == "1"
+QUICK = quick_mode("BP")
 DELAY = float(os.environ.get("BP_DELAY", "0.3" if QUICK else "2.3"))
 END_HOLD = 0.2 if QUICK else 2.0
 
 # ---- palette (shared house style) ---------------------------------------- #
-BG = "#0E1117"          # dark slate background
-INK = "#F5F3EF"         # warm white text
-MUTED = "#8A93A6"       # secondary text / axes
 GRID = "#232A38"        # faint gridlines / panel fills
-FAINT = "#3A4152"       # guides
 
-GOOD = "#3DD68C"        # low loss / downhill / good weights (green)
 FWD_C = "#5B8DEF"       # the forward pass / activations (blue)
 LOSS_C = "#FF8C42"      # the loss (orange)
 GRAD_C = "#C792EA"      # the backward pass / gradients (violet) — the hero signal
-GOLD = "#FFD166"        # rule / highlight / mid loss
-BAD = "#FF5C5C"         # high loss / error (red)
 
 
 # ========================================================================== #
@@ -202,12 +184,10 @@ def neuron(label="", color=INK, r=0.40, fill=GRID, label_fs=24):
 # ========================================================================== #
 # Shared, camera-agnostic helpers (used by both 2D and 3D scenes)
 # ========================================================================== #
-class _Common:
-    def beat(self, t=1.0):
-        self.wait(t * DELAY)
-
-    def card_wait(self, t=1.0):
-        self.wait(t * (0.3 if QUICK else 1.25))
+class _Common(ExplainerMixin):
+    pace = Pace(
+        quick=QUICK, delay=DELAY, end_hold=END_HOLD, card=(0.3, 1.25), stretch=None,
+    )
 
     def section_header(self, label, color):
         t = Text(label, font_size=33, color=INK, weight="BOLD").to_corner(UL, buff=0.5)
@@ -232,15 +212,7 @@ class _Common:
 # 2D base — static camera by design. Owns the intro/outro + 2D scenes.
 # ========================================================================== #
 class _BPBase(_Common, Scene):
-    def setup(self):
-        self.camera.background_color = BG
-
-    def wipe(self, rt=0.7):
-        self.wait(END_HOLD)
-        for m in self.mobjects:
-            m.clear_updaters()
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=rt)
+    WIPE_SETTLES = True
 
     # ---- house-style intro / outro cards ---------------------------------- #
     def _rule_under(self, header, color=GOLD, pad=1.0, drop=0.45):
