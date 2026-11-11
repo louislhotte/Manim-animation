@@ -22,6 +22,12 @@ handles the ones marked (lib).
 - **`get_part_by_text` is not real** (`hasattr` lies via `__getattr__`): lay tokens out
   yourself if you need per-token control.
 - Pass `font=` / `slant=` only when set: `font=None` can choke Pango. (lib) `txt()`.
+- **Per-character control**: `Text(s, disable_ligatures=True)` has exactly one submobject
+  per character, spaces included, so `t[7]` / `t[10:13]` index the string. Without it,
+  ligatures and dropped spaces shift every index. For text that is typed, inserted
+  into or deleted from, set the string once between sentinels (`"H" + s + "H"`) and cut
+  one advance cell per character at the ink midpoints: `prose_cells` / `LiveLine` in
+  `animations/Yjs/kit.py`.
 
 ## Mobjects and groups
 - **`Circle`/`Ellipse`/`Arc` default to `color=RED`**, and `.set_opacity(x)` turns on the
@@ -38,6 +44,28 @@ handles the ones marked (lib).
 - **A 2-tuple centre** passed to a helper that does `move_to`: coerce to 3-D first.
 - **Scene classes named like Manim mobjects** (`Vector`, `Matrix`, `Line`) shadow them
   in the module after the class statement. Name scenes `VectorScene`, ...
+- **Attribute names that collide with the `Mobject` API**: a custom `self.fade = 0.0`
+  or `def target(self)` on a `VGroup` subclass breaks `FadeOut` / `MoveToTarget` far
+  from the cause (`'float' object is not callable`). `target`, `fade`, `scale`, `shift`,
+  `color`, `points` are taken: name yours `alpha`, `aim`, ...
+- **`FadeOut` of a nested part splits its parent**: fading `chip.digit` makes Manim
+  restructure `scene.mobjects` (the parent is replaced by its remaining pieces), and
+  the leftovers no longer follow the parent. Animate the part's opacity
+  (`part.animate.set_opacity(0)`) and swap in a new mobject, or fade the whole parent.
+- **Animating a new `VGroup` of mobjects that are already on stage** re-adds them as
+  that group: they jump to the top of the draw order, and parents that held them are
+  split the same way. Build such groups before anything is added, or fade the pieces.
+  `Succession(...)` / `AnimationGroup(...)` around an animation of a *nested* mobject
+  do this silently (their own group is added to the scene), so a big parent such as a
+  window ends up as loose parts in `scene.mobjects`. A later `FadeOut(parent)` then
+  re-adds the parent *on top* of everything added since, hiding what should survive
+  it. Before adding the survivors, put the parent back: `self.add(parent)`.
+- **A child taken out of its parent (`parent.remove(child)`) is not drawn at all** until
+  it is added to the scene again: do both in the same breath, not a play apart.
+- **Identity colours that sit side by side** (three writers, three series): run the
+  `dataviz` skill's `validate_palette.js` on the film surface (`--mode dark --surface
+  "#0E1117" --pairs all`). The house `SKY` / `LILAC` pair fails colour-vision
+  separation; `#508FF9` / `#E26E1A` / `#C170BB` passes (Yjs film).
 
 ## Animation
 - **`always_redraw`**: never `Create`/`FadeIn` the live mobject (strict-zip crash).
@@ -48,6 +76,52 @@ handles the ones marked (lib).
 - **Do not stretch `Wait`**: reading holds are owned by `beat`/`read`/`settle`.
   (lib) `play()` never scales a bare `Wait`; `play_unstretched()` bypasses
   `pace.anim_slow` when a fade must keep its exact length.
+- **`self.play(..., run_time=X)` overrides every animation's own `run_time`**, including
+  `m.animate(run_time=...)` and the parts of a `Succession`. When durations differ,
+  set them per animation and leave the play-level kwarg out.
+- **`Succession` / `AnimationGroup` put the mobjects of non-introducer animations on
+  stage when the play starts**, not when their turn comes (only introducers such as
+  `FadeIn` / `Create` are added late). A custom mover scheduled after a `Wait` shows
+  early: hide it in `__init__` and reveal it in `interpolate_mobject` (`Travel` in
+  `animations/Yjs/kit.py`).
+- **A mobject removed from its parent during a play is still drawn until that play
+  ends**: the renderer freezes its list of moving family members when the play starts.
+  A label swapped by an updater (`group.remove(old); group.add(new)`) therefore shows
+  old and new on top of each other (`×6` under `×11` reads `×611`). Hide before
+  removing: `old.set_opacity(0)`. It only shows in frames sampled *mid-animation*:
+  zoom on a counter or a typed label while it runs, not just at the end of a beat.
+- **An animation that ends before its play does is re-applied at alpha = 1 on every
+  later frame** (a top-level animation, or the last-ending child of a top-level
+  `AnimationGroup`). So `play(FadeIn(m), ..., Succession(Wait(5), FadeOut(m)))` fades `m`
+  out and then pops it back until the play ends: two captions sat on top of each other
+  for 1.5 s. Put the early animation in a `Succession(...)` (it stops interpolating
+  after its last child), or use two plays.
+- **Two animations on one mobject in the same play** (`FadeIn(m)` plus
+  `m.animate.shift(...)`): the second captures the first's start state (transparent).
+  Play them one after the other, or fold both into one animation.
+- **Tweening plain attributes while updaters keep running**: an `Animation` suspends
+  the updaters of its mobject. Run attribute tweens on a throwaway `Mobject()` host
+  with `suspend_mobject_updating=False` (`Tween`, `Breathe` in `animations/Yjs/kit.py`),
+  so self-laying-out rows and lines keep following.
+
+## Pacing and motion
+- **Reading time as a guarantee**: a fixed `read()` after each caption either rushes
+  long captions or freezes short ones. `_Base.cap()` / `hold()` in `animations/Yjs/yjs.py`
+  swap the caption *as an animation* (it plays under the motion) and then wait only
+  for what is left of `chars / 16 + 0.9 s`. `YJ_TRACE=1` prints the time each caption
+  really stayed up and flags the short ones.
+- **Holds that move**: `hold(ambient=lambda t: [...])` fills the remaining reading
+  time with motion that means something (the item under discussion breathes, packets
+  keep flowing) instead of a freeze.
+- **Find the dead stretches without watching**: `python tools/motioncheck.py
+  <video.mp4>...` prints the share of the film that moves and every still stretch
+  of 2 s or more with its timestamp. Aim for no still stretch over about 3 s.
+- **Swaps in one place: leave, then arrive.** `play(FadeOut(a), FadeIn(b))` with `a`
+  and `b` in the same spot stacks two pictures (two captions, two code panels, a chart
+  and the table that replaces it) for half the fade, and a frozen frame of it reads
+  as a bug. Fade the old one out first: `FadeOut(a, run_time=0.25)` plus
+  `Succession(Wait(0.25), FadeIn(b, run_time=0.4))` in the same play (no play-level
+  `run_time`). `_Base.then()` and `_Base.cap()` in `animations/Yjs/yjs.py` do this.
 
 ## Arrows
 - **`Arrow(mobject, mobject)` comes out diagonal**: Manim takes the farthest bezier point,
@@ -72,3 +146,9 @@ handles the ones marked (lib).
   in `tools/requirements-render.txt`.
 - **`.gitignore` blocks `*.png`**: bake photos as `.jpg`, or `git add -f` on purpose.
 - Unseeded randomness makes every render different: seed (`np.random.default_rng(7)`).
+- **Manim's partial-movie cache can serve a stale clip after a fix.** A play is keyed
+  on the scene state when it starts and on the animations' own attributes, not on
+  the code they call. A fix inside an updater, a `refresh()` or an
+  `interpolate_mobject` leaves the key unchanged, so the old clip is reused and the
+  bug "is still there". Render with `./render.sh <scene> --no-cache` after such a fix,
+  and for the final HD render.

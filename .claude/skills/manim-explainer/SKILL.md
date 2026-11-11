@@ -128,7 +128,10 @@ string then collides). Repeated glyphs are spaced by at least their own width.
 
 **Pacing.** Err slow: prose ~2 s on screen, formulas / code / dense diagrams 3-4 s
 *after* they finish drawing. `read()` after every caption; never pad empty holds to
-reach a target length. Measured runtime goes in the README.
+reach a target length. Measured runtime goes in the README. Slow is not still: a
+reading hold should carry motion that means something (the item under discussion
+pulses, packets keep flowing, a counter runs), never a frozen frame for 4 s. Pattern
+and measuring tool: `reference/gotchas.md`, "Pacing and motion".
 
 **Arrows and motion.** `arr(a.get_right(), b.get_left())`: endpoints are points
 (`arr` raises on a mobject). Loop-backs are orthogonal elbows in a free lane, not
@@ -160,6 +163,10 @@ metaphor. Every number on screen is computed or cited, and the source is on scre
    venv python). Identical digests prove identical frames; `--ignore-code` compares
    on-screen state only (for moved helpers). Any other difference must be explained.
 5. Final HD render only after 1-4 are clean; report the measured duration.
+
+For a film that has to feel dynamic, also run `python tools/motioncheck.py` on the
+full-pace 480p scene videos (not `--quick`): it prints the share of time that moves
+and every still stretch of 2 s or more, so freezes are found without watching.
 
 Rendering: `./render.sh [scene|full] [-q l|m|h|k] [--quick] [--check] [--stitch]
 [--list] [-p] [-- manim args]`. The shared venv lives outside OneDrive at
