@@ -52,6 +52,11 @@ handles the ones marked (lib).
   restructure `scene.mobjects` (the parent is replaced by its remaining pieces), and
   the leftovers no longer follow the parent. Animate the part's opacity
   (`part.animate.set_opacity(0)`) and swap in a new mobject, or fade the whole parent.
+  Worse when the parent lays itself out in an updater: the scene only updates its
+  top-level mobjects, so **the parent's updater stops for good, without any error**.
+  After `FadeOut(panel.title)` a `TextPanel` kept its last layout: a block "opened"
+  in one jump at the next explicit refresh, rows shown later never appeared, and a
+  new arc stayed a default-size triangle at the origin (Terraform, scene 8).
 - **Animating a new `VGroup` of mobjects that are already on stage** re-adds them as
   that group: they jump to the top of the draw order, and parents that held them are
   split the same way. Build such groups before anything is added, or fade the pieces.
@@ -62,6 +67,18 @@ handles the ones marked (lib).
   it. Before adding the survivors, put the parent back: `self.add(parent)`.
 - **A child taken out of its parent (`parent.remove(child)`) is not drawn at all** until
   it is added to the scene again: do both in the same breath, not a play apart.
+- **`set_z_index` only reaches the family a group has *now*.** Content added later to
+  a raised group (a line appended to a HUD panel whose window is at z-index 10) keeps
+  z-index 0 and is drawn *under* the panel's own background: the text "does not
+  appear". Give new children the parent's z-index when adding them (`TextPanel._adopt`
+  in `animations/Terraform/kit.py`).
+- **A film helper named like a `manimx` helper silently replaces it.** With
+  `from manimx import *` followed by `from stage import *`, a 3D `plate(origin, ...)`
+  shadowed the house `plate(mob)`, and the failure surfaced far away as an unexpected
+  keyword argument. Give film-local helpers their own names (`ground_plate`).
+- **`family_members_with_points()` skips mobjects that have no points yet.** A part
+  that builds its faces in `refresh()` must walk `get_family()`, or the faces never get
+  their first points and nothing is drawn.
 - **Identity colours that sit side by side** (three writers, three series): run the
   `dataviz` skill's `validate_palette.js` on the film surface (`--mode dark --surface
   "#0E1117" --pairs all`). The house `SKY` / `LILAC` pair fails colour-vision
@@ -83,7 +100,7 @@ handles the ones marked (lib).
   stage when the play starts**, not when their turn comes (only introducers such as
   `FadeIn` / `Create` are added late). A custom mover scheduled after a `Wait` shows
   early: hide it in `__init__` and reveal it in `interpolate_mobject` (`Travel` in
-  `animations/Yjs/kit.py`).
+  `manimx/motion.py`).
 - **A mobject removed from its parent during a play is still drawn until that play
   ends**: the renderer freezes its list of moving family members when the play starts.
   A label swapped by an updater (`group.remove(old); group.add(new)`) therefore shows
@@ -96,20 +113,31 @@ handles the ones marked (lib).
   out and then pops it back until the play ends: two captions sat on top of each other
   for 1.5 s. Put the early animation in a `Succession(...)` (it stops interpolating
   after its last child), or use two plays.
+- **Recolouring a nested part re-stacks it.** The same split as above: animating
+  `field.box.animate.set_stroke(AMBER)` inside a group re-adds the box *after* its
+  siblings, and an opaque box then covers the caret that was drawn on it. Fade a
+  stroke-only copy in over the part instead of recolouring the part.
 - **Two animations on one mobject in the same play** (`FadeIn(m)` plus
   `m.animate.shift(...)`): the second captures the first's start state (transparent).
   Play them one after the other, or fold both into one animation.
 - **Tweening plain attributes while updaters keep running**: an `Animation` suspends
   the updaters of its mobject. Run attribute tweens on a throwaway `Mobject()` host
-  with `suspend_mobject_updating=False` (`Tween`, `Breathe` in `animations/Yjs/kit.py`),
+  with `suspend_mobject_updating=False` (`Tween`, `Breathe` in `manimx/motion.py`),
   so self-laying-out rows and lines keep following.
 
 ## Pacing and motion
 - **Reading time as a guarantee**: a fixed `read()` after each caption either rushes
-  long captions or freezes short ones. `_Base.cap()` / `hold()` in `animations/Yjs/yjs.py`
+  long captions or freezes short ones. `cap()` / `hold()` (in `manimx`, born in the Yjs film)
   swap the caption *as an animation* (it plays under the motion) and then wait only
-  for what is left of `chars / 16 + 0.9 s`. `YJ_TRACE=1` prints the time each caption
-  really stayed up and flags the short ones.
+  for what is left of `chars / 16 + 0.9 s`. `MX_TRACE=1` (or the film's own
+  `TRACE_ENV`, e.g. `YJ_TRACE=1`) prints the time each caption really stayed up and
+  flags the short ones.
+- **A narrated film is paced by its narration**: `tell(caption, vo)` gives the beat
+  the time the line takes to say (`words / WPS + VO_PAD`), `cue("phrase")` waits
+  until the narrator reaches a word, so the picture changes on it. Cues are computed
+  from word counts: when a cue falls *before* the previous animation has finished it
+  simply does not wait, so keep the animations between two cues shorter than the
+  words between them. `MX_TRACE_DIR` + `tools/voiceover.py` give the timed script.
 - **Holds that move**: `hold(ambient=lambda t: [...])` fills the remaining reading
   time with motion that means something (the item under discussion breathes, packets
   keep flowing) instead of a freeze.
@@ -121,7 +149,7 @@ handles the ones marked (lib).
   and the table that replaces it) for half the fade, and a frozen frame of it reads
   as a bug. Fade the old one out first: `FadeOut(a, run_time=0.25)` plus
   `Succession(Wait(0.25), FadeIn(b, run_time=0.4))` in the same play (no play-level
-  `run_time`). `_Base.then()` and `_Base.cap()` in `animations/Yjs/yjs.py` do this.
+  `run_time`). `then()` and `cap()` in `manimx` do this.
 
 ## Arrows
 - **`Arrow(mobject, mobject)` comes out diagonal**: Manim takes the farthest bezier point,
@@ -146,6 +174,8 @@ handles the ones marked (lib).
   in `tools/requirements-render.txt`.
 - **`.gitignore` blocks `*.png`**: bake photos as `.jpg`, or `git add -f` on purpose.
 - Unseeded randomness makes every render different: seed (`np.random.default_rng(7)`).
+  `hash("a string")` is random too (it changes with every Python process): never
+  derive a phase or a colour from it, use an index.
 - **Manim's partial-movie cache can serve a stale clip after a fix.** A play is keyed
   on the scene state when it starts and on the animations' own attributes, not on
   the code they call. A fix inside an updater, a `refresh()` or an
