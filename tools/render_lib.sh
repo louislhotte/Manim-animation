@@ -50,7 +50,9 @@ Usage: ./render.sh [SCENE] [-q l|m|h|k] [-p] [--quick] [--check] [--stitch]
   -- ARGS      pass the rest straight to manim (e.g. -- -s for a still image)
 
 Env: MX_PYTHON (interpreter to use), MX_VENV, MX_MEDIA_DIR, MX_QUICK, MX_DELAY,
-     MX_READ, MX_FONT. Typical loop for $name:
+     MX_READ, MX_FONT, MX_TRACE=1 (print how long each timed caption stays up),
+     MX_TRACE_DIR=<dir> (save those timings: tools/voiceover.py turns them into a
+     narration script). Typical loop for $name:
   ./render.sh <scene> --quick --check     # layout pass, then read the sheet
   ./render.sh full -q h                   # final 1080p60 (slow: run in background)
 EOF

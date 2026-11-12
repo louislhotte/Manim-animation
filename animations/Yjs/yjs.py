@@ -80,7 +80,6 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import re
 from pathlib import Path
 
@@ -355,62 +354,10 @@ class _Base(ExplainerScene):
             g, pad.next_to(g, RIGHT, buff=0)
         )  # the card centres this box on the rule's end
 
-    READ_CPS, READ_BASE = 16.0, 0.9  # reading time of a caption: chars / 16 + 0.9 s
-
-    def cap(self, text, rt=0.45, at=0.0, **kw):
-        """The caption swap as an animation, to play *while* something else moves.
-
-        ``at`` = how long after the start of its play the swap happens (a caption
-        scheduled inside a ``Succession``), so reading time is counted from there.
-        """
-        new = self.say(text, **kw)
-        new.set_z_index(20)
-        # The FadeIn always sits in a Succession: a bare animation that ends before its
-        # play does is re-applied at alpha = 1 on every later frame, which would undo a
-        # FadeOut of this caption scheduled later in the same play (``at``).
-        if self._cap is None:
-            anims = [Succession(FadeIn(new, shift=UP * 0.1))]
-        else:  # out, then in: two sentences never sit on top of each other
-            anims = [
-                FadeOut(self._cap, shift=UP * 0.1, run_time=0.45),
-                Succession(Wait(0.4), FadeIn(new, shift=UP * 0.1, run_time=0.6)),
-            ]
-        self._cap = new
-        self._cap_t0 = self.renderer.time + at
-        self._cap_need = len(text) / self.READ_CPS + self.READ_BASE
-        self._note(text, at)
-        return AnimationGroup(*anims, run_time=rt)
-
-    def lead(self, text, wait=0.7, **kw):
-        """A caption that lands *before* the motion it describes (read, then watch)."""
-        self.play(self.cap(text, **kw))
-        self.wait(0.1 if self.pace.quick else wait)
-
-    def hold(self, extra=0.0, floor=0.3, ambient=None):
-        """Keep the caption up until it has had its reading time.
-
-        ``ambient(rt)`` returns animations lasting ``rt``: the hold then moves (the
-        item being discussed breathes, packets keep flowing) instead of freezing.
-        """
-        left = max(floor, self._cap_need + extra - (self.renderer.time - self._cap_t0))
-        if self.pace.quick:
-            left = min(left, 0.3)
-        if ambient is not None and left >= 0.8:
-            self.play(*ambient(left))
-        else:
-            self.wait(left)
-
-    @staticmethod
-    def then(anim, after):
-        """``anim``, ``after`` seconds into its play: "this leaves, then that arrives".
-        Two different pictures never share a spot, not even for half a second."""
-        return Succession(Wait(after), anim)
-
-    def settle(self, ambient=None):
-        """End of a scene: the last caption's reading time, plus a breath."""
-        if getattr(self, "_cap", None) is None:
-            return super().settle()
-        self.hold(extra=0.5, ambient=ambient)
+    # Pacing comes from manimx: ``cap`` (the caption swap as an animation), ``hold`` /
+    # ``settle`` (wait only for what is left of the reading time, chars / 16 + 0.9 s,
+    # with ambient motion), ``then`` (leave, then arrive), and the caption trace.
+    TRACE_ENV = "YJ_TRACE"
 
     def wave(self, *rows, rt=2.4):
         """Light up the same item on every copy, one item after the other: the copies
@@ -427,26 +374,6 @@ class _Base(ExplainerScene):
             ),
             run_time=rt,
         )
-
-    # ---- YJ_TRACE=1: print how long every caption stays up (a reading-time check) -- #
-    def _note(self, text, at=0.0):
-        if os.environ.get("YJ_TRACE"):
-            self.__dict__.setdefault("_caps", []).append(
-                (self.renderer.time + at, text)
-            )
-
-    def wipe(self, rt=None):
-        caps = self.__dict__.pop("_caps", None)
-        if caps:
-            end = self.renderer.time
-            print(f"\n== captions of {type(self).__name__} (ends at {end:.1f} s)")
-            for (t0, text), (t1, _) in zip(caps, caps[1:] + [(end, "")], strict=True):
-                need = len(text) / self.READ_CPS + self.READ_BASE
-                flag = "  <-- SHORT" if t1 - t0 < need - 0.12 else ""
-                print(
-                    f"  {t0:6.1f}  {t1 - t0:4.1f} s (needs {need:3.1f})  {len(text):3d} ch  {text}{flag}"
-                )
-        super().wipe(rt)
 
     def header(self, label, color):
         h = self.section_header(label, color)

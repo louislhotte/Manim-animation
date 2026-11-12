@@ -23,25 +23,41 @@ A film declares only what is specific to it::
 Every method here is a default: override any of them in the film's base class.
 Mixed 2D/3D films put shared methods on a mixin ``class _Common(ExplainerMixin)``
 and combine it with ``Scene`` / ``ThreeDScene``.
+
+Three ways to pace captions, from simplest to most deliberate:
+
+* ``caption(text)``: swap the caption, then hold ``read()`` (most films);
+* ``cap(text)`` + ``hold()``: the swap is an animation that plays under the motion,
+  and the hold waits only for what is left of the caption's reading time (Yjs);
+* ``tell(caption, vo)`` + ``cue("phrase")``: a film made to be narrated. A beat lasts
+  as long as its voice-over line; the picture changes when the narrator reaches a
+  word. ``MX_TRACE_DIR`` + ``tools/voiceover.py`` produce the timed script (Terraform).
 """
 
 from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
 
 from manim import (
     DOWN,
     UL,
     UP,
+    AnimationGroup,
     Create,
     FadeIn,
     FadeOut,
     Line,
     MovingCameraScene,
     Scene,
+    Succession,
     ThreeDScene,
     Transform,
     VGroup,
     Wait,
     Write,
+    config,
 )
 
 from .code import hl_lines
@@ -69,6 +85,13 @@ class ExplainerMixin:
     WIPE_RT: float = 0.7  # default fade-out time of wipe()
     WIPE_STRETCH: bool = True  # False: the wipe fade ignores pace.anim_slow
     WIPE_SETTLES: bool = False  # True: wipe() holds settle() before fading
+    # narrated films (tell / cue): speaking rate, and a breath after every line
+    WPS: float = 2.5  # words per second = 150 words a minute
+    VO_PAD: float = 0.8
+    # timed captions (cap / hold): reading time = chars / READ_CPS + READ_BASE seconds
+    READ_CPS: float = 16.0
+    READ_BASE: float = 0.9
+    TRACE_ENV: str = "MX_TRACE"  # env var that prints how long each caption stayed up
 
     # canonical bookend cards (play_intro / play_outro) and film order (play_all)
     TITLE: str = ""
@@ -83,6 +106,8 @@ class ExplainerMixin:
         super().setup()
         self.camera.background_color = self.background
         self._cap = None  # the running bottom caption
+        self._cap_t0 = 0.0  # when the running caption appeared (timed captions)
+        self._cap_need = None  # how long it must stay up; None = not a timed caption
         self.hlrect = None  # the moving code-line highlight
 
     # ---- timing ----------------------------------------------------------- #
@@ -126,12 +151,24 @@ class ExplainerMixin:
         quick, normal = self.pace.card
         self.wait(t * (quick if self.pace.quick else normal))
 
-    def settle(self):
-        """Hold the finished scene before it wipes."""
-        self.wait(self.pace.end_hold)
+    def settle(self, ambient=None):
+        """Hold the finished scene before it wipes.
+
+        After a timed caption (``cap``) the hold is what is left of its reading
+        time plus a breath, filled with ``ambient`` motion when one is given.
+        """
+        # getattr: films that override setup() without calling it never set these
+        if (
+            getattr(self, "_cap", None) is None
+            or getattr(self, "_cap_need", None) is None
+        ):
+            self.wait(self.pace.end_hold)
+        else:
+            self.hold(extra=0.5, ambient=ambient)
 
     def wipe(self, rt=None):
         """Clear every updater, then fade everything out."""
+        self._trace_flush()
         if self.WIPE_SETTLES:
             self.settle()
         rt = self.WIPE_RT if rt is None else rt
@@ -181,6 +218,145 @@ class ExplainerMixin:
         if self._cap is not None and self._cap in self.mobjects:
             self.play(FadeOut(self._cap), run_time=rt)
         self._cap = None
+
+    # ---- timed captions: reading time as a guarantee ------------------------- #
+    def pin(self, *mobs):
+        """Declare HUD mobjects before they are animated in. A no-op in 2D;
+        ``Explainer3DScene`` fixes them in the frame."""
+        return mobs[0] if len(mobs) == 1 else mobs
+
+    def cap(self, text, rt=0.45, at=0.0, need=None, note=None, **kw):
+        """The caption swap as an *animation*, to play while something else moves.
+
+        ``hold()`` then waits only for what is left of the caption's time on screen:
+        its reading time (``chars / READ_CPS + READ_BASE`` s), or ``need`` seconds
+        when given (e.g. the time it takes to say a voice-over line). ``at`` = how
+        long after the start of its play the swap happens (a caption scheduled
+        inside a ``Succession``); ``note`` is kept with the caption in the trace.
+        """
+        new = self.say(text, **kw)
+        new.set_z_index(20)
+        self.pin(new)
+        # The FadeIn always sits in a Succession: a bare animation that ends before its
+        # play does is re-applied at alpha = 1 on every later frame, which would undo a
+        # FadeOut of this caption scheduled later in the same play (``at``).
+        if self._cap is None:
+            anims = [Succession(FadeIn(new, shift=UP * 0.1))]
+        else:  # out, then in: two sentences never sit on top of each other
+            anims = [
+                FadeOut(self._cap, shift=UP * 0.1, run_time=0.45),
+                Succession(Wait(0.4), FadeIn(new, shift=UP * 0.1, run_time=0.6)),
+            ]
+        self._cap = new
+        self._cap_t0 = self.renderer.time + at
+        self._cap_need = (
+            len(text) / self.READ_CPS + self.READ_BASE if need is None else need
+        )
+        self._note(text, at, note)
+        return AnimationGroup(*anims, run_time=rt)
+
+    def lead(self, text, wait=0.7, **kw):
+        """A caption that lands *before* the motion it describes (read, then watch)."""
+        self.play(self.cap(text, **kw))
+        self.wait(0.1 if self.pace.quick else wait)
+
+    def hold(self, extra=0.0, floor=0.3, ambient=None):
+        """Keep the caption up until it has had its time on screen.
+
+        ``ambient(rt)`` returns animations lasting ``rt``: the hold then moves (the
+        item being discussed breathes, packets keep flowing) instead of freezing.
+        """
+        left = max(floor, self._cap_need + extra - (self.renderer.time - self._cap_t0))
+        if self.pace.quick:
+            left = min(left, 0.3)
+        if ambient is not None and left >= 0.8:
+            self.play(*ambient(left))
+        else:
+            self.wait(left)
+
+    @staticmethod
+    def then(anim, after):
+        """``anim``, ``after`` seconds into its play: "this leaves, then that arrives".
+        Two different pictures never share a spot, not even for half a second."""
+        return Succession(Wait(after), anim)
+
+    # ---- narrated beats: a film made to be voiced over ------------------------ #
+    def tell(self, caption, vo, **kw):
+        """Start a narrated beat: the caption swap as an animation (see ``cap``).
+
+        ``vo`` is the line the narrator says. The beat lasts at least as long as it
+        takes to say it (``words / WPS + VO_PAD`` seconds) or to read the caption,
+        whichever is longer: ``hold`` / ``settle`` wait for what is left. ``vo``
+        travels with the caption in the trace (``tools/voiceover.py``).
+        """
+        self._vo = vo
+        self._vo_t0 = self.renderer.time + kw.get("at", 0.0)
+        need = max(
+            len(caption) / self.READ_CPS + self.READ_BASE,
+            len(vo.split()) / self.WPS + self.VO_PAD,
+        )
+        return self.cap(caption, need=need, note=vo, **kw)
+
+    def cue(self, phrase, lead=0.3, ambient=None):
+        """Wait until the narrator reaches ``phrase`` in the current line, so the
+        picture changes on the right word (``lead`` seconds early). ``ambient(rt)``
+        fills the wait with motion, as in ``hold``."""
+        i = self._vo.index(phrase)
+        t = len(self._vo[:i].split()) / self.WPS - lead
+        left = self._vo_t0 + t - self.renderer.time
+        if self.pace.quick:
+            left = min(left, 0.12)
+        if ambient is not None and left >= 0.8:
+            self.play(*ambient(left))
+        elif left > 1.5 / config.frame_rate:
+            self.wait(left)
+
+    # ---- trace: how long did every caption really stay up? ------------------- #
+    def narrate(self, note, need=0.0):
+        """Record a line of narration that has no caption (over a title card, say).
+        It only exists in the trace, for ``tools/voiceover.py``."""
+        self._note("", 0.0, note, need=need)
+
+    def _note(self, text, at=0.0, note=None, need=None):
+        if any(os.environ.get(k) for k in (self.TRACE_ENV, "MX_TRACE", "MX_TRACE_DIR")):
+            self.__dict__.setdefault("_caps", []).append(
+                {
+                    "t": self.renderer.time + at,
+                    "text": text,
+                    "need": self._cap_need if need is None else need,
+                    "note": note,
+                }
+            )
+
+    def tear_down(self):
+        self._trace_flush()  # scenes that never wipe (title cards) still report
+        super().tear_down()
+
+    def _trace_flush(self):
+        """Print (and, with ``MX_TRACE_DIR``, save) the captions of the scene that is
+        about to wipe: start, time on screen, time needed; short ones are flagged."""
+        caps = self.__dict__.pop("_caps", None)
+        if not caps:
+            return
+        end = self.renderer.time
+        name = type(self).__name__
+        print(f"\n== captions of {name} (ends at {end:.1f} s)")
+        for row, nxt in zip(caps, caps[1:] + [{"t": end}], strict=True):
+            row["dur"] = nxt["t"] - row["t"]
+            flag = "  <-- SHORT" if row["dur"] < row["need"] - 0.12 else ""
+            print(
+                f"  {row['t']:6.1f}  {row['dur']:4.1f} s (needs {row['need']:3.1f})"
+                f"  {len(row['text']):3d} ch  {row['text']}{flag}"
+            )
+        out = os.environ.get("MX_TRACE_DIR")
+        if out:
+            path = Path(out) / f"{name}.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            done = self.__dict__.setdefault("_trace_parts", [])
+            done.append({"end": end, "captions": caps})
+            path.write_text(
+                json.dumps({"scene": name, "wps": self.WPS, "parts": done}, indent=1)
+            )
 
     def swap_cap(self, old, new_text, **kw):
         """Transform caption ``old`` (or nothing) into a new one; returns it."""
@@ -310,6 +486,12 @@ class Explainer3DScene(ExplainerMixin, ThreeDScene):
         """Pin mobjects to the screen (captions, headers, legends) and return them."""
         self.add_fixed_in_frame_mobjects(*mobs)
         return mobs[0] if len(mobs) == 1 else VGroup(*mobs)
+
+    def pin(self, *mobs):
+        """Fix mobjects in the frame *without* adding them to the scene, so that an
+        animation (``FadeIn``, ``cap``) can bring them in."""
+        self.camera.add_fixed_in_frame_mobjects(*mobs)
+        return mobs[0] if len(mobs) == 1 else mobs
 
 
 class ExplainerCameraScene(ExplainerMixin, MovingCameraScene):

@@ -9,7 +9,9 @@ plus the house layer:
   (pacing, captions, wipes, intro/outro cards, code-line focus);
 * glyphs (``chip pill stamp plate arr wire make_tick make_cross dot_label``),
   ``code_panel``, data-as-picture primitives (``heatmap vcells prob_bars
-  live_number``) and frame-safety helpers (``keep_inside fit_in_frame``).
+  live_number``) and frame-safety helpers (``keep_inside fit_in_frame``);
+* motion (``Tween Breathe Throb Travel stream ripple Do Pop``): attribute tweens,
+  ambient pulses for reading holds, packets, bursts.
 
 See ``.claude/skills/manim-explainer/SKILL.md`` for how to build a film with it
 and ``tools/render_lib.sh`` for rendering. Two names intentionally replace
@@ -39,6 +41,19 @@ from .layout import (
     SAFE,
     fit_in_frame,
     keep_inside,
+)
+from .motion import (
+    Breathe,
+    Do,
+    Pop,
+    Throb,
+    Travel,
+    Tween,
+    glow_dot,
+    mix,
+    polyline,
+    ripple,
+    stream,
 )
 from .pacing import Pace, quick_mode
 from .palette import (
@@ -151,7 +166,19 @@ __all__ = [
     "CAPTION_W",
     "keep_inside",
     "fit_in_frame",
+    # motion
+    "mix",
+    "Tween",
+    "Breathe",
+    "Throb",
+    "Do",
+    "Pop",
+    "Travel",
+    "glow_dot",
+    "stream",
+    "polyline",
+    "ripple",
 ]
 # ...plus everything `from manim import *` exports (house names above win).
 __all__ += sorted({n for n in dir(_manim) if not n.startswith("_")} - set(__all__))
-_HOUSE = tuple(__all__[: __all__.index("fit_in_frame") + 1])
+_HOUSE = tuple(__all__[: __all__.index("ripple") + 1])

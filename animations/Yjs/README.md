@@ -103,7 +103,7 @@ python ../../tools/motioncheck.py /private/tmp/yjs-media/videos/yjs/480p15/*.mp4
 
 Media goes to `/private/tmp/yjs-media` (override with `YJ_MEDIA_DIR`); the final
 film is copied to `media/` here (git-ignored). Pacing: every caption is held for
-its reading time (`chars / 16 + 0.9 s`, see `_Base.hold`), and the holds carry
+its reading time (`chars / 16 + 0.9 s`, see `hold` in `manimx/scene.py`), and the holds carry
 motion; `--quick` collapses them. `motioncheck.py` prints the share of each scene
 that moves and any still stretch of 2 s or more: on the final render the eight
 content scenes move 69 to 82 % of the time, with no still stretch over 2 s (the
