@@ -1,0 +1,187 @@
+{
+ "versions": {
+  "node": "v25.6.0",
+  "yjs": "13.6.33",
+  "tiptap": "3.33.1",
+  "hocuspocus": "4.8.0",
+  "y_tiptap": "3.3.0"
+ },
+ "defaults": {
+  "debounce": 2000,
+  "maxDebounce": 10000,
+  "timeout": 60000,
+  "gc": true
+ },
+ "client_ids": {
+  "ada": 1,
+  "bob": 2,
+  "agent": 3
+ },
+ "tokens": [
+  "Summary:",
+  " we",
+  " all",
+  " edit",
+  " at",
+  " once",
+  " and",
+  " stay",
+  " in",
+  " sync",
+  "."
+ ],
+ "after_humans": {
+  "ada": "<h1>Release notes</h1><p>Live collaboration finally ships this week.</p>",
+  "bob": "<h1>Release notes</h1><p>Live collaboration finally ships this week.</p>"
+ },
+ "after_agent": {
+  "ada": "<h1>Release notes</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync.</p>",
+  "bob": "<h1>Release notes</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync.</p>",
+  "agent_xml": "<heading level=\"1\">Release notes</heading><paragraph>Live collaboration finally ships this week.</paragraph><paragraph>Summary: we can all edit at once and stay in sync.</paragraph>",
+  "server_xml": "<heading level=\"1\">Release notes</heading><paragraph>Live collaboration finally ships this week.</paragraph><paragraph>Summary: we can all edit at once and stay in sync.</paragraph>"
+ },
+ "awareness": [
+  {
+   "clientId": 1,
+   "user": {
+    "name": "Ada",
+    "color": "#508FF9"
+   },
+   "has_cursor": false
+  },
+  {
+   "clientId": 2,
+   "user": {
+    "name": "Bob",
+    "color": "#E26E1A"
+   },
+   "has_cursor": false
+  },
+  {
+   "clientId": 3,
+   "user": {
+    "name": "Agent",
+    "color": "#C170BB"
+   },
+   "has_cursor": true
+  }
+ ],
+ "caret_labels_in_ada_editor": [
+  "Agent"
+ ],
+ "while_offline": {
+  "ada": "<h1>Release notes</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync, even offline.</p>",
+  "bob": "<h1>Release notes (draft)</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync.</p>"
+ },
+ "after_reconnect": {
+  "ada": "<h1>Release notes (draft)</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync, even offline.</p>",
+  "bob": "<h1>Release notes (draft)</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync, even offline.</p>",
+  "server_xml": "<heading level=\"1\">Release notes (draft)</heading><paragraph>Live collaboration finally ships this week.</paragraph><paragraph>Summary: we can all edit at once and stay in sync, even offline.</paragraph>"
+ },
+ "after_restart": "<h1>Release notes (draft)</h1><p>Live collaboration finally ships this week.</p><p>Summary: we can all edit at once and stay in sync, even offline.</p>",
+ "stored_bytes": 279,
+ "state_bytes": 279,
+ "events": {
+  "onConnect": 5,
+  "onDisconnect": 5,
+  "onChange": 95,
+  "store": 2,
+  "onChange_bytes": [
+   51,
+   16,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   16,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   12,
+   12,
+   10,
+   12,
+   10,
+   12,
+   10,
+   12,
+   10,
+   12,
+   10,
+   12,
+   10,
+   12,
+   10,
+   10,
+   10,
+   10,
+   10,
+   24,
+   18,
+   12,
+   13,
+   14,
+   12,
+   14,
+   13,
+   12,
+   14,
+   12,
+   12,
+   12,
+   12,
+   14,
+   10,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   12,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10,
+   10
+  ]
+ }
+}

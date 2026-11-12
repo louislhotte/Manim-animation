@@ -1,0 +1,22 @@
+{
+  "name": "yjs-film-demo",
+  "private": true,
+  "type": "module",
+  "description": "Real Yjs / Tiptap / Hocuspocus runs that bake the numbers shown in the film.",
+  "dependencies": {
+    "@automerge/automerge": "3.5.0",
+    "@hocuspocus/extension-database": "4.8.0",
+    "@hocuspocus/provider": "4.8.0",
+    "@hocuspocus/server": "4.8.0",
+    "@tiptap/core": "3.33.1",
+    "@tiptap/extension-collaboration": "3.33.1",
+    "@tiptap/extension-collaboration-caret": "3.33.1",
+    "@tiptap/pm": "3.33.1",
+    "@tiptap/starter-kit": "3.33.1",
+    "@tiptap/y-tiptap": "3.3.0",
+    "jsdom": "29.1.1",
+    "loro-crdt": "1.17.1",
+    "y-protocols": "1.0.7",
+    "yjs": "13.6.33"
+  }
+}

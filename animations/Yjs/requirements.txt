@@ -1,0 +1,4 @@
+# Rendered with the shared venv (tools/requirements-render.txt: manim, numpy,
+# pillow, scipy). List only what this film needs beyond that.
+manim==0.21.0
+numpy
