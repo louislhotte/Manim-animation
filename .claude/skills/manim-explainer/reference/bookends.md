@@ -17,6 +17,13 @@ the rest:
 | `RULE_COLOR`, `BYLINE_COLOR` | default `GOLD`, `SKY` |
 | `intro_emblem()` | optional small mobject at the right end of the rule |
 
+The card **centres the emblem's box on the right end of the rule**, 0.3 above it.
+With a long title the rule ends about 0.9 from the frame's edge, so an emblem that
+hangs right of that point is cropped (MIP film: only its first dot was on screen).
+Shift it with an invisible pad inside the returned group: `VGroup(g, pad.next_to(g,
+RIGHT, buff=0))` moves `g` left by half the pad's width (`LEFT` moves it right).
+Look at the intro card in a full-size frame like any other scene.
+
 Byline: **"Created by Ptolémé"**. Outro title: **"Thank you for watching!"**.
 Thin scene classes expose them: `class Intro(_Base): construct -> self.play_intro()`.
 Older films keep bespoke `play_intro` overrides; new films should not need one.

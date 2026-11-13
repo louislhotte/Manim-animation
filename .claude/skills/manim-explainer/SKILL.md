@@ -101,9 +101,10 @@ class _Base(ExplainerScene):              # Explainer3DScene for 3D; ExplainerMi
 | Timing | `beat(t)` rhythm, `read(k)` reading hold (~3 s), `settle()`, `wipe()`, `card_wait()` |
 | Captions | `caption(text)` (swap + hold), `say(text)` (mobject only), `clear_cap()`, `cite(src)`, `takeaway(l1, l2)` |
 | Timed captions | `cap(text)` (the swap as an animation, played under the motion), `hold(ambient=)` / `settle(ambient=)` (wait only for what is left of the reading time), `lead(text)`, `then(anim, after)` (leave, then arrive) |
-| Narrated film | `tell(caption, vo)` (a beat lasts as long as its line takes to say), `cue("phrase", ambient=)` (wait for the narrator to reach a word), `narrate(vo)` (over a card); `tools/voiceover.py` writes the timed script |
+| Narrated film | `class _Common(NarratedMixin)`: `tell(caption, vo)` (a beat lasts as long as its line takes to say), `cue("phrase", ambient=)` (wait for the narrator to reach a word), `over_card(vo)`, `header()`, `note()`; `tools/voiceover.py` writes the timed script |
+| 3D with a HUD | `ExplainerStageScene` (`hud_root`, `billboard`, `sway`, camera `screen_shift`); `Painter` = a mobject that draws itself on the frame (a textured ground, a swarm): `reference/3d.md` |
 | Motion | `Tween(obj, attr=...)`, `Breathe`, `Throb`, `Travel` / `stream` (packets), `ripple`, `Do`, `Pop`, `glow_dot`, `polyline`, `mix` |
-| Text | `Text` (crisp), `txt(s, fs, color)`, `mono(s)`, `mtext([...])` formulas, `safe_t2c`, `clamp_width` |
+| Text | `Text` (crisp), `txt(s, fs, color)`, `mono(s)`, `mtext([...])` formulas, `safe_t2c`, `clamp_width`; `line_txt` + `align_baselines` for rows, columns and changing values (shared baseline) |
 | Glyphs | `chip`, `pill`, `stamp`, `plate`, `arr(p, q)` (points only), `wire`, `make_tick`, `make_cross`, `dot_label` |
 | Data | `heatmap`, `vcells`, `prob_bars`, `live_number(tracker)` (LaTeX-free counter) |
 | Code | `code_panel(spec, t2c_table, title)` -> `(panel, lines)`, then `self.focus(panel, lines, [i])` |
@@ -147,7 +148,14 @@ beat with `tell(caption, vo)` and place the visual changes with `cue("phrase")`,
 so they land on the narrator's word. Render with `MX_TRACE_DIR=<dir>` and run
 `python tools/voiceover.py animations/<Name>` for `VOICEOVER.md` (timecodes,
 room, words per line; `TIGHT` marks a line that does not fit) and `voiceover.srt`.
-Worked example: `animations/Terraform`.
+**Every claim the narrator makes gets its picture, on its word.** Read the script
+line by line against the cues: a sentence with a number or a "because" and no
+`cue` under it is a hole (MIP: "half a ride earns half its fee" had nothing on
+screen until `0.52 × €7.00 = €3.64` was added; "gap, as a share of the floor"
+until the formula with the log's own numbers appeared). A picture that arrives
+needs its reading time before the next cue: put the cue on the first word of the
+sentence it illustrates, not the last.
+Worked examples: `animations/Terraform`, `animations/MIP`.
 
 **Arrows and motion.** `arr(a.get_right(), b.get_left())`: endpoints are points
 (`arr` raises on a mobject). Loop-backs are orthogonal elbows in a free lane, not
@@ -179,6 +187,22 @@ metaphor. Every number on screen is computed or cited, and the source is on scre
    venv python). Identical digests prove identical frames; `--ignore-code` compares
    on-screen state only (for moved helpers). Any other difference must be explained.
 5. Final HD render only after 1-4 are clean; report the measured duration.
+6. **Then read full-size frames of the HD render**, one per beat (`ffmpeg -ss T -i
+   clip.mp4 -frames:v 1 -q:v 2 f.jpg`, Read it undivided: one 1920x1080 frame, not a
+   grid). A contact sheet shrinks every frame to a quarter, and what it hides is
+   what a viewer on a big screen sees first. In the MIP film the sheets were clean
+   and the full frames showed: a dimmer whose knob had vanished, a pill stretched
+   into an ellipse, a marker striking through an axis label, labels 1 px apart,
+   rows of text on drifting baselines, an emblem cropped by the frame's edge, a label
+   crossing a pane border. Fix, then repeat on the scenes that changed.
+7. **A film that states facts gets an independent read of its claims**: a reviewer
+   (a fresh agent, or you after a break) checks every narration line and on-screen
+   number against the baked data, and re-runs any demo *from the committed files*.
+   Ask for three lists: wrong or misleading statements, visual bugs, pacing. On the
+   MIP film this found what no render check could: a comparison that flattered the
+   method, a rule justified by the enumeration the film rules out, a truncated log,
+   and runs that could not be reproduced from the rounded data in the repo
+   (`reference/real-data.md`).
 
 For a film that has to feel dynamic, also run `python tools/motioncheck.py` on the
 full-pace 480p scene videos (not `--quick`): it prints the share of time that moves

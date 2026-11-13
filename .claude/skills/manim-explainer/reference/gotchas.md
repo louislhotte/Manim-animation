@@ -14,6 +14,17 @@ handles the ones marked (lib).
 - **Pango trims leading/trailing spaces**: separate inline pieces with `buff`.
 - **Coloured word mid-sentence**: one `Text(..., t2c=...)`; a `VGroup` of words
   misaligns baselines (descenders).
+- **Text is placed by its ink, not its baseline.** `move_to`, `arrange` and `next_to`
+  use the bounding box, and a `Text`'s box hugs its glyphs: "0", "none yet" and
+  "1,000" centred on one y sit on three baselines; a column of names wobbles with
+  their descenders (up to 4 px at 1080p); a counter jumps when its first comma
+  appears; lines of a log are unevenly spaced. (lib) `line_txt(s, fs, ...)` returns
+  the text in a box as tall as its *line* (same height whatever the glyphs, centre =
+  middle of a capital): use it for table rows, legends, log and code lines, a label
+  over a value, and any value that changes in place. Mixed sizes in one row:
+  `align_baselines(a, b, ...)`. Its Text is `.body` (for a tight
+  `SurroundingRectangle`). `Readout` in `animations/MIP/kit.py` is the pattern for
+  label-over-value HUD numbers (`fresh(text)` gives the next value in place).
 - **Soft wrap**: a single `Text` longer than ~100 characters wraps by itself. Split it.
 - **Never `Transform` a number `Text` into another number**: it crossfades into mush.
   Use `live_number` (redraw) or `FadeOut`/`FadeIn` with a small shift.
@@ -48,6 +59,17 @@ handles the ones marked (lib).
   or `def target(self)` on a `VGroup` subclass breaks `FadeOut` / `MoveToTarget` far
   from the cause (`'float' object is not callable`). `target`, `fade`, `scale`, `shift`,
   `color`, `points` are taken: name yours `alpha`, `aim`, ...
+  Three more that fail *silently* (MIP film): `self.width = 2.2` on any mobject calls
+  Manim's width **setter** (it rescales the mobject) and reads back the bounding-box
+  width, so a stroke width became 5 and a painter's line width 0; `self.dim` is an
+  instance attribute (the dimension, 3) that shadows a method named `dim`;
+  `self.name = {...}` replaces what `repr` prints. Also taken: `height`, `depth`.
+  And `color` on a `VMobject` is a **property**: `dimmer.color = BLUE`, meant as "the
+  colour its fill will use", repainted the whole group (track, knob and digits all
+  blue: the knob vanished, and it only showed in HD frames). Name yours `hue`.
+- **`stretch_to_fit_width` on a rounded shape distorts its corners**: a pill whose
+  width follows a value becomes an ellipse. Rebuild the shape at the new width
+  (`m.become(RoundedRectangle(width=w, ...))`) instead of stretching it.
 - **`FadeOut` of a nested part splits its parent**: fading `chip.digit` makes Manim
   restructure `scene.mobjects` (the parent is replaced by its remaining pieces), and
   the leftovers no longer follow the parent. Animate the part's opacity
@@ -124,6 +146,15 @@ handles the ones marked (lib).
   the updaters of its mobject. Run attribute tweens on a throwaway `Mobject()` host
   with `suspend_mobject_updating=False` (`Tween`, `Breathe` in `manimx/motion.py`),
   so self-laying-out rows and lines keep following.
+- **A mobject driven only by `Tween` may be painted once per play.** During a play
+  Manim repaints the mobjects that are animated or own an updater, and whatever is
+  drawn *after* the first of them (in z-sorted order); everything before is baked
+  into a static image. A tree whose `k` was tweened stayed frozen while a counter
+  next to it ran (its z-index put it before the first moving mobject). Give every
+  attribute-driven mobject an updater, even an empty one (`_alive` in
+  `animations/MIP/kit.py`). It shows only in frames sampled mid-play.
+- **`-s` (save last frame) of a house scene is blank**: every scene ends with
+  `wipe()`. To look at a layout, render the clip and pull a frame out with ffmpeg.
 
 ## Pacing and motion
 - **Reading time as a guarantee**: a fixed `read()` after each caption either rushes
