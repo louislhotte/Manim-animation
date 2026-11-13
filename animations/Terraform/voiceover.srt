@@ -1,0 +1,107 @@
+1
+00:00:00,000 --> 00:00:10,600
+Terraform: how a text file becomes real infrastructure. We will follow one small example, from an empty cloud region to three full environments.
+
+2
+00:00:14,483 --> 00:00:26,822
+This is a Terraform file. Five short blocks, each describing a piece of cloud infrastructure: a network, a subnet, a firewall, two servers, and a storage bucket.
+
+3
+00:00:27,333 --> 00:00:39,238
+None of it exists yet. Run one command, terraform apply, say yes, and Terraform calls the cloud's API to build it all, in the right order.
+
+4
+00:00:40,533 --> 00:00:51,133
+From now on, the file is the source of truth. To change the cloud, you change the file. That is infrastructure as code.
+
+5
+00:00:53,349 --> 00:01:14,819
+Open one block. The keyword resource means: this should exist. Then its type, an AWS server, and a name you choose. Inside, its arguments. Count equals two: this one block declares two servers, web zero and web one. Then their image, their size, their subnet and their firewall.
+
+6
+00:01:15,333 --> 00:01:27,237
+Notice what is missing: steps. You never write create this, wait for that, then launch. You declare the result, and Terraform works out the API calls.
+
+7
+00:01:27,749 --> 00:01:38,784
+Those calls come from a provider, a plugin that speaks one API. There are providers for AWS, Azure, Google Cloud, Kubernetes, and thousands more.
+
+8
+00:01:40,999 --> 00:01:54,643
+Blocks can point at each other. The subnet needs the network's ID, which does not exist yet, so it references it. Terraform now knows the subnet depends on the network.
+
+9
+00:01:55,149 --> 00:02:05,749
+The order of the blocks in the file does not matter. From the references, Terraform builds a dependency graph, and the graph decides.
+
+10
+00:02:06,249 --> 00:02:22,936
+That is what apply did at the start: it walked the graph. Whatever has no pending dependency is created at once, in parallel: the network and the bucket, then the subnet and the firewall, then both servers.
+
+11
+00:02:23,483 --> 00:02:32,344
+And terraform destroy walks the same graph in reverse, so nothing is removed while something still depends on it.
+
+12
+00:02:34,549 --> 00:02:52,541
+Now the same run again, one step at a time. First, terraform init downloads the provider. Then, before touching anything, terraform plan compares what you declared with what exists: six resources to add. It is a preview, like a diff.
+
+13
+00:02:53,049 --> 00:03:04,084
+terraform apply then makes those calls. And for each resource, it records the ID of the real object in a file called the state.
+
+14
+00:03:04,599 --> 00:03:14,765
+The state is Terraform's memory. It is how it knows that this block in your code is that server in the cloud.
+
+15
+00:03:15,266 --> 00:03:27,605
+Apply again, and there is nothing to do. Code, state and cloud agree. You can apply the same file a hundred times and get the same result.
+
+16
+00:03:29,816 --> 00:03:43,894
+To change the infrastructure, you change the file. Two servers become three. The plan shows exactly one resource to add, and leaves the other six alone. Apply, and it is built.
+
+17
+00:03:44,966 --> 00:03:54,696
+Some changes can be made in place. A bigger instance type is an update: same servers, new size, after a restart.
+
+18
+00:03:55,283 --> 00:04:07,622
+Others cannot. A new machine image forces a replacement: Terraform destroys each server and creates a new one. The plan tells you which, before you say yes.
+
+19
+00:04:11,149 --> 00:04:21,749
+Now someone changes a server by hand, in the cloud console. The real infrastructure no longer matches the file. This is called drift.
+
+20
+00:04:22,249 --> 00:04:31,980
+The next plan notices. Every plan starts by reading the real resources, and comparing them with the state and the code.
+
+21
+00:04:32,483 --> 00:04:40,909
+It proposes to put the server back the way the file says. Apply, and the drift is gone.
+
+22
+00:04:43,349 --> 00:04:56,993
+In a team, the state cannot live on one laptop. It goes in a shared backend, like an S3 bucket, where everyone and your CI pipeline read the same state.
+
+23
+00:04:57,499 --> 00:05:12,012
+Turn on the lock file, and the state is locked while someone applies. If two people run apply at the same time, the second one is refused, instead of corrupting the state.
+
+24
+00:05:14,216 --> 00:05:21,773
+Finally, wrap those five blocks in a module, with the number of servers as an input.
+
+25
+00:05:22,283 --> 00:05:35,926
+Now the same code builds dev, with one server. Then staging, with two servers. And production, with four. Three environments, three state files, one definition, and nothing done by hand.
+
+26
+00:05:36,433 --> 00:05:44,859
+That is Terraform: describe the infrastructure you want, review the plan, and let it make the cloud match.
+
+27
+00:05:46,566 --> 00:05:48,905
+Thank you for watching.
