@@ -1,0 +1,60 @@
+
+Gurobi 14.0.0 (mac64[arm], Python) logging started Fri Nov 13 01:13:29 2026
+
+Set parameter LogToConsole to value 0
+Restricted license - for non-production use only - expires 2028-11-29
+Gurobi Optimizer version 14.0.0 build v14.0.0rc1 (mac64[arm] - Darwin 25.6.0 25G241)
+
+CPU model: Apple M4 Max
+Thread count: 14 physical cores, 14 logical processors, using up to 14 threads
+
+Non-default parameters:
+LogToConsole  0
+
+Optimize a model with 17 rows, 73 columns and 192 nonzeros (Max)
+Model fingerprint: 0x22c78cd2
+Model has 64 linear objective coefficients
+Model has 64 simple general constraints
+  64 INDICATOR
+Variable types: 9 continuous, 64 integer (64 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+00, 7e+00]
+  Bounds range     [1e+00, 6e+01]
+  RHS range        [1e+00, 1e+00]
+  GenCon rhs range [8e+00, 2e+01]
+  GenCon coe range [1e+00, 1e+00]
+
+Found heuristic solution: objective -0.0000000
+Presolve added 8 rows and 0 columns
+Presolve removed 0 rows and 44 columns
+Presolve time: 0.00s
+Presolved: 25 rows, 29 columns, 152 nonzeros
+Found heuristic solution: objective 16.6000000
+Variable types: 3 continuous, 26 integer (26 binary)
+
+Root relaxation: objective 3.278638e+01, 19 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   32.78638    0    9   16.60000   32.78638  97.5%     -    0s
+H    0     0                      21.0000000   32.78638  56.1%     -    0s
+H    0     0                      23.7000000   32.78638  38.3%     -    0s
+     0     0   27.11528    0    7   23.70000   27.11528  14.4%     -    0s
+H    0     0                      24.4000000   27.11528  11.1%     -    0s
+
+Cutting planes:
+  Learned: 1
+  Gomory: 1
+  Cover: 3
+  MIR: 2
+  RLT: 3
+
+Explored 1 nodes (27 simplex iterations) in 0.02 seconds (0.00 work units)
+Thread count was 14 (of 14 available processors)
+
+Solution count 5: 24.4 23.7 21 ... -0
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.440000000000e+01, best bound 2.440000000000e+01, gap 0.0000%

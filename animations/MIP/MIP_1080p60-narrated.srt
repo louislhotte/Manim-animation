@@ -1,0 +1,123 @@
+1
+00:00:01,421 --> 00:00:10,700
+Mixed-integer programming: how a solver finds the best plan among billions, and proves it. Our example: delivering meals in Paris, on a Friday night.
+
+2
+00:00:14,154 --> 00:00:23,484
+Friday, eight p.m., in Paris. One hundred and four couriers are on their bikes, and four hundred and three meals are waiting in restaurant kitchens.
+
+3
+00:00:26,208 --> 00:00:41,146
+Who should deliver what, and in which sequence, so that the couriers earn the most in the next hour? Just handing out the orders can be done in more ways than there are atoms in the universe.
+
+4
+00:00:43,393 --> 00:00:56,613
+A solver such as Gurobi finds the best plan, district by district, in under a minute, and proves that nothing better exists. To see how, follow one courier: Léa.
+
+5
+00:00:59,683 --> 00:01:14,939
+This is Léa. She has one hour left, and eight orders around her. Each pays a fee, and each can only be delivered inside its own window: after the meal is ready, before the customer's deadline.
+
+6
+00:01:16,431 --> 00:01:30,109
+She cannot deliver them all. A course is a choice: which orders, in which sequence. Her instinct: take the best-paid order that still fits, then the next. That course earns eleven euros ninety.
+
+7
+00:01:31,875 --> 00:01:44,954
+Is there better? With eight orders, a computer can try every sequence: one hundred and nine thousand six hundred of them. The best one earns twenty-four euros forty. Twice as much.
+
+8
+00:01:46,457 --> 00:01:55,097
+But this does not scale. With twenty orders, there are six billion billion sequences: at a million per second, two hundred thousand years.
+
+9
+00:01:59,281 --> 00:02:15,934
+So we stop searching by hand, and describe the problem instead. First, the decisions. For every possible ride, from one stop to an order, a variable that is zero or one: skip it, or ride it. Sixty-four switches.
+
+10
+00:02:16,906 --> 00:02:24,680
+Second, the goal: add up the fee of every order she rides to, and make that sum as large as possible.
+
+11
+00:02:27,113 --> 00:02:36,779
+Third, the rules. A courier starts one course at most. An order is delivered at most once. And she can only leave a stop she has reached.
+
+12
+00:02:39,987 --> 00:02:50,865
+The last rule is about time. Every order gets one more variable: the minute it is delivered. Draw time as height: each order's window becomes a bar.
+
+13
+00:02:53,275 --> 00:03:05,137
+If she rides from one order to the next, the second minute comes at least one ride later. And every delivery must fall inside its window, before the hour ends.
+
+14
+00:03:06,920 --> 00:03:23,485
+Whole-number decisions, continuous times, rules that can be written as linear inequalities: a mixed-integer program. One call, optimize, and the solver answers: twenty-four euros forty. The same course as trying everything, in two hundredths of a second.
+
+15
+00:03:25,893 --> 00:03:39,104
+How can a solver be sure, without trying every sequence? It starts by simplifying. Of the sixty-four possible rides, twenty-eight can never fit the clock. Remove them: thirty-six switches remain.
+
+16
+00:03:40,046 --> 00:03:55,785
+Then it cheats. Let every switch become a dimmer, anywhere between zero and one: half of this ride, three quarters of that one. With no yes-or-no left, the problem is easy: a linear program, solved in half a millisecond.
+
+17
+00:03:58,284 --> 00:04:18,925
+The relaxed plan claims thirty-three euros ninety. It is not a real course: half a ride earns half its fee, and only half obeys the clock. But every real course is still allowed in the relaxed problem, so no real course can earn more. That number is a ceiling.
+
+18
+00:04:23,832 --> 00:04:37,589
+Now pick one fractional ride, and split the problem in two. In one branch, she must take that ride. In the other, she must leave it. Each branch is relaxed again, and gets a ceiling of its own.
+
+19
+00:04:40,456 --> 00:04:56,775
+Keep splitting, diving down one side. Some branches are dead ends: no plan fits. Then a relaxed plan comes out whole, only zeros and ones: a real course, worth seventeen euros fifty. That is a floor: the best course so far.
+
+20
+00:04:59,398 --> 00:05:16,687
+From here, always open the branch with the highest ceiling. Better courses appear, and the floor rises: twenty-two forty, twenty-three seventy, twenty-four forty. And a branch whose ceiling is under the floor cannot hide anything better: cut it, without looking inside.
+
+21
+00:05:18,330 --> 00:05:34,217
+The ceiling comes down, the floor comes up. When they meet, the search is over: twenty-four euros forty is proven optimal. One hundred and sixteen small problems, and no branch is left that could hide a better course.
+
+22
+00:05:37,590 --> 00:06:04,594
+A real solver adds two accelerators. First, cutting planes. Our relaxed plan claimed six orders. But six deliveries take more than sixty minutes, and the last deadline is at fifty-nine: no real course fits more than five. Add that rule, at most five, and the ceiling drops from thirty-three ninety to twenty-nine twenty, without a single branch. A solver finds such rules by itself.
+
+23
+00:06:06,531 --> 00:06:20,567
+Second, heuristics: quick guesses at real courses, to raise the floor early. Even a simple rule, always the order that can be delivered soonest, gives a floor of seventeen euros ten before the search begins.
+
+24
+00:06:22,925 --> 00:06:43,931
+Gurobi does all this, and narrates it in its log. Presolve removes forty-four of the seventy-three columns, its word for variables. The root relaxation gives a first ceiling, already lower than ours: thirty-two seventy-nine. Lines marked H are heuristic floors. Then cutting planes take the ceiling down to twenty-seven.
+
+25
+00:06:45,364 --> 00:07:04,573
+Three columns tell the story. Incumbent is the floor. Best bound is the ceiling. Gap is the distance between them, as a share of the floor. Here it closes at the very first node, without a single branch: our one hundred and twenty-nine nodes became one.
+
+26
+00:07:06,393 --> 00:07:17,999
+Now a whole district, the eleventh arrondissement: eight couriers, thirty-two orders, one thousand two hundred and forty-eight switches. Same model, same call. Here is the search, in real time.
+
+27
+00:07:20,164 --> 00:07:42,448
+More than thirty-one thousand nodes in three point four seconds, for a problem with three thousand billion billion billion ways to hand out its orders. The gap is closed: this plan is proven optimal. Stop a solver earlier, and the gap still tells you how far from the best you can possibly be.
+
+28
+00:07:46,012 --> 00:08:02,789
+Back to Friday night. Each courier serves one arrondissement, so the same model runs once per arrondissement: twenty models, more than ten thousand switches in all. Gurobi solves them one after the other in fifty-five seconds, and every one is proven optimal.
+
+29
+00:08:05,366 --> 00:08:18,260
+And the couriers ride. One hour later: three hundred and seventy-eight of the four hundred and three meals delivered, two thousand one hundred and sixty euros earned.
+
+30
+00:08:19,309 --> 00:08:29,157
+The obvious rule, always sending the order that can be delivered soonest, would have delivered forty-six meals fewer, and earned the couriers fifteen percent less.
+
+31
+00:08:30,758 --> 00:08:43,112
+That is mixed-integer programming. You describe the plan you want: decisions, a goal, rules. The solver relaxes, branches and bounds, until it can prove its answer.

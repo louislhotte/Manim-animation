@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import os
 
-from manim import DEFAULT_FONT_SIZE, DOWN, RIGHT, UP, VGroup
+from manim import DEFAULT_FONT_SIZE, DOWN, RIGHT, UP, VGroup, VMobject
 from manim import Text as BaseText
 
 from .palette import FONT, INK, MONO
@@ -50,6 +50,64 @@ def txt(text, fs=24, color=INK, weight="NORMAL", font=None, slant=None, **extra)
 def mono(text, fs=22, color=INK, **kw):
     """Monospaced text (Menlo): code, identifiers, aligned numbers."""
     return txt(text, fs=fs, color=color, font=MONO, **kw)
+
+
+LINE_UP, LINE_DOWN = 1.42, 0.42  # a line box, in cap heights above / below the baseline
+
+
+class _Strut(VMobject):
+    """An invisible vertical segment that only gives its group a height. Its stroke
+    width stays 0 whatever style the group is given (``Write`` strokes outlines)."""
+
+    def __init__(self, bottom, top):
+        super().__init__(stroke_width=0, fill_opacity=0)
+        self.set_points_as_corners([bottom, top])
+
+    def set_stroke(
+        self, color=None, width=None, opacity=None, background=False, family=True
+    ):
+        return super().set_stroke(
+            color=color, width=0, opacity=opacity, background=background, family=family
+        )
+
+
+def line_txt(text, fs=24, color=INK, **kw):
+    """``txt`` in a box as tall as its *line*, so pieces placed by their boxes share
+    a baseline.
+
+    Manim places a mobject by its bounding box, and a ``Text``'s box hugs its glyphs:
+    "0", "none yet" and "1,000" centred on the same y sit on three baselines, and a
+    column of names wobbles with their descenders. This returns ``VGroup(text,
+    strut)`` whose height depends only on the font and the size (``LINE_UP`` cap
+    heights above the baseline, ``LINE_DOWN`` below), and whose centre is the middle
+    of a capital letter. Use it for rows and columns of text (tables, legends, log
+    lines, a label over a value) and for a value that changes in place: ``move_to``,
+    ``arrange`` and ``next_to`` then line the text up, not its ink. Pieces of
+    different sizes in one row: ``align_baselines``. ``.body`` is the Text.
+    """
+    t = txt("H" + text, fs=fs, color=color, **kw)  # the H is a ruler: it sits on the
+    h = t.submobjects[0]  # baseline and is one cap height tall
+    cap, base = h.height, h.get_bottom()[1]
+    t.remove(h)
+    x = t.get_left()[0] if t.submobjects else h.get_left()[0]
+    g = VGroup(t, _Strut([x, base - LINE_DOWN * cap, 0], [x, base + LINE_UP * cap, 0]))
+    g.body = t
+    return g
+
+
+def baseline_of(line):
+    """The y of the baseline of a ``line_txt``."""
+    strut = line.submobjects[-1]
+    return strut.get_bottom()[1] + strut.height * LINE_DOWN / (LINE_UP + LINE_DOWN)
+
+
+def align_baselines(*lines):
+    """Shift each ``line_txt`` vertically onto the baseline of the first; returns them
+    as a ``VGroup``. For a row that mixes sizes (a big number, then a small unit)."""
+    y = baseline_of(lines[0])
+    for m in lines[1:]:
+        m.shift(UP * (y - baseline_of(m)))
+    return VGroup(*lines)
 
 
 def mtext(parts, base_fs=32):

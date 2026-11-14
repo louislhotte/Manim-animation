@@ -4,6 +4,7 @@
 plus the house layer:
 
 * crisp ``Text`` (rendered at >= 60 pt, scaled down) and the house font;
+  ``line_txt`` for rows and columns of text that must share a baseline;
 * the palette (``BG INK MUTED FAINT PANEL GOLD GOOD BAD SKY MINT LILAC AMBER``);
 * ``Pace`` + ``ExplainerScene`` / ``Explainer3DScene`` / ``ExplainerMixin``
   (pacing, captions, wipes, intro/outro cards, code-line focus);
@@ -11,7 +12,9 @@ plus the house layer:
   ``code_panel``, data-as-picture primitives (``heatmap vcells prob_bars
   live_number``) and frame-safety helpers (``keep_inside fit_in_frame``);
 * motion (``Tween Breathe Throb Travel stream ripple Do Pop``): attribute tweens,
-  ambient pulses for reading holds, packets, bursts.
+  ambient pulses for reading holds, packets, bursts;
+* 3D with a HUD (``ExplainerStageScene HudCamera``) and mobjects that draw themselves
+  (``Painter``): see ``manimx/three_d.py``.
 
 See ``.claude/skills/manim-explainer/SKILL.md`` for how to build a film with it
 and ``tools/render_lib.sh`` for rendering. Two names intentionally replace
@@ -81,8 +84,10 @@ from .scene import (
     Explainer3DScene,
     ExplainerMixin,
     ExplainerScene,
+    NarratedMixin,
     rule_under,
 )
+from .three_d import ExplainerStageScene, HudCamera, Painter, PainterCamera
 from .text import (
     TEXT_BASE,
     BaseText,
@@ -90,7 +95,10 @@ from .text import (
     _BaseText,
     _safe_t2c,
     _TEXT_BASE,
+    align_baselines,
+    baseline_of,
     clamp_width,
+    line_txt,
     mono,
     mtext,
     safe_t2c,
@@ -105,6 +113,9 @@ __all__ = [
     "TEXT_BASE",
     "_TEXT_BASE",
     "txt",
+    "line_txt",
+    "baseline_of",
+    "align_baselines",
     "mono",
     "mtext",
     "safe_t2c",
@@ -132,11 +143,17 @@ __all__ = [
     "Pace",
     "quick_mode",
     "ExplainerMixin",
+    "NarratedMixin",
     "ExplainerScene",
     "Explainer3DScene",
     "ExplainerCameraScene",
     "rule_under",
     "BYLINE",
+    # 3D scenes with a HUD, self-painting mobjects
+    "ExplainerStageScene",
+    "HudCamera",
+    "Painter",
+    "PainterCamera",
     # glyphs, code, data, layout
     "chip",
     "pill",

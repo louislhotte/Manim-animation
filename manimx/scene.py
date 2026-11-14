@@ -471,6 +471,46 @@ class ExplainerMixin:
         self.play_outro()
 
 
+class NarratedMixin(ExplainerMixin):
+    """A film made to be voiced over (``tell`` / ``cue``): fewer, bigger captions,
+    scenes that end on the narrator's last word, a line to say over the title card.
+
+    Put it first in the film's shared mixin: ``class _Common(NarratedMixin)``; set
+    ``WPS`` (the narrator's words per second) and ``VO_PAD`` (the breath after a line).
+    """
+
+    CAPTION_FS: float = 27
+    END_BREATH: float = 1.3  # at least this long on the finished picture
+
+    def say(self, text, color=INK, fs=None, y=CAPTION_Y, weight="MEDIUM"):
+        m = txt(text, fs=fs or self.CAPTION_FS, color=color, weight=weight)
+        clamp_width(m, CAPTION_W)
+        m.move_to([0, y, 0])
+        return m
+
+    def settle(self, ambient=None):
+        """End of a scene: what is left of the narration, and a breath on the
+        finished picture."""
+        floor = 0.3 if self.pace.quick else self.END_BREATH
+        self.hold(extra=0.5, floor=floor, ambient=ambient)
+
+    def over_card(self, vo):
+        """A line to say over a title card (it has no caption of its own)."""
+        self.narrate(vo, need=len(vo.split()) / self.WPS + self.VO_PAD)
+
+    def header(self, label, color=GOLD):
+        """The section header, brought in as a HUD element."""
+        h = self.pin(self.section_header(label, color))
+        self.play(FadeIn(h, shift=DOWN * 0.2), run_time=0.5)
+        return h
+
+    def note(self, s):
+        """The small source line at the bottom edge (what is real, what is not)."""
+        c = self.pin(self.cite(s))
+        c.set_z_index(20)
+        return c
+
+
 class ExplainerScene(ExplainerMixin, Scene):
     """A 2D explainer scene."""
 

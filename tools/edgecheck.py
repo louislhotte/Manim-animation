@@ -13,8 +13,14 @@ Usage:
 Needs ffmpeg/ffprobe on PATH and numpy + Pillow (the Manim venv has both).
 Usually run for you by ``./render.sh <scene> --check``; by hand:
     ~/.cache/manimx/venv/bin/python tools/edgecheck.py Scene.mp4 48
+
+A film whose background is a picture that fills the frame (a map, a photograph)
+sets ``MX_EDGE_THRESH`` in its render.sh: only pixels that differ from the house
+background by more than that count as content, so the dim picture may touch the
+edges while text and bright marks still may not (MIP uses 150).
 """
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -25,7 +31,8 @@ from PIL import Image
 
 BG = np.array([14, 17, 23])  # house background #0E1117 — change if a scene differs
 MARGIN = 9  # px border strip to inspect
-COLOR_THRESH = 34  # channel distance from BG to count a pixel as "content"
+# channel distance from BG to count a pixel as "content"
+COLOR_THRESH = int(os.environ.get("MX_EDGE_THRESH", 34))
 BLEED_THRESH = 20  # content px in a strip → flag as cut off
 
 
