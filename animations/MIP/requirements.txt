@@ -1,0 +1,6 @@
+# Rendered with the shared venv (tools/requirements-render.txt: manim, numpy,
+# pillow, scipy). Rendering this film needs nothing beyond that: the map is drawn
+# with moderngl, which Manim already depends on. Baking the assets needs more:
+# see requirements-bake.txt.
+manim==0.21.0
+numpy

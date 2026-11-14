@@ -1,0 +1,5 @@
+# Only to re-bake assets/ (python generate_assets.py). Not needed to render.
+# gurobipy ships with a size-limited licence (2,000 variables, 2,000 constraints),
+# restricted by Gurobi to non-production use; every model of this film fits in it.
+gurobipy>=12
+scipy
