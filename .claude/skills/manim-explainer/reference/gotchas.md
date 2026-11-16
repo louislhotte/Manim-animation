@@ -142,6 +142,17 @@ handles the ones marked (lib).
 - **Two animations on one mobject in the same play** (`FadeIn(m)` plus
   `m.animate.shift(...)`): the second captures the first's start state (transparent).
   Play them one after the other, or fold both into one animation.
+- **Two `.animate` builders on one mobject share the last target**, even inside a
+  `Succession`: `Succession(m.animate.set_opacity(0.2), Wait(1), m.animate.
+  set_opacity(1))` never dims `m` (each `.animate` replaces `m.target`, and both are
+  built when the play starts). A dip and return is one animation:
+  `UpdateFromAlphaFunc(m, lambda mob, a: mob.set_opacity(...))` (`dip` in
+  `animations/Protocols/protocols.py`).
+- **An animation of a parent overrides an animation of its child in the same play.**
+  `icon.animate.set_opacity(0.45)` next to `icon.leds.animate.set_color(RED)`: the
+  LEDs stayed green, because the parent's transform carries its whole family from
+  start to target on every frame. Animate disjoint groups (`VGroup(*[m for m in
+  icon if m not in icon.leds])`), or set the child's colour directly first.
 - **Tweening plain attributes while updaters keep running**: an `Animation` suspends
   the updaters of its mobject. Run attribute tweens on a throwaway `Mobject()` host
   with `suspend_mobject_updating=False` (`Tween`, `Breathe` in `manimx/motion.py`),
@@ -172,6 +183,34 @@ handles the ones marked (lib).
 - **Holds that move**: `hold(ambient=lambda t: [...])` fills the remaining reading
   time with motion that means something (the item under discussion breathes, packets
   keep flowing) instead of a freeze.
+- **A wait for a cue is a frozen frame.** In a narrated film with few captions the
+  stills are almost all `cue()` waits: the narrator talks, nothing moves. Give the
+  wait something that means "this is what is being said": `cue("phrase", ambient=
+  lambda rt: [Throb(door, rt)])`, a `Shimmer` on a screen that is waiting, traffic
+  that keeps flowing on open connections; or make the motion last until the word
+  (`run_time=self.span("phrase")`). The Protocols film went from 45 to 80 % of
+  moving time that way.
+- **Numbers said in one breath need pictures that fit in one breath.** "Twenty,
+  forty, eighty" takes a second to say; the three round trips it describes took
+  fifteen on screen, so the clock was raced through them and the trains flashed by.
+  Spread the words over the picture instead ("twenty packets in the second round
+  trip, forty in the third, eighty in the fourth"), or shorten the picture. The cue
+  sheets (`tools/cuesheet.py`) show it: three frames in a row with the same picture.
+- **A picture must outlive its sentence.** Four status codes each got a sentence,
+  and each answer left the screen half a second into its own sentence: the request
+  for the *next* one had been sent as soon as the previous animation ended. Start
+  the change that brings the next picture on the next number or noun (`cue("Four
+  hundred and one")`, then the request leaves), so every picture stays up from its
+  word to the next one. On the cue sheet: the frame under a phrase must still show
+  that phrase's picture 0.9 s later.
+- **Related numbers must add up on screen.** "53 ms" one way beside "105 ms" there
+  and back is two correct roundings and one visible error. Give the smaller one a
+  decimal (52.5 and 105), and format a running counter the same way at both ends.
+- **`Throb` of a group swells the group, not its members.** Three ticks that sit
+  apart, throbbed as one `VGroup`, slide towards and away from their common centre:
+  a tick drifted over a certificate card and over the label it was ticking (only a
+  full-size frame taken mid-hold showed it). (lib) `throbs([a, b, c], rt)` gives one
+  `Throb` per member; keep the single `Throb` for a compact group.
 - **Find the dead stretches without watching**: `python tools/motioncheck.py
   <video.mp4>...` prints the share of the film that moves and every still stretch
   of 2 s or more with its timestamp. Aim for no still stretch over about 3 s.
@@ -181,6 +220,35 @@ handles the ones marked (lib).
   as a bug. Fade the old one out first: `FadeOut(a, run_time=0.25)` plus
   `Succession(Wait(0.25), FadeIn(b, run_time=0.4))` in the same play (no play-level
   `run_time`). `then()` and `cap()` in `manimx` do this.
+
+## Clock-driven pictures (`animations/Protocols`)
+When the data is a list of timed events (a packet leaves at 105.6 ms and arrives at
+158.1 ms, a queue overflows, an acknowledgment comes back), do not choreograph
+hundreds of mobjects. Keep "now" in a `Clock` and let painters draw the state at
+that instant:
+
+- `Layer` (`manimx`) is a `Painter` with an `alpha` that `FadeIn` / `FadeOut`
+  animate; it is repainted on every frame. Its `paint(camera, pixels)` reads `clock.t` and draws
+  with Cairo in frame units (`camera.get_cairo_context(pixels)`), or writes pixels
+  directly (a picture whose rows appear as their bytes arrive).
+- The scene only runs the clock: `self.play(clock.run(210, run_time=6))`, stopping
+  where the narrator needs a word (`run_time=self.span("phrase")`). Several views of
+  the same instant (packets on a wire, the receiver's picture, the sender's window,
+  a live plot) stay in step for free, and the same events replay at any scale.
+- A flat scene needs `camera_class=PainterCamera` (`kw.setdefault` in `__init__`).
+- Manim builds a fade from a deep copy of the mobject: keep big arrays and the clock
+  in objects that copy as themselves (`Shared.__deepcopy__` returns `self`).
+- Cairo wants colours as blue, green, red here (Manim's frame is BGRA to Cairo).
+- **Manim and the painters share one Cairo context.** Manim leaves its last vector
+  path in it (it only strokes and fills with `_preserve`), so a painter's first
+  `stroke()` redrew that path in the painter's colour: a thin grey bar appeared
+  beside whatever text had been drawn last (the invisible strut of a `line_txt`).
+  And a painter's line caps and dashes stayed set for the vector mobjects drawn
+  after it. (lib) `PainterCamera` now wraps every `paint` in `save()` / `new_path()`
+  / `restore()`.
+- Text on moving things: a few `Text` mobjects with an updater (`ride` in the
+  Protocols kit); never hundreds. Give mass glyphs a colour that carries their
+  content instead (a packet tinted by the pixels it carries).
 
 ## Arrows
 - **`Arrow(mobject, mobject)` comes out diagonal**: Manim takes the farthest bezier point,

@@ -72,6 +72,57 @@ invisible on screen:
   in the code: compare each trace's `note` lines with the `vo` strings of the scene
   (a clip rendered before a late wording fix looks fine and says the old line).
 
+## A laboratory on loopback: real network data with no network
+`animations/Protocols` was built under "nothing leaves this machine". Two programs
+on `127.0.0.1` still give real bytes, real handshakes and real errors (`lab.py`):
+- **A relay between client and server** is the eavesdropper of the story and the
+  recorder of the film: it logs every byte with a timestamp, cuts a TLS stream into
+  records (5-byte header: type, version, length), and can rewrite what passes (a
+  changed JSON value goes unnoticed on HTTP; one flipped bit of a TLS record gives
+  the library's real error).
+- **TLS without a browser**: `ssl` on both ends, certificates from the `openssl`
+  command line (a root, an issuing authority, a leaf, and three that must be
+  refused: self-signed, wrong name, expired). Private keys go *outside the
+  repository* (`~/.cache/manimx/<film>-pki`); only what crossed the wire is baked.
+- **The kernel answers without a packet capture** (which needs root): on macOS
+  `getsockopt(IPPROTO_TCP, 0x106)` returns `tcp_connection_info` (first congestion
+  window, timers, counters); a closed port refuses in under a millisecond; and
+  `127.0.0.2` is a black hole: a connection attempt there shows the SYN retry timer
+  and the 75 s the kernel takes to give up. `getaddrinfo(name, flags=AI_NUMERICHOST)`
+  raises the exact error of a failed DNS lookup without sending a query.
+- **What cannot be recorded is modelled, and says so**: TCP sequence numbers and loss
+  come from a small simulation that follows the RFCs (`tcpsim.py`), fed with the real
+  bytes; delays are the physical minimum (great circle, speed of light in fibre).
+- A `manim.cfg` with `notify_outdated_version = False` in the film folder stops
+  Manim's own version check, the last thing that touched the network at render time.
+- **Say whose machine it is.** Error numbers, kernel timers and trust stores belong
+  to the machine that baked the film: `[Errno 61]` / `[Errno 60]` and 75 s of SYN
+  retries are macOS; the viewer's Linux server says 111 / 110 and gives up after
+  about two minutes; "195 trusted authorities" was the bundle of one OpenSSL build,
+  not the operating system's store. Say "here" in the narration, put the other
+  system's values in the scene's note line and in a README table, and name the
+  source of a count precisely or say a round figure that holds everywhere.
+- **A model told as an event needs its label on screen**, not only in the README:
+  "at best" under a stopwatch that shows a physical lower bound, "a model,
+  exaggerated to be visible" under a loss rate chosen for the picture.
+- **Read a chart at the timecode of the sentence said over it.** The congestion
+  window was plotted as the RFC computes it; during fast recovery that value is
+  inflated by one segment per duplicate ACK, so the curve climbed while the narrator
+  said "and slows down". Correct and misleading: plot the quantity the sentence is
+  about (the window the sender falls back to), and say in the README what the raw
+  value does.
+- **Say which product and which version.** "The balancer answers 502" is nginx and
+  the cloud balancers; HAProxy and Envoy answer 503. "One more round trip" is TLS
+  1.3; 1.2 costs two. One qualifier in the sentence ("with TLS 1.3", "or 503 with
+  some products") keeps it true for the viewer whose stack differs.
+- **A number about your own artifact is still a number: count it.** A note said "a
+  40-line proxy" for a file with 53 lines of code. Count with a script, or say
+  "small".
+- **After moving a concept, re-read every sentence that counts.** Once DNS was taken
+  out of the stack, "one request, four protocols" was wrong (five are named; there
+  are four *layers*), and "each step speaks its own protocol" too (two steps share
+  HTTP).
+
 ## A paper's table or figure: show the real thing
 A cell-by-cell rebuild of a results table was rejected as "not professional" even
 with every number exact. Crop the PDF instead:

@@ -101,9 +101,10 @@ class _Base(ExplainerScene):              # Explainer3DScene for 3D; ExplainerMi
 | Timing | `beat(t)` rhythm, `read(k)` reading hold (~3 s), `settle()`, `wipe()`, `card_wait()` |
 | Captions | `caption(text)` (swap + hold), `say(text)` (mobject only), `clear_cap()`, `cite(src)`, `takeaway(l1, l2)` |
 | Timed captions | `cap(text)` (the swap as an animation, played under the motion), `hold(ambient=)` / `settle(ambient=)` (wait only for what is left of the reading time), `lead(text)`, `then(anim, after)` (leave, then arrive) |
-| Narrated film | `class _Common(NarratedMixin)`: `tell(caption, vo)` (a beat lasts as long as its line takes to say), `cue("phrase", ambient=)` (wait for the narrator to reach a word), `over_card(vo)`, `header()`, `note()`; `tools/voiceover.py` writes the timed script |
+| Narrated film | `class _Common(NarratedMixin)`: `tell(caption, vo)` (a beat lasts as long as its line takes to say), `voice(vo)` (the same beat with no caption), `cue("phrase", ambient=)` (wait for the narrator to reach a word), `span("phrase")` (how long a motion must last to end on that word), `over_card(vo)`, `header()`, `note()`; `tools/voiceover.py` writes the timed script |
+| A clock drives the picture | `Clock` (`clock.run(to, run_time)`) + `Layer` painters that draw the state at `clock.t` (hundreds of packets, a picture filling in, a live plot); flat scenes take `camera_class=PainterCamera`: `reference/gotchas.md`, "Clock-driven pictures" |
 | 3D with a HUD | `ExplainerStageScene` (`hud_root`, `billboard`, `sway`, camera `screen_shift`); `Painter` = a mobject that draws itself on the frame (a textured ground, a swarm): `reference/3d.md` |
-| Motion | `Tween(obj, attr=...)`, `Breathe`, `Throb`, `Travel` / `stream` (packets), `ripple`, `Do`, `Pop`, `glow_dot`, `polyline`, `mix` |
+| Motion | `Tween(obj, attr=...)`, `Breathe`, `Throb` / `throbs` (one per member), `Travel` / `stream` (packets), `ripple`, `Do`, `Pop`, `glow_dot`, `polyline`, `mix` |
 | Text | `Text` (crisp), `txt(s, fs, color)`, `mono(s)`, `mtext([...])` formulas, `safe_t2c`, `clamp_width`; `line_txt` + `align_baselines` for rows, columns and changing values (shared baseline) |
 | Glyphs | `chip`, `pill`, `stamp`, `plate`, `arr(p, q)` (points only), `wire`, `make_tick`, `make_cross`, `dot_label` |
 | Data | `heatmap`, `vcells`, `prob_bars`, `live_number(tracker)` (LaTeX-free counter) |
@@ -148,6 +149,13 @@ beat with `tell(caption, vo)` and place the visual changes with `cue("phrase")`,
 so they land on the narrator's word. Render with `MX_TRACE_DIR=<dir>` and run
 `python tools/voiceover.py animations/<Name>` for `VOICEOVER.md` (timecodes,
 room, words per line; `TIGHT` marks a line that does not fit) and `voiceover.srt`.
+**When the user asks for less text**, drop the caption: start the beat with
+`voice(vo)` and let the screen carry only data (flags, numbers, real bytes, status
+codes, error messages); keep at most one short caption per scene, for its takeaway
+(`animations/Protocols`: five captions in eleven minutes). A wait for the narrator is
+then a frozen frame unless something fills it: give every `cue` and `hold` an
+`ambient=`, or let the motion itself last until the word (`run_time=self.span(
+"phrase")`), and check with `tools/motioncheck.py` at the real pace.
 **Every claim the narrator makes gets its picture, on its word.** Read the script
 line by line against the cues: a sentence with a number or a "because" and no
 `cue` under it is a hole (MIP: "half a ride earns half its fee" had nothing on
@@ -160,7 +168,12 @@ Worked examples: `animations/Terraform`, `animations/MIP`.
 **Arrows and motion.** `arr(a.get_right(), b.get_left())`: endpoints are points
 (`arr` raises on a mobject). Loop-backs are orthogonal elbows in a free lane, not
 `CurvedArrow`s. No arrow may cross content or land on an image. Camera moves only in
-real 3D scenes (`reference/3d.md`); 2D motion comes from the mobjects.
+real 3D scenes (`reference/3d.md`), and sparingly even there: the user finds the
+tilt-and-orbit of the 3D films "always the same". Default to a locked camera, give
+each scene its own motion mechanic instead (a traced sequence diagram, pixels
+painted by arriving data, a live plot, a race of blocks), and get depth, when it
+means something, from an oblique drawing of flat sheets (`Sheets` in
+`animations/Protocols/kit.py`). 2D motion comes from the mobjects.
 
 **Content.** Real data when it exists (`reference/real-data.md`); a paper's table or
 figure is shown as a cropped screenshot, never rebuilt. Concrete artifact over
@@ -202,11 +215,28 @@ metaphor. Every number on screen is computed or cited, and the source is on scre
    MIP film this found what no render check could: a comparison that flattered the
    method, a rule justified by the enumeration the film rules out, a truncated log,
    and runs that could not be reproduced from the rounded data in the repo
-   (`reference/real-data.md`).
+   (`reference/real-data.md`). On the Protocols film: a correct chart that climbed
+   while the narrator said "slows down", a proof of identity taught without the
+   private key, a line of code standing on the wrong layer, "53 ms" beside "105 ms",
+   facts true only of the machine that baked them, and two animations that were
+   silently no-ops. Give the reviewer the film and the code, not your conclusions.
+   After a rewrite of the narration, a second, cheaper pass on the script alone (one
+   text file: every line, caption and note) is worth it: on Protocols it found a
+   recap that no longer counted right, a line count nobody had counted, and three
+   sentences true for one product or version only.
 
 For a film that has to feel dynamic, also run `python tools/motioncheck.py` on the
 full-pace 480p scene videos (not `--quick`): it prints the share of time that moves
-and every still stretch of 2 s or more, so freezes are found without watching.
+and every still stretch of 2 s or more, so freezes are found without watching. In a
+narrated film most of them are waits for a `cue`: fill them (`ambient=`).
+
+For a narrated film, `python tools/cuesheet.py animations/<Name>` (after a
+real-pace render with `MX_TRACE_DIR`) writes one sheet per scene: the frame just
+after every cue, with its phrase underneath. Reading them is how "every claim gets
+its picture, on its word" is checked: a picture that has not changed when its word
+has been said, or that has already left while its sentence is still being said;
+three numbers spoken in one second while the clock races through three round
+trips; a line that says "the hole is filled" two seconds before it is.
 
 Rendering: `./render.sh [scene|full] [-q l|m|h|k] [--quick] [--check] [--stitch]
 [--list] [-p] [-- manim args]`. The shared venv lives outside OneDrive at
