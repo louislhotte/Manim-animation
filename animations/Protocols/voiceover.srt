@@ -1,0 +1,155 @@
+1
+00:00:00,000 --> 00:00:12,339
+TCP, HTTP, HTTPS: what really happens when one machine calls another. We will follow a single request, from a phone in Paris to a server in Singapore.
+
+2
+00:00:14,483 --> 00:00:27,257
+Léa, a courier in Paris, taps her screen. A third of a second later, at best, her next deliveries are there. They came from a server in Singapore.
+
+3
+00:00:27,767 --> 00:00:42,714
+Ten thousand seven hundred kilometres away. Even light, in glass fibre, needs more than fifty milliseconds for that trip. And before the answer arrived, the trip was made six times: three round trips.
+
+4
+00:00:44,117 --> 00:00:57,760
+Why three? Because her app does not send one message. It runs five small steps: find the server's address, open a connection, secure it, send a request, read the reply.
+
+5
+00:00:58,267 --> 00:01:09,301
+Each step speaks a protocol, and each protocol relies on the one below. So start at the bottom: what does a network really carry?
+
+6
+00:01:12,317 --> 00:01:23,351
+First, the address. A directory service, DNS, turns the server's name into a number: an IP address. Every machine on the Internet has one.
+
+7
+00:01:24,267 --> 00:01:41,388
+Now the server sends Léa the map of her course: two hundred and thirty kilobytes. No network carries that in one piece. It is cut into packets of at most fifteen hundred bytes, each stamped with its destination.
+
+8
+00:01:41,900 --> 00:01:57,283
+Routers pass each packet along, hop by hop, looking only at that address. Packets may take different roads, and overtake each other. And a router that is overwhelmed simply drops what it cannot hold.
+
+9
+00:01:58,083 --> 00:02:09,118
+This is all the Internet Protocol promises: its best effort. In this run, nine packets of the picture never arrived, and nobody was told.
+
+10
+00:02:11,333 --> 00:02:24,542
+TCP repairs all this, and it starts with a connection. On the server, a program listens on a numbered door, a port: four four three, by convention, for HTTPS.
+
+11
+00:02:25,050 --> 00:02:42,606
+The phone sends a packet flagged SYN: let's synchronise. The server answers SYN, ACK. The phone acknowledges. This is the handshake: three packets, one round trip, and each side knows the other is there. No data has moved yet.
+
+12
+00:02:43,116 --> 00:02:53,282
+If no program listens on that port, the machine itself answers at once with a reset: connection refused. The failure is instant.
+
+13
+00:02:53,783 --> 00:03:08,296
+But if a firewall silently drops the packet, nothing comes back. The phone asks again after one second, and again, then waits longer and longer, and gives up: here, after seventy-five seconds.
+
+14
+00:03:08,783 --> 00:03:27,644
+A refusal is fast, a timeout is slow, and that alone tells you where to look. Refused: something answered no. Usually the machine itself: nothing listens on that port. Timed out: a firewall, most often; or an address where no machine answers.
+
+15
+00:03:29,850 --> 00:03:47,406
+Once connected, TCP numbers every byte. Each packet says where its bytes belong, so the phone can put them back in order. And for each packet it receives, it answers with an acknowledgment: I have everything up to here.
+
+16
+00:03:47,916 --> 00:04:06,777
+The server starts carefully: ten packets. Each acknowledgment that comes back lets it send two more. Twenty packets in the second round trip: this is slow start. Forty in the third: its congestion window doubles every time. And in the fourth, eighty.
+
+17
+00:04:07,283 --> 00:04:27,883
+Then a packet is lost. The phone keeps what follows, but cannot hand it to the app: there is a hole. Its acknowledgments repeat the same number. Three repeats, and the server sends that packet again, and cuts its window: to TCP, a loss means congestion.
+
+18
+00:04:28,700 --> 00:04:44,952
+One more round trip, and the hole is filled: the picture is complete, every byte, in order. That is TCP's promise: bytes go in at one end, and the same bytes come out at the other.
+
+19
+00:04:48,366 --> 00:05:08,531
+On that stream, the two programs can finally talk. Their language is HTTP: in its classic form, plain text. A request: a method, GET; a path, which says what is wanted; then headers, one per line, and an empty line to say: I am done.
+
+20
+00:05:09,032 --> 00:05:23,111
+The server reads the path, finds the function in charge, and answers in the same style: a status line, headers, an empty line, and the body. Here, Léa's course, as JSON.
+
+21
+00:05:23,616 --> 00:05:47,259
+The status code says how it went. Two hundred: fine. Four hundred and four: the caller asked for something that does not exist. Four hundred and one: the caller did not say who is asking. Five hundred: the server itself failed. So read the first digit: four, the caller's mistake; five, the server's.
+
+22
+00:05:47,766 --> 00:06:01,844
+HTTP is stateless: nothing in the protocol ties a request to the one before. So every request must carry everything, including who is asking. That is what this token is for.
+
+23
+00:06:02,349 --> 00:06:19,036
+Opening a connection for every request costs two round trips each time. Keep the connection, and the next request costs one: that is keep-alive. HTTP 2 goes further: several requests travel at once on the same connection.
+
+24
+00:06:22,398 --> 00:06:41,259
+There is a problem. Those packets cross networks that belong to strangers: a café's Wi-Fi, then several operators. Anyone on the path can read every byte: the path, the answer, and the token, which is all it takes to pass for Léa.
+
+25
+00:06:41,765 --> 00:06:51,930
+They can also change bytes on the way. Twenty-four euros forty becomes two forty-four, and the phone has no way to know.
+
+26
+00:06:54,131 --> 00:07:11,253
+HTTPS closes both holes by slipping one more protocol, TLS, between TCP and HTTP. It begins with a handshake of its own. Each side invents a secret number, and sends the other a public value computed from it.
+
+27
+00:07:12,098 --> 00:07:24,002
+Mixing its own secret with the other's public value, each side arrives at the same key. The eavesdropper saw both public values, and cannot compute it.
+
+28
+00:07:24,515 --> 00:07:45,984
+But a key shared with whom? The server must prove its name. It presents a certificate, signed by an authority, itself signed by a root that the phone already trusts: one of the couple of hundred that every system ships with. The chain holds, and the name matches.
+
+29
+00:07:46,498 --> 00:07:59,272
+One thing is still missing: a certificate is public, anyone can copy it. So the server signs the handshake with the matching private key, which never leaves it.
+
+30
+00:07:59,781 --> 00:08:18,207
+An impostor can copy the certificate, but not that key. Its only option is a certificate of its own making, which no authority vouches for. The handshake stops right there, with an error you will meet one day: certificate verify failed.
+
+31
+00:08:18,715 --> 00:08:39,315
+From then on, every byte is sealed. On the wire, the same request is noise. Flip a single bit, and the receiver rejects the whole record. What still shows: the two addresses, the size of the messages, and the server's name, in a field called SNI.
+
+32
+00:08:40,231 --> 00:08:53,440
+The price, with TLS one point three: one more round trip when the connection opens. In exchange: nobody can read, nobody can alter, and you know who is answering.
+
+33
+00:08:56,448 --> 00:09:13,570
+In production, a load balancer receives the request, and that is usually where the sealed pipe ends. Behind it, the balancer opens its own connection to an application server, which opens others: to a solver, to a database.
+
+34
+00:09:14,565 --> 00:09:30,382
+Each link is a separate TCP connection, kept open and reused whenever possible. Not all of them speak HTTP: a database has its own language. But underneath, it is the same reliable stream of bytes.
+
+35
+00:09:30,898 --> 00:09:51,498
+So when something breaks, the chain tells you where. The application is down: its port refuses, and the balancer answers five zero two, or five zero three with some products. The solver takes three point four seconds, but the balancer only waits three: five zero four.
+
+36
+00:09:52,515 --> 00:10:12,680
+And every hop costs time. A round trip to Singapore: a hundred and five milliseconds, at best. A new secure connection needs three of them before the answer comes; an open one, just one. So keep connections open, and put servers close to their users.
+
+37
+00:10:14,881 --> 00:10:38,960
+Back to the five lines. The first asks a directory for an address. The second opens a connection: TCP, a reliable stream of bytes, on top of IP, packets with no guarantee. The third seals it: TLS, a private stream with a proven identity. The last two speak HTTP: a request, and a response.
+
+38
+00:10:39,465 --> 00:11:02,673
+And each line fails in its own way. The first: the name is unknown. The second: a refusal, if nothing listens; a timeout, if nothing answers. The third: a certificate that does not check out. The last two: a status code. Find the line that failed, and you know where to look.
+
+39
+00:11:03,381 --> 00:11:09,634
+One request, four layers: each one simple, because of the one below it.

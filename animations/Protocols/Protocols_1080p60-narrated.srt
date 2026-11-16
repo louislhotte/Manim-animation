@@ -1,0 +1,479 @@
+1
+00:00:00,000 --> 00:00:13,442
+TCP, HTTP, HTTPS. What really happens when one machine calls another? Follow one request from a phone in Paris to a server in Singapore, down through the layers that make it work.
+
+2
+00:00:14,480 --> 00:00:22,219
+Léa is a courier working in Paris. She taps her screen, and a third of a second later, at best, her next deliveries appear.
+
+3
+00:00:23,610 --> 00:00:26,956
+That answer has travelled all the way from a server in Singapore.
+
+4
+00:00:27,770 --> 00:00:30,254
+Ten thousand seven hundred kilometres away.
+
+5
+00:00:30,380 --> 00:00:35,345
+Even light in glass fibre needs more than fifty milliseconds for that single trip.
+
+6
+00:00:36,030 --> 00:00:43,451
+And before the answer arrived, the trip was made six times: three complete round trips, back and forth across that distance.
+
+7
+00:00:44,120 --> 00:00:47,544
+Why three? Because her app does not simply send one message.
+
+8
+00:00:48,460 --> 00:00:53,000
+It runs five small steps: find the server's address, open a connection,
+
+9
+00:00:53,680 --> 00:00:57,009
+secure it, send a request, and finally read the reply.
+
+10
+00:00:58,270 --> 00:01:02,737
+Each step speaks a protocol, and each protocol relies on the one below it.
+
+11
+00:01:03,920 --> 00:01:10,658
+So start at the bottom. What does a network really carry? Follow the data, and those four layers will start to make sense.
+
+12
+00:01:12,320 --> 00:01:19,327
+First, the address. A directory service, DNS, turns the server's name into a number: an IP address.
+
+13
+00:01:19,710 --> 00:01:23,648
+The phone and the server use these addresses to exchange packets.
+
+14
+00:01:24,270 --> 00:01:30,209
+Now the server sends Léa the map of her course: two hundred and thirty kilobytes of image data.
+
+15
+00:01:30,790 --> 00:01:33,217
+This network cannot carry it in one piece.
+
+16
+00:01:33,830 --> 00:01:40,859
+It is cut into packets of at most fifteen hundred bytes. Each carries its destination, ready for the routers ahead.
+
+17
+00:01:41,900 --> 00:01:47,430
+Routers pass each packet along, hop by hop, using its destination address to choose the way.
+
+18
+00:01:47,550 --> 00:01:51,080
+Packets may take different roads, and even overtake each other.
+
+19
+00:01:51,470 --> 00:01:57,841
+And an overwhelmed router simply drops what it cannot hold. Watch the queue overflow as packets arrive.
+
+20
+00:01:58,080 --> 00:02:02,042
+This is all the Internet Protocol promises: its best effort.
+
+21
+00:02:02,430 --> 00:02:11,104
+In this run, nine packets of the picture never arrived. The red gaps show exactly what is missing. The network itself does not repair them.
+
+22
+00:02:11,330 --> 00:02:14,794
+TCP repairs all this, and it starts with a connection.
+
+23
+00:02:15,680 --> 00:02:23,452
+On the server, a program listens on a numbered door, called a port. Four four three is the usual port for HTTPS.
+
+24
+00:02:25,050 --> 00:02:28,337
+The phone sends a packet flagged SYN: let's synchronise.
+
+25
+00:02:28,960 --> 00:02:32,049
+The server answers SYN, ACK. The phone acknowledges.
+
+26
+00:02:32,440 --> 00:02:35,604
+This is the handshake: three packets, one round trip,
+
+27
+00:02:36,350 --> 00:02:42,753
+and each side knows the other is there. The connection is ready, but no application data has moved yet.
+
+28
+00:02:43,120 --> 00:02:49,512
+If no program listens on that port, the machine itself answers at once with a reset. There is no listener:
+
+29
+00:02:50,070 --> 00:02:53,451
+connection refused. An answer comes back immediately.
+
+30
+00:02:53,780 --> 00:02:57,657
+But if a firewall silently drops the packet, nothing comes back.
+
+31
+00:02:58,570 --> 00:03:01,426
+The phone asks again after one second, and again,
+
+32
+00:03:02,480 --> 00:03:08,444
+then waits longer and longer, before giving up. Here, that happens after seventy-five seconds.
+
+33
+00:03:08,780 --> 00:03:14,838
+A refusal is fast, a timeout is slow, and that difference already tells us where to look for the failure.
+
+34
+00:03:15,740 --> 00:03:21,210
+Refused: something answered no. Usually the machine itself: nothing listens on that port.
+
+35
+00:03:21,390 --> 00:03:29,754
+Timed out: perhaps a firewall dropping packets, or an address where no machine answers. All the caller knows is that nothing came back.
+
+36
+00:03:29,854 --> 00:03:31,854
+TCP numbers every byte.
+
+37
+00:03:32,460 --> 00:03:39,113
+Each packet says where its bytes belong, so the phone can put them back in order, even after a scrambled arrival.
+
+38
+00:03:39,410 --> 00:03:47,931
+In this model, each packet gets an acknowledgment: I have everything up to here. That returning number tells the sender how far the receiver got.
+
+39
+00:03:48,031 --> 00:03:50,447
+The server starts carefully: ten packets.
+
+40
+00:03:50,547 --> 00:03:53,795
+Each acknowledgment that comes back lets it send two more.
+
+41
+00:03:54,870 --> 00:03:58,346
+Twenty packets in the second round trip: this is slow start.
+
+42
+00:03:59,660 --> 00:04:02,665
+Forty in the third: the window doubles each round.
+
+43
+00:04:04,500 --> 00:04:06,365
+And in the fourth, eighty packets.
+
+44
+00:04:07,280 --> 00:04:08,751
+Then a packet is lost.
+
+45
+00:04:09,460 --> 00:04:16,275
+The phone keeps what follows, but cannot hand it to the app. Those later bytes must wait: there is a hole in the stream.
+
+46
+00:04:16,410 --> 00:04:22,751
+Its acknowledgments repeat the same number. Three repeats, and the server sends that missing packet again,
+
+47
+00:04:22,940 --> 00:04:28,486
+and cuts its window. TCP treats this loss as congestion, and sends less at once.
+
+48
+00:04:28,700 --> 00:04:30,267
+One more round trip, and
+
+49
+00:04:30,870 --> 00:04:34,827
+the hole is filled. The picture is complete: every byte, in order.
+
+50
+00:04:36,090 --> 00:04:47,927
+That is TCP's promise: bytes go in at one end, and the same bytes come out at the other, in order. The application works with a stream, while TCP handles the missing pieces underneath.
+
+51
+00:04:48,370 --> 00:04:51,449
+On that stream, the two programs can finally talk.
+
+52
+00:04:52,280 --> 00:04:56,331
+Their language is HTTP. Version one uses plain text.
+
+53
+00:04:56,630 --> 00:05:00,440
+A request: a method, GET; a path, which says what is wanted;
+
+54
+00:05:01,840 --> 00:05:08,896
+then headers, one per line. Finally, an empty line marks the end of the headers. This GET request needs no body.
+
+55
+00:05:09,030 --> 00:05:12,231
+The server reads the path, finds the function in charge,
+
+56
+00:05:13,380 --> 00:05:18,691
+and answers in the same style: a status line, headers, an empty line, and the body.
+
+57
+00:05:20,340 --> 00:05:22,855
+Here, Léa's delivery course, as JSON.
+
+58
+00:05:23,620 --> 00:05:26,788
+The status code says how it went. Two hundred: fine.
+
+59
+00:05:27,960 --> 00:05:32,178
+Four hundred and four: the caller asked for something that does not exist.
+
+60
+00:05:33,620 --> 00:05:38,736
+Four hundred and one: the request lacks valid credentials to identify the caller.
+
+61
+00:05:38,836 --> 00:05:41,337
+Five hundred: the server itself failed.
+
+62
+00:05:41,440 --> 00:05:47,601
+So read the first digit. Four means a client error. Five means a server error. That is the first clue.
+
+63
+00:05:47,770 --> 00:05:53,132
+HTTP is stateless: nothing in the protocol ties a request to the one before it.
+
+64
+00:05:53,850 --> 00:06:02,371
+So each request carries its own context, including who is asking. This token identifies the caller, and the server checks it every time.
+
+65
+00:06:02,471 --> 00:06:06,743
+Opening a connection for every request costs two round trips each time.
+
+66
+00:06:07,570 --> 00:06:11,820
+Keep the connection, and the next request costs one: that is keep-alive.
+
+67
+00:06:12,780 --> 00:06:20,937
+HTTP two goes further: several requests travel at once on the same connection. The third lane shows them overlapping.
+
+68
+00:06:22,400 --> 00:06:30,248
+There is a problem. Those packets cross networks belonging to strangers: a café's Wi-Fi, then several operators along the route.
+
+69
+00:06:30,348 --> 00:06:34,021
+Anyone on the path can read every byte: the path, the answer,
+
+70
+00:06:35,440 --> 00:06:41,581
+and the token. Copying it is enough to pass for Léa. The server accepts the stolen token and answers.
+
+71
+00:06:41,770 --> 00:06:43,774
+They can also change bytes on the way.
+
+72
+00:06:45,240 --> 00:06:54,067
+Twenty-four euros forty becomes two forty-four. The phone cannot detect that the amount has changed. Reliable delivery does not prevent tampering.
+
+73
+00:06:54,967 --> 00:06:59,285
+HTTPS slips TLS into the stack, securing the connection.
+
+74
+00:07:00,220 --> 00:07:02,294
+It begins with a handshake of its own.
+
+75
+00:07:03,700 --> 00:07:11,368
+Each side invents a secret number, and sends the other a public value computed from it. The secret stays on its own machine.
+
+76
+00:07:12,100 --> 00:07:18,771
+Mixing its own secret with the other's public value, each side arrives at the same key. Both results match.
+
+77
+00:07:19,050 --> 00:07:24,172
+The eavesdropper saw both public values, but lacks the secrets needed to compute the key.
+
+78
+00:07:24,510 --> 00:07:28,239
+But a key shared with whom? The server must also prove its name.
+
+79
+00:07:29,730 --> 00:07:32,676
+It presents a certificate, signed by an authority,
+
+80
+00:07:33,210 --> 00:07:42,173
+itself signed by a root that the phone already trusts. That root comes from the trusted authorities installed on the system, shown here as the grid below.
+
+81
+00:07:42,340 --> 00:07:46,314
+The chain holds, and the name matches the server being contacted.
+
+82
+00:07:46,500 --> 00:07:51,049
+One thing is still missing: a certificate is public. Anyone can copy it.
+
+83
+00:07:52,150 --> 00:07:59,427
+So the server signs the handshake with the matching private key, which never leaves it. The signature proves it holds that key.
+
+84
+00:07:59,780 --> 00:08:03,573
+An impostor can copy the certificate, but not that private key.
+
+85
+00:08:04,130 --> 00:08:10,485
+Here, it tries a certificate of its own making. No trusted authority vouches for it, so the chain breaks.
+
+86
+00:08:10,650 --> 00:08:18,573
+The handshake stops right there, with an error pointing to the identity check: certificate verify failed. The request never goes through.
+
+87
+00:08:18,710 --> 00:08:21,588
+From then on, every application byte is sealed.
+
+88
+00:08:21,760 --> 00:08:25,073
+On the wire, the same request becomes unreadable noise.
+
+89
+00:08:25,240 --> 00:08:29,920
+Flip a single bit, and the receiver rejects the whole record. It detects the change.
+
+90
+00:08:30,020 --> 00:08:33,799
+What still shows: the two addresses, the size of the messages,
+
+91
+00:08:34,800 --> 00:08:38,605
+and, in this handshake, the server's name, in a field called SNI.
+
+92
+00:08:40,230 --> 00:08:45,301
+The price, with TLS one point three: one more round trip when the connection opens.
+
+93
+00:08:46,750 --> 00:08:55,807
+In exchange: privacy, tamper detection, and proof of the server's identity. The conversation stays the same, protected inside the stream.
+
+94
+00:08:56,450 --> 00:09:03,928
+In production, a load balancer receives the request. Often, the sealed pipe ends here, before the request passes onward.
+
+95
+00:09:04,028 --> 00:09:14,251
+Behind it, the balancer opens its own connection to an application server, which opens others: to a solver, to a database. Every link has its own endpoints.
+
+96
+00:09:14,560 --> 00:09:20,041
+Each link is a separate TCP connection, kept open and reused whenever possible.
+
+97
+00:09:20,220 --> 00:09:25,452
+Not all speak HTTP: a database has its own language for requests and results.
+
+98
+00:09:25,552 --> 00:09:31,067
+But underneath, it is the same reliable stream of bytes, with separate endpoints for each connection.
+
+99
+00:09:31,167 --> 00:09:33,930
+So when something breaks, the chain tells us where.
+
+100
+00:09:34,810 --> 00:09:42,839
+The application is down: its port refuses, and the balancer answers five zero two, or five zero three with some products.
+
+101
+00:09:43,940 --> 00:09:52,606
+The solver takes three point four seconds, but the balancer only waits three: five zero four. Its deadline expires before the reply.
+
+102
+00:09:52,706 --> 00:09:54,390
+And every hop costs time.
+
+103
+00:09:54,690 --> 00:09:58,893
+A round trip to Singapore: a hundred and five milliseconds, at best.
+
+104
+00:09:59,910 --> 00:10:03,776
+A new secure connection needs three of them before the answer comes;
+
+105
+00:10:05,120 --> 00:10:06,757
+an open one, just one.
+
+106
+00:10:07,300 --> 00:10:14,704
+So keep connections open, and put servers close to their users. Shorter distances reduce the delay on every round trip.
+
+107
+00:10:14,880 --> 00:10:16,279
+Back to the five lines.
+
+108
+00:10:17,060 --> 00:10:19,562
+The first asks a directory for an address.
+
+109
+00:10:20,530 --> 00:10:28,170
+The second opens a connection: TCP, a reliable stream of bytes, on top of IP, packets with no guarantee.
+
+110
+00:10:28,790 --> 00:10:33,120
+The third seals it: TLS, a private stream with a proven identity.
+
+111
+00:10:34,010 --> 00:10:38,376
+The last two speak HTTP: send a request, and read a response.
+
+112
+00:10:39,460 --> 00:10:41,415
+And each line fails in its own way.
+
+113
+00:10:42,940 --> 00:10:44,931
+The first: the name is unknown.
+
+114
+00:10:45,550 --> 00:10:50,283
+The second: a refusal, if nothing listens; a timeout, if nothing answers.
+
+115
+00:10:50,770 --> 00:10:53,527
+The third: a certificate that does not check out.
+
+116
+00:10:54,680 --> 00:10:56,596
+The last two: a status code.
+
+117
+00:10:57,290 --> 00:11:03,236
+Find the line that failed, and the error points to the layer that needs attention. Start investigating there.
+
+118
+00:11:03,380 --> 00:11:12,768
+One request, four layers: each one simpler because of the one below it. Unreliable packets become a meaningful, protected conversation.
+
+119
+00:11:12,868 --> 00:11:17,874
+Packets carry bytes. TCP puts them in order. TLS protects the stream.
+
+120
+00:11:18,150 --> 00:11:23,385
+HTTP gives it meaning. Four layers, one conversation. Thanks for watching.

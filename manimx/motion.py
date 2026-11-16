@@ -14,6 +14,10 @@ Two ideas, both born in the Yjs film and shared since:
 
 ``Travel`` / ``stream`` send packets along a path, ``ripple`` is the "these agree"
 burst, ``Do`` runs a callback inside a ``Succession``, ``Pop`` lands a small mark.
+
+* **A clock drives the picture.** When the data is a list of timed events, keep
+  "now" in a ``Clock`` and let painters (``manimx.Layer``) draw the state at that
+  instant; the scene only runs the clock (the Protocols film).
 """
 
 from __future__ import annotations
@@ -42,6 +46,30 @@ from manim import (
 )
 
 from .palette import GOOD
+
+
+class Shared:
+    """Data a painter only reads (big arrays, a clock). Manim builds a fade from a
+    deep copy of the mobject: whatever is ``Shared`` is handed over as it is."""
+
+    def __deepcopy__(self, memo):
+        return self
+
+
+class Clock(Shared):
+    """ "Now", in whatever unit the film's events use. Painters draw the world at
+    ``clock.t``; a scene only runs the clock: ``self.play(clock.run(210, 6.0))``."""
+
+    def __init__(self, t=0.0):
+        self.t = float(t)
+
+    def run(self, to, run_time, rate_func=linear):
+        """The animation that advances the clock to ``to`` in ``run_time`` seconds."""
+        return Tween(self, run_time=run_time, rate_func=rate_func, t=float(to))
+
+    def set(self, t):
+        self.t = float(t)
+        return self
 
 
 def mix(a, b, t):
@@ -122,6 +150,13 @@ class Throb(Animation):
     def interpolate_mobject(self, alpha):
         v = 0.5 - 0.5 * math.cos(2 * math.pi * self.cycles * alpha)
         self.mobject.become(self.base.copy().scale(1 + self.amp * v))
+
+
+def throbs(mobs, run_time, **kw):
+    """One ``Throb`` per mobject: each swells about its own centre. A single ``Throb``
+    of a group swells the *group*: members that sit apart slide towards and away
+    from each other, over whatever lies between them."""
+    return [Throb(m, run_time, **kw) for m in mobs]
 
 
 def ripple(*mobs, color=GOOD, buff=0.14, grow=1.07, run_time=0.8, margin=0.22):

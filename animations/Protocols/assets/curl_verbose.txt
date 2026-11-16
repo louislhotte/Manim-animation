@@ -1,0 +1,45 @@
+* Added api.dispatch.example:8443:127.0.0.1 to DNS cache
+* Hostname api.dispatch.example was found in DNS cache
+*   Trying 127.0.0.1:8443...
+* Connected to api.dispatch.example (127.0.0.1) port 8443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [325 bytes data]
+*  CAfile: demo-root.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* (304) (IN), TLS handshake, Unknown (8):
+{ [6 bytes data]
+* (304) (IN), TLS handshake, Certificate (11):
+{ [989 bytes data]
+* (304) (IN), TLS handshake, CERT verify (15):
+{ [79 bytes data]
+* (304) (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* (304) (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / AEAD-AES256-GCM-SHA384 / [blank] / UNDEF
+* ALPN: server did not agree on a protocol. Uses default.
+* Server certificate:
+*  subject: CN=api.dispatch.example
+*  start date: Nov 14 01:20:38 2026 GMT
+*  expire date: Feb 12 01:20:38 2027 GMT
+*  subjectAltName: host "api.dispatch.example" matched cert's "api.dispatch.example"
+*  issuer: O=Demo Trust Services; CN=Demo Issuing CA
+*  SSL certificate verify ok.
+* using HTTP/1.x
+> GET /courses/lea HTTP/1.1
+> Host: api.dispatch.example:8443
+> User-Agent: curl/8.7.1
+> Authorization: Bearer lea-4f1c9a
+> Accept: application/json
+> 
+* Request completely sent off
+< HTTP/1.1 200 OK
+< Content-Type: application/json
+< Content-Length: 83
+< 
+{ [83 bytes data]
+* Connection #0 to host api.dispatch.example left intact
+{"courier":"lea","stops":["ramen","burger","pasta","pizza","noodles"],"earns":24.4}

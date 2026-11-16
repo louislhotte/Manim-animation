@@ -12,9 +12,10 @@ plus the house layer:
   ``code_panel``, data-as-picture primitives (``heatmap vcells prob_bars
   live_number``) and frame-safety helpers (``keep_inside fit_in_frame``);
 * motion (``Tween Breathe Throb Travel stream ripple Do Pop``): attribute tweens,
-  ambient pulses for reading holds, packets, bursts;
+  ambient pulses for reading holds, packets, bursts; ``Clock`` for pictures drawn
+  from timed events;
 * 3D with a HUD (``ExplainerStageScene HudCamera``) and mobjects that draw themselves
-  (``Painter``): see ``manimx/three_d.py``.
+  (``Painter``, ``Layer``; ``PainterCamera`` for flat scenes): see ``manimx/three_d.py``.
 
 See ``.claude/skills/manim-explainer/SKILL.md`` for how to build a film with it
 and ``tools/render_lib.sh`` for rendering. Two names intentionally replace
@@ -47,8 +48,10 @@ from .layout import (
 )
 from .motion import (
     Breathe,
+    Clock,
     Do,
     Pop,
+    Shared,
     Throb,
     Travel,
     Tween,
@@ -57,6 +60,7 @@ from .motion import (
     polyline,
     ripple,
     stream,
+    throbs,
 )
 from .pacing import Pace, quick_mode
 from .palette import (
@@ -87,7 +91,7 @@ from .scene import (
     NarratedMixin,
     rule_under,
 )
-from .three_d import ExplainerStageScene, HudCamera, Painter, PainterCamera
+from .three_d import ExplainerStageScene, HudCamera, Layer, Painter, PainterCamera
 from .text import (
     TEXT_BASE,
     BaseText,
@@ -153,6 +157,7 @@ __all__ = [
     "ExplainerStageScene",
     "HudCamera",
     "Painter",
+    "Layer",
     "PainterCamera",
     # glyphs, code, data, layout
     "chip",
@@ -185,9 +190,12 @@ __all__ = [
     "fit_in_frame",
     # motion
     "mix",
+    "Clock",
+    "Shared",
     "Tween",
     "Breathe",
     "Throb",
+    "throbs",
     "Do",
     "Pop",
     "Travel",

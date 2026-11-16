@@ -1,0 +1,239 @@
+TCP, HTTP, HTTPS. What really happens when one machine calls another? Follow one request from a phone in Paris to a server in Singapore, down through the layers that make it work.
+
+Léa is a courier working in Paris. She taps her screen, and a third of a second later, at best, her next deliveries appear.
+
+That answer has travelled all the way from a server in Singapore.
+
+Ten thousand seven hundred kilometres away.
+
+Even light in glass fibre needs more than fifty milliseconds for that single trip.
+
+And before the answer arrived, the trip was made six times: three complete round trips, back and forth across that distance.
+
+Why three? Because her app does not simply send one message.
+
+It runs five small steps: find the server's address, open a connection,
+
+secure it, send a request, and finally read the reply.
+
+Each step speaks a protocol, and each protocol relies on the one below it.
+
+So start at the bottom. What does a network really carry? Follow the data, and those four layers will start to make sense.
+
+First, the address. A directory service, DNS, turns the server's name into a number: an IP address.
+
+The phone and the server use these addresses to exchange packets.
+
+Now the server sends Léa the map of her course: two hundred and thirty kilobytes of image data.
+
+This network cannot carry it in one piece.
+
+It is cut into packets of at most fifteen hundred bytes. Each carries its destination, ready for the routers ahead.
+
+Routers pass each packet along, hop by hop, using its destination address to choose the way.
+
+Packets may take different roads, and even overtake each other.
+
+And an overwhelmed router simply drops what it cannot hold. Watch the queue overflow as packets arrive.
+
+This is all the Internet Protocol promises: its best effort.
+
+In this run, nine packets of the picture never arrived. The red gaps show exactly what is missing. The network itself does not repair them.
+
+TCP repairs all this, and it starts with a connection.
+
+On the server, a program listens on a numbered door, called a port. Four four three is the usual port for HTTPS.
+
+The phone sends a packet flagged SYN: let's synchronise.
+
+The server answers SYN, ACK. The phone acknowledges.
+
+This is the handshake: three packets, one round trip,
+
+and each side knows the other is there. The connection is ready, but no application data has moved yet.
+
+If no program listens on that port, the machine itself answers at once with a reset. There is no listener:
+
+connection refused. An answer comes back immediately.
+
+But if a firewall silently drops the packet, nothing comes back.
+
+The phone asks again after one second, and again,
+
+then waits longer and longer, before giving up. Here, that happens after seventy-five seconds.
+
+A refusal is fast, a timeout is slow, and that difference already tells us where to look for the failure.
+
+Refused: something answered no. Usually the machine itself: nothing listens on that port.
+
+Timed out: perhaps a firewall dropping packets, or an address where no machine answers. All the caller knows is that nothing came back.
+
+TCP numbers every byte.
+
+Each packet says where its bytes belong, so the phone can put them back in order, even after a scrambled arrival.
+
+In this model, each packet gets an acknowledgment: I have everything up to here. That returning number tells the sender how far the receiver got.
+
+The server starts carefully: ten packets.
+
+Each acknowledgment that comes back lets it send two more.
+
+Twenty packets in the second round trip: this is slow start.
+
+Forty in the third: the window doubles each round.
+
+And in the fourth, eighty packets.
+
+Then a packet is lost.
+
+The phone keeps what follows, but cannot hand it to the app. Those later bytes must wait: there is a hole in the stream.
+
+Its acknowledgments repeat the same number. Three repeats, and the server sends that missing packet again,
+
+and cuts its window. TCP treats this loss as congestion, and sends less at once.
+
+One more round trip, and
+
+the hole is filled. The picture is complete: every byte, in order.
+
+That is TCP's promise: bytes go in at one end, and the same bytes come out at the other, in order. The application works with a stream, while TCP handles the missing pieces underneath.
+
+On that stream, the two programs can finally talk.
+
+Their language is HTTP. Version one uses plain text.
+
+A request: a method, GET; a path, which says what is wanted;
+
+then headers, one per line. Finally, an empty line marks the end of the headers. This GET request needs no body.
+
+The server reads the path, finds the function in charge,
+
+and answers in the same style: a status line, headers, an empty line, and the body.
+
+Here, Léa's delivery course, as JSON.
+
+The status code says how it went. Two hundred: fine.
+
+Four hundred and four: the caller asked for something that does not exist.
+
+Four hundred and one: the request lacks valid credentials to identify the caller.
+
+Five hundred: the server itself failed.
+
+So read the first digit. Four means a client error. Five means a server error. That is the first clue.
+
+HTTP is stateless: nothing in the protocol ties a request to the one before it.
+
+So each request carries its own context, including who is asking. This token identifies the caller, and the server checks it every time.
+
+Opening a connection for every request costs two round trips each time.
+
+Keep the connection, and the next request costs one: that is keep-alive.
+
+HTTP two goes further: several requests travel at once on the same connection. The third lane shows them overlapping.
+
+There is a problem. Those packets cross networks belonging to strangers: a café's Wi-Fi, then several operators along the route.
+
+Anyone on the path can read every byte: the path, the answer,
+
+and the token. Copying it is enough to pass for Léa. The server accepts the stolen token and answers.
+
+They can also change bytes on the way.
+
+Twenty-four euros forty becomes two forty-four. The phone cannot detect that the amount has changed. Reliable delivery does not prevent tampering.
+
+HTTPS slips TLS into the stack, securing the connection.
+
+It begins with a handshake of its own.
+
+Each side invents a secret number, and sends the other a public value computed from it. The secret stays on its own machine.
+
+Mixing its own secret with the other's public value, each side arrives at the same key. Both results match.
+
+The eavesdropper saw both public values, but lacks the secrets needed to compute the key.
+
+But a key shared with whom? The server must also prove its name.
+
+It presents a certificate, signed by an authority,
+
+itself signed by a root that the phone already trusts. That root comes from the trusted authorities installed on the system, shown here as the grid below.
+
+The chain holds, and the name matches the server being contacted.
+
+One thing is still missing: a certificate is public. Anyone can copy it.
+
+So the server signs the handshake with the matching private key, which never leaves it. The signature proves it holds that key.
+
+An impostor can copy the certificate, but not that private key.
+
+Here, it tries a certificate of its own making. No trusted authority vouches for it, so the chain breaks.
+
+The handshake stops right there, with an error pointing to the identity check: certificate verify failed. The request never goes through.
+
+From then on, every application byte is sealed.
+
+On the wire, the same request becomes unreadable noise.
+
+Flip a single bit, and the receiver rejects the whole record. It detects the change.
+
+What still shows: the two addresses, the size of the messages,
+
+and, in this handshake, the server's name, in a field called SNI.
+
+The price, with TLS one point three: one more round trip when the connection opens.
+
+In exchange: privacy, tamper detection, and proof of the server's identity. The conversation stays the same, protected inside the stream.
+
+In production, a load balancer receives the request. Often, the sealed pipe ends here, before the request passes onward.
+
+Behind it, the balancer opens its own connection to an application server, which opens others: to a solver, to a database. Every link has its own endpoints.
+
+Each link is a separate TCP connection, kept open and reused whenever possible.
+
+Not all speak HTTP: a database has its own language for requests and results.
+
+But underneath, it is the same reliable stream of bytes, with separate endpoints for each connection.
+
+So when something breaks, the chain tells us where.
+
+The application is down: its port refuses, and the balancer answers five zero two, or five zero three with some products.
+
+The solver takes three point four seconds, but the balancer only waits three: five zero four. Its deadline expires before the reply.
+
+And every hop costs time.
+
+A round trip to Singapore: a hundred and five milliseconds, at best.
+
+A new secure connection needs three of them before the answer comes;
+
+an open one, just one.
+
+So keep connections open, and put servers close to their users. Shorter distances reduce the delay on every round trip.
+
+Back to the five lines.
+
+The first asks a directory for an address.
+
+The second opens a connection: TCP, a reliable stream of bytes, on top of IP, packets with no guarantee.
+
+The third seals it: TLS, a private stream with a proven identity.
+
+The last two speak HTTP: send a request, and read a response.
+
+And each line fails in its own way.
+
+The first: the name is unknown.
+
+The second: a refusal, if nothing listens; a timeout, if nothing answers.
+
+The third: a certificate that does not check out.
+
+The last two: a status code.
+
+Find the line that failed, and the error points to the layer that needs attention. Start investigating there.
+
+One request, four layers: each one simpler because of the one below it. Unreliable packets become a meaningful, protected conversation.
+
+Packets carry bytes. TCP puts them in order. TLS protects the stream.
+
+HTTP gives it meaning. Four layers, one conversation. Thanks for watching.

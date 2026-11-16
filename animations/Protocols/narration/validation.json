@@ -1,0 +1,51 @@
+{
+  "Protocols_1080p60.mp4": {
+    "duration": "683.814714",
+    "size": 48786083,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "duration": "683.814714",
+        "nb_frames": "41029"
+      }
+    ],
+    "videoHash": "SHA256=08fe8a62f8f6f9bc1bf6f3864673494d8bec3b79835881f0004b4693b6cc08a7"
+  },
+  "Protocols_1080p60-narrated.mp4": {
+    "duration": "683.814714",
+    "size": 63247554,
+    "streams": [
+      {
+        "codec_type": "video",
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "duration": "683.814714",
+        "nb_frames": "41029"
+      },
+      {
+        "codec_type": "audio",
+        "codec_name": "aac",
+        "sample_rate": "48000",
+        "duration": "683.729000",
+        "nb_frames": "32051"
+      }
+    ],
+    "videoHash": "SHA256=08fe8a62f8f6f9bc1bf6f3864673494d8bec3b79835881f0004b4693b6cc08a7"
+  },
+  "Protocols_1080p60-narration.wav": {
+    "duration": "683.729417",
+    "size": 98457138,
+    "streams": [
+      {
+        "codec_type": "audio",
+        "codec_name": "pcm_s24le",
+        "sample_rate": "48000",
+        "duration": "683.729417"
+      }
+    ]
+  }
+}

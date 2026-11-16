@@ -1,0 +1,13 @@
+{
+ "lea": {
+  "courier": "lea",
+  "stops": [
+   "ramen",
+   "burger",
+   "pasta",
+   "pizza",
+   "noodles"
+  ],
+  "earns": 24.4
+ }
+}

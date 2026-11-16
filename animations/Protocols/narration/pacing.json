@@ -1,0 +1,1211 @@
+{
+  "durationSec": 683.814714,
+  "cueCount": 120,
+  "spokenDurationSec": 603.093458,
+  "maxGapSec": 1.835417,
+  "tailSec": 0.429506,
+  "reviewCount": 0,
+  "gaps": [
+    {
+      "position": "between",
+      "startSec": 13.441542,
+      "endSec": 14.48,
+      "durationSec": 1.038458,
+      "afterCue": "001",
+      "beforeCue": "002",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 22.219167,
+      "endSec": 23.61,
+      "durationSec": 1.390833,
+      "afterCue": "002",
+      "beforeCue": "003",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 26.95625,
+      "endSec": 27.77,
+      "durationSec": 0.81375,
+      "afterCue": "003",
+      "beforeCue": "004",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 30.254042,
+      "endSec": 30.38,
+      "durationSec": 0.125958,
+      "afterCue": "004",
+      "beforeCue": "005",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 35.345292,
+      "endSec": 36.03,
+      "durationSec": 0.684708,
+      "afterCue": "005",
+      "beforeCue": "006",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 43.450792,
+      "endSec": 44.12,
+      "durationSec": 0.669208,
+      "afterCue": "006",
+      "beforeCue": "007",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 47.544333,
+      "endSec": 48.46,
+      "durationSec": 0.915667,
+      "afterCue": "007",
+      "beforeCue": "008",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 53.000292,
+      "endSec": 53.68,
+      "durationSec": 0.679708,
+      "afterCue": "008",
+      "beforeCue": "009",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 57.009125,
+      "endSec": 58.27,
+      "durationSec": 1.260875,
+      "afterCue": "009",
+      "beforeCue": "010",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 62.73725,
+      "endSec": 63.92,
+      "durationSec": 1.18275,
+      "afterCue": "010",
+      "beforeCue": "011",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 70.658125,
+      "endSec": 72.32,
+      "durationSec": 1.661875,
+      "afterCue": "011",
+      "beforeCue": "012",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 79.326625,
+      "endSec": 79.71,
+      "durationSec": 0.383375,
+      "afterCue": "012",
+      "beforeCue": "013",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 83.647917,
+      "endSec": 84.27,
+      "durationSec": 0.622083,
+      "afterCue": "013",
+      "beforeCue": "014",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 90.209333,
+      "endSec": 90.79,
+      "durationSec": 0.580667,
+      "afterCue": "014",
+      "beforeCue": "015",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 93.216542,
+      "endSec": 93.83,
+      "durationSec": 0.613458,
+      "afterCue": "015",
+      "beforeCue": "016",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 100.858958,
+      "endSec": 101.9,
+      "durationSec": 1.041042,
+      "afterCue": "016",
+      "beforeCue": "017",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 107.429875,
+      "endSec": 107.55,
+      "durationSec": 0.120125,
+      "afterCue": "017",
+      "beforeCue": "018",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 111.080333,
+      "endSec": 111.47,
+      "durationSec": 0.389667,
+      "afterCue": "018",
+      "beforeCue": "019",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 117.841042,
+      "endSec": 118.08,
+      "durationSec": 0.238958,
+      "afterCue": "019",
+      "beforeCue": "020",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 122.042083,
+      "endSec": 122.43,
+      "durationSec": 0.387917,
+      "afterCue": "020",
+      "beforeCue": "021",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 131.104208,
+      "endSec": 131.33,
+      "durationSec": 0.225792,
+      "afterCue": "021",
+      "beforeCue": "022",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 134.794208,
+      "endSec": 135.68,
+      "durationSec": 0.885792,
+      "afterCue": "022",
+      "beforeCue": "023",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 143.451667,
+      "endSec": 145.05,
+      "durationSec": 1.598333,
+      "afterCue": "023",
+      "beforeCue": "024",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 148.336542,
+      "endSec": 148.96,
+      "durationSec": 0.623458,
+      "afterCue": "024",
+      "beforeCue": "025",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 152.049,
+      "endSec": 152.44,
+      "durationSec": 0.391,
+      "afterCue": "025",
+      "beforeCue": "026",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 155.603833,
+      "endSec": 156.35,
+      "durationSec": 0.746167,
+      "afterCue": "026",
+      "beforeCue": "027",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 162.753375,
+      "endSec": 163.12,
+      "durationSec": 0.366625,
+      "afterCue": "027",
+      "beforeCue": "028",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 169.512292,
+      "endSec": 170.07,
+      "durationSec": 0.557708,
+      "afterCue": "028",
+      "beforeCue": "029",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 173.451125,
+      "endSec": 173.78,
+      "durationSec": 0.328875,
+      "afterCue": "029",
+      "beforeCue": "030",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 177.657458,
+      "endSec": 178.57,
+      "durationSec": 0.912542,
+      "afterCue": "030",
+      "beforeCue": "031",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 181.426,
+      "endSec": 182.48,
+      "durationSec": 1.054,
+      "afterCue": "031",
+      "beforeCue": "032",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 188.444,
+      "endSec": 188.78,
+      "durationSec": 0.336,
+      "afterCue": "032",
+      "beforeCue": "033",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 194.838083,
+      "endSec": 195.74,
+      "durationSec": 0.901917,
+      "afterCue": "033",
+      "beforeCue": "034",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 201.210125,
+      "endSec": 201.39,
+      "durationSec": 0.179875,
+      "afterCue": "034",
+      "beforeCue": "035",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 209.753625,
+      "endSec": 209.853625,
+      "durationSec": 0.1,
+      "afterCue": "035",
+      "beforeCue": "036",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 211.85425,
+      "endSec": 212.46,
+      "durationSec": 0.60575,
+      "afterCue": "036",
+      "beforeCue": "037",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 219.113292,
+      "endSec": 219.41,
+      "durationSec": 0.296708,
+      "afterCue": "037",
+      "beforeCue": "038",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 227.931375,
+      "endSec": 228.031375,
+      "durationSec": 0.1,
+      "afterCue": "038",
+      "beforeCue": "039",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 230.446583,
+      "endSec": 230.546583,
+      "durationSec": 0.1,
+      "afterCue": "039",
+      "beforeCue": "040",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 233.795458,
+      "endSec": 234.87,
+      "durationSec": 1.074542,
+      "afterCue": "040",
+      "beforeCue": "041",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 238.346,
+      "endSec": 239.66,
+      "durationSec": 1.314,
+      "afterCue": "041",
+      "beforeCue": "042",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 242.664583,
+      "endSec": 244.5,
+      "durationSec": 1.835417,
+      "afterCue": "042",
+      "beforeCue": "043",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 246.364667,
+      "endSec": 247.28,
+      "durationSec": 0.915333,
+      "afterCue": "043",
+      "beforeCue": "044",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 248.750833,
+      "endSec": 249.46,
+      "durationSec": 0.709167,
+      "afterCue": "044",
+      "beforeCue": "045",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 256.274917,
+      "endSec": 256.41,
+      "durationSec": 0.135083,
+      "afterCue": "045",
+      "beforeCue": "046",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 262.751375,
+      "endSec": 262.94,
+      "durationSec": 0.188625,
+      "afterCue": "046",
+      "beforeCue": "047",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 268.485792,
+      "endSec": 268.7,
+      "durationSec": 0.214208,
+      "afterCue": "047",
+      "beforeCue": "048",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 270.266708,
+      "endSec": 270.87,
+      "durationSec": 0.603292,
+      "afterCue": "048",
+      "beforeCue": "049",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 274.827458,
+      "endSec": 276.09,
+      "durationSec": 1.262542,
+      "afterCue": "049",
+      "beforeCue": "050",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 287.926667,
+      "endSec": 288.37,
+      "durationSec": 0.443333,
+      "afterCue": "050",
+      "beforeCue": "051",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 291.449167,
+      "endSec": 292.28,
+      "durationSec": 0.830833,
+      "afterCue": "051",
+      "beforeCue": "052",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 296.330667,
+      "endSec": 296.63,
+      "durationSec": 0.299333,
+      "afterCue": "052",
+      "beforeCue": "053",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 300.440333,
+      "endSec": 301.84,
+      "durationSec": 1.399667,
+      "afterCue": "053",
+      "beforeCue": "054",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 308.895958,
+      "endSec": 309.03,
+      "durationSec": 0.134042,
+      "afterCue": "054",
+      "beforeCue": "055",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 312.231083,
+      "endSec": 313.38,
+      "durationSec": 1.148917,
+      "afterCue": "055",
+      "beforeCue": "056",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 318.690625,
+      "endSec": 320.34,
+      "durationSec": 1.649375,
+      "afterCue": "056",
+      "beforeCue": "057",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 322.855208,
+      "endSec": 323.62,
+      "durationSec": 0.764792,
+      "afterCue": "057",
+      "beforeCue": "058",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 326.788083,
+      "endSec": 327.96,
+      "durationSec": 1.171917,
+      "afterCue": "058",
+      "beforeCue": "059",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 332.177667,
+      "endSec": 333.62,
+      "durationSec": 1.442333,
+      "afterCue": "059",
+      "beforeCue": "060",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 338.736083,
+      "endSec": 338.836083,
+      "durationSec": 0.1,
+      "afterCue": "060",
+      "beforeCue": "061",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 341.336833,
+      "endSec": 341.44,
+      "durationSec": 0.103167,
+      "afterCue": "061",
+      "beforeCue": "062",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 347.60075,
+      "endSec": 347.77,
+      "durationSec": 0.16925,
+      "afterCue": "062",
+      "beforeCue": "063",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 353.132167,
+      "endSec": 353.85,
+      "durationSec": 0.717833,
+      "afterCue": "063",
+      "beforeCue": "064",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 362.371125,
+      "endSec": 362.471125,
+      "durationSec": 0.1,
+      "afterCue": "064",
+      "beforeCue": "065",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 366.74275,
+      "endSec": 367.57,
+      "durationSec": 0.82725,
+      "afterCue": "065",
+      "beforeCue": "066",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 371.819708,
+      "endSec": 372.78,
+      "durationSec": 0.960292,
+      "afterCue": "066",
+      "beforeCue": "067",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 380.937458,
+      "endSec": 382.4,
+      "durationSec": 1.462542,
+      "afterCue": "067",
+      "beforeCue": "068",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 390.248292,
+      "endSec": 390.348292,
+      "durationSec": 0.1,
+      "afterCue": "068",
+      "beforeCue": "069",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 394.021167,
+      "endSec": 395.44,
+      "durationSec": 1.418833,
+      "afterCue": "069",
+      "beforeCue": "070",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 401.580875,
+      "endSec": 401.77,
+      "durationSec": 0.189125,
+      "afterCue": "070",
+      "beforeCue": "071",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 403.773792,
+      "endSec": 405.24,
+      "durationSec": 1.466208,
+      "afterCue": "071",
+      "beforeCue": "072",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 414.066583,
+      "endSec": 414.966583,
+      "durationSec": 0.9,
+      "afterCue": "072",
+      "beforeCue": "073",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 419.284542,
+      "endSec": 420.22,
+      "durationSec": 0.935458,
+      "afterCue": "073",
+      "beforeCue": "074",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 422.293667,
+      "endSec": 423.7,
+      "durationSec": 1.406333,
+      "afterCue": "074",
+      "beforeCue": "075",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 431.368,
+      "endSec": 432.1,
+      "durationSec": 0.732,
+      "afterCue": "075",
+      "beforeCue": "076",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 438.770625,
+      "endSec": 439.05,
+      "durationSec": 0.279375,
+      "afterCue": "076",
+      "beforeCue": "077",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 444.171833,
+      "endSec": 444.51,
+      "durationSec": 0.338167,
+      "afterCue": "077",
+      "beforeCue": "078",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 448.239417,
+      "endSec": 449.73,
+      "durationSec": 1.490583,
+      "afterCue": "078",
+      "beforeCue": "079",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 452.676083,
+      "endSec": 453.21,
+      "durationSec": 0.533917,
+      "afterCue": "079",
+      "beforeCue": "080",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 462.172708,
+      "endSec": 462.34,
+      "durationSec": 0.167292,
+      "afterCue": "080",
+      "beforeCue": "081",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 466.31375,
+      "endSec": 466.5,
+      "durationSec": 0.18625,
+      "afterCue": "081",
+      "beforeCue": "082",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 471.048708,
+      "endSec": 472.15,
+      "durationSec": 1.101292,
+      "afterCue": "082",
+      "beforeCue": "083",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 479.427083,
+      "endSec": 479.78,
+      "durationSec": 0.352917,
+      "afterCue": "083",
+      "beforeCue": "084",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 483.572542,
+      "endSec": 484.13,
+      "durationSec": 0.557458,
+      "afterCue": "084",
+      "beforeCue": "085",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 490.485292,
+      "endSec": 490.65,
+      "durationSec": 0.164708,
+      "afterCue": "085",
+      "beforeCue": "086",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 498.573333,
+      "endSec": 498.71,
+      "durationSec": 0.136667,
+      "afterCue": "086",
+      "beforeCue": "087",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 501.587708,
+      "endSec": 501.76,
+      "durationSec": 0.172292,
+      "afterCue": "087",
+      "beforeCue": "088",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 505.07325,
+      "endSec": 505.24,
+      "durationSec": 0.16675,
+      "afterCue": "088",
+      "beforeCue": "089",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 509.919833,
+      "endSec": 510.02,
+      "durationSec": 0.100167,
+      "afterCue": "089",
+      "beforeCue": "090",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 513.798625,
+      "endSec": 514.8,
+      "durationSec": 1.001375,
+      "afterCue": "090",
+      "beforeCue": "091",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 518.60475,
+      "endSec": 520.23,
+      "durationSec": 1.62525,
+      "afterCue": "091",
+      "beforeCue": "092",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 525.300833,
+      "endSec": 526.75,
+      "durationSec": 1.449167,
+      "afterCue": "092",
+      "beforeCue": "093",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 535.806583,
+      "endSec": 536.45,
+      "durationSec": 0.643417,
+      "afterCue": "093",
+      "beforeCue": "094",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 543.928417,
+      "endSec": 544.028417,
+      "durationSec": 0.1,
+      "afterCue": "094",
+      "beforeCue": "095",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 554.251042,
+      "endSec": 554.56,
+      "durationSec": 0.308958,
+      "afterCue": "095",
+      "beforeCue": "096",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 560.041,
+      "endSec": 560.22,
+      "durationSec": 0.179,
+      "afterCue": "096",
+      "beforeCue": "097",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 565.452333,
+      "endSec": 565.552333,
+      "durationSec": 0.1,
+      "afterCue": "097",
+      "beforeCue": "098",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 571.067083,
+      "endSec": 571.167083,
+      "durationSec": 0.1,
+      "afterCue": "098",
+      "beforeCue": "099",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 573.930042,
+      "endSec": 574.81,
+      "durationSec": 0.879958,
+      "afterCue": "099",
+      "beforeCue": "100",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 582.83925,
+      "endSec": 583.94,
+      "durationSec": 1.10075,
+      "afterCue": "100",
+      "beforeCue": "101",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 592.605583,
+      "endSec": 592.705583,
+      "durationSec": 0.1,
+      "afterCue": "101",
+      "beforeCue": "102",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 594.38975,
+      "endSec": 594.69,
+      "durationSec": 0.30025,
+      "afterCue": "102",
+      "beforeCue": "103",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 598.893167,
+      "endSec": 599.91,
+      "durationSec": 1.016833,
+      "afterCue": "103",
+      "beforeCue": "104",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 603.77625,
+      "endSec": 605.12,
+      "durationSec": 1.34375,
+      "afterCue": "104",
+      "beforeCue": "105",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 606.757375,
+      "endSec": 607.3,
+      "durationSec": 0.542625,
+      "afterCue": "105",
+      "beforeCue": "106",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 614.704,
+      "endSec": 614.88,
+      "durationSec": 0.176,
+      "afterCue": "106",
+      "beforeCue": "107",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 616.279167,
+      "endSec": 617.06,
+      "durationSec": 0.780833,
+      "afterCue": "107",
+      "beforeCue": "108",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 619.561833,
+      "endSec": 620.53,
+      "durationSec": 0.968167,
+      "afterCue": "108",
+      "beforeCue": "109",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 628.170458,
+      "endSec": 628.79,
+      "durationSec": 0.619542,
+      "afterCue": "109",
+      "beforeCue": "110",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 633.120167,
+      "endSec": 634.01,
+      "durationSec": 0.889833,
+      "afterCue": "110",
+      "beforeCue": "111",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 638.375792,
+      "endSec": 639.46,
+      "durationSec": 1.084208,
+      "afterCue": "111",
+      "beforeCue": "112",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 641.415042,
+      "endSec": 642.94,
+      "durationSec": 1.524958,
+      "afterCue": "112",
+      "beforeCue": "113",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 644.931458,
+      "endSec": 645.55,
+      "durationSec": 0.618542,
+      "afterCue": "113",
+      "beforeCue": "114",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 650.283042,
+      "endSec": 650.77,
+      "durationSec": 0.486958,
+      "afterCue": "114",
+      "beforeCue": "115",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 653.527,
+      "endSec": 654.68,
+      "durationSec": 1.153,
+      "afterCue": "115",
+      "beforeCue": "116",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 656.595833,
+      "endSec": 657.29,
+      "durationSec": 0.694167,
+      "afterCue": "116",
+      "beforeCue": "117",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 663.236292,
+      "endSec": 663.38,
+      "durationSec": 0.143708,
+      "afterCue": "117",
+      "beforeCue": "118",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 672.768167,
+      "endSec": 672.868167,
+      "durationSec": 0.1,
+      "afterCue": "118",
+      "beforeCue": "119",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "between",
+      "startSec": 677.874,
+      "endSec": 678.15,
+      "durationSec": 0.276,
+      "afterCue": "119",
+      "beforeCue": "120",
+      "reviewSuggested": false,
+      "thresholdSec": 2.0
+    },
+    {
+      "position": "closing",
+      "startSec": 683.385208,
+      "endSec": 683.814714,
+      "durationSec": 0.429506,
+      "afterCue": "120",
+      "beforeCue": null,
+      "reviewSuggested": false,
+      "thresholdSec": 1.5
+    }
+  ],
+  "interpretation": "Flags require review of visible work and reading needs; they do not authorize cuts or prove poor pacing."
+}

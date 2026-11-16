@@ -1,0 +1,749 @@
+{
+  "sourceVideo": "/Users/lhottelouis/Library/CloudStorage/OneDrive-TheBostonConsultingGroup,Inc/Desktop/Manim-animation/animations/Protocols/Protocols_1080p60.mp4",
+  "durationSec": 683.814714,
+  "cues": [
+    {
+      "id": "001",
+      "startSec": 0.0,
+      "text": "TCP, HTTP, HTTPS. What really happens when one machine calls another? Follow one request from a phone in Paris to a server in Singapore, down through the layers that make it work.",
+      "latestEndSec": 14.4
+    },
+    {
+      "id": "002",
+      "startSec": 14.48,
+      "text": "L\u00e9a is a courier working in Paris. She taps her screen, and a third of a second later, at best, her next deliveries appear.",
+      "latestEndSec": 23.53
+    },
+    {
+      "id": "003",
+      "startSec": 23.61,
+      "text": "That answer has travelled all the way from a server in Singapore.",
+      "latestEndSec": 27.69
+    },
+    {
+      "id": "004",
+      "startSec": 27.77,
+      "text": "Ten thousand seven hundred kilometres away.",
+      "latestEndSec": 30.3,
+      "speed": 1.018
+    },
+    {
+      "id": "005",
+      "startSec": 30.38,
+      "text": "Even light in glass fibre needs more than fifty milliseconds for that single trip.",
+      "latestEndSec": 35.95
+    },
+    {
+      "id": "006",
+      "startSec": 36.03,
+      "text": "And before the answer arrived, the trip was made six times: three complete round trips, back and forth across that distance.",
+      "latestEndSec": 44.04
+    },
+    {
+      "id": "007",
+      "startSec": 44.12,
+      "text": "Why three? Because her app does not simply send one message.",
+      "latestEndSec": 48.38
+    },
+    {
+      "id": "008",
+      "startSec": 48.46,
+      "text": "It runs five small steps: find the server's address, open a connection,",
+      "latestEndSec": 53.6
+    },
+    {
+      "id": "009",
+      "startSec": 53.68,
+      "text": "secure it, send a request, and finally read the reply.",
+      "latestEndSec": 58.190000000000005
+    },
+    {
+      "id": "010",
+      "startSec": 58.27,
+      "text": "Each step speaks a protocol, and each protocol relies on the one below it.",
+      "latestEndSec": 63.84
+    },
+    {
+      "id": "011",
+      "startSec": 63.92,
+      "text": "So start at the bottom. What does a network really carry? Follow the data, and those four layers will start to make sense.",
+      "latestEndSec": 72.24
+    },
+    {
+      "id": "012",
+      "startSec": 72.32,
+      "text": "First, the address. A directory service, DNS, turns the server's name into a number: an IP address.",
+      "latestEndSec": 79.63
+    },
+    {
+      "id": "013",
+      "startSec": 79.71,
+      "text": "The phone and the server use these addresses to exchange packets.",
+      "latestEndSec": 84.19
+    },
+    {
+      "id": "014",
+      "startSec": 84.27,
+      "text": "Now the server sends L\u00e9a the map of her course: two hundred and thirty kilobytes of image data.",
+      "latestEndSec": 90.71000000000001
+    },
+    {
+      "id": "015",
+      "startSec": 90.79,
+      "text": "This network cannot carry it in one piece.",
+      "latestEndSec": 93.75
+    },
+    {
+      "id": "016",
+      "startSec": 93.83,
+      "text": "It is cut into packets of at most fifteen hundred bytes. Each carries its destination, ready for the routers ahead.",
+      "latestEndSec": 101.82000000000001
+    },
+    {
+      "id": "017",
+      "startSec": 101.9,
+      "text": "Routers pass each packet along, hop by hop, using its destination address to choose the way.",
+      "latestEndSec": 107.47,
+      "speed": 1.044
+    },
+    {
+      "id": "018",
+      "startSec": 107.55,
+      "text": "Packets may take different roads, and even overtake each other.",
+      "latestEndSec": 111.39
+    },
+    {
+      "id": "019",
+      "startSec": 111.47,
+      "text": "And an overwhelmed router simply drops what it cannot hold. Watch the queue overflow as packets arrive.",
+      "latestEndSec": 118.0
+    },
+    {
+      "id": "020",
+      "startSec": 118.08,
+      "text": "This is all the Internet Protocol promises: its best effort.",
+      "latestEndSec": 122.35000000000001
+    },
+    {
+      "id": "021",
+      "startSec": 122.43,
+      "text": "In this run, nine packets of the picture never arrived. The red gaps show exactly what is missing. The network itself does not repair them.",
+      "latestEndSec": 131.25
+    },
+    {
+      "id": "022",
+      "startSec": 131.33,
+      "text": "TCP repairs all this, and it starts with a connection.",
+      "latestEndSec": 135.6
+    },
+    {
+      "id": "023",
+      "startSec": 135.68,
+      "text": "On the server, a program listens on a numbered door, called a port. Four four three is the usual port for HTTPS.",
+      "latestEndSec": 144.97
+    },
+    {
+      "id": "024",
+      "startSec": 145.05,
+      "text": "The phone sends a packet flagged SYN: let's synchronise.",
+      "latestEndSec": 148.88
+    },
+    {
+      "id": "025",
+      "startSec": 148.96,
+      "text": "The server answers SYN, ACK. The phone acknowledges.",
+      "latestEndSec": 152.35999999999999
+    },
+    {
+      "id": "026",
+      "startSec": 152.44,
+      "text": "This is the handshake: three packets, one round trip,",
+      "latestEndSec": 156.26999999999998
+    },
+    {
+      "id": "027",
+      "startSec": 156.35,
+      "text": "and each side knows the other is there. The connection is ready, but no application data has moved yet.",
+      "latestEndSec": 163.04
+    },
+    {
+      "id": "028",
+      "startSec": 163.12,
+      "text": "If no program listens on that port, the machine itself answers at once with a reset. There is no listener:",
+      "latestEndSec": 169.98999999999998
+    },
+    {
+      "id": "029",
+      "startSec": 170.07,
+      "text": "connection refused. An answer comes back immediately.",
+      "latestEndSec": 173.7
+    },
+    {
+      "id": "030",
+      "startSec": 173.78,
+      "text": "But if a firewall silently drops the packet, nothing comes back.",
+      "latestEndSec": 178.48999999999998
+    },
+    {
+      "id": "031",
+      "startSec": 178.57,
+      "text": "The phone asks again after one second, and again,",
+      "latestEndSec": 182.39999999999998
+    },
+    {
+      "id": "032",
+      "startSec": 182.48,
+      "text": "then waits longer and longer, before giving up. Here, that happens after seventy-five seconds.",
+      "latestEndSec": 188.7
+    },
+    {
+      "id": "033",
+      "startSec": 188.78,
+      "text": "A refusal is fast, a timeout is slow, and that difference already tells us where to look for the failure.",
+      "latestEndSec": 195.66
+    },
+    {
+      "id": "034",
+      "startSec": 195.74,
+      "text": "Refused: something answered no. Usually the machine itself: nothing listens on that port.",
+      "latestEndSec": 201.30999999999997,
+      "speed": 1.008
+    },
+    {
+      "id": "035",
+      "startSec": 201.39,
+      "text": "Timed out: perhaps a firewall dropping packets, or an address where no machine answers. All the caller knows is that nothing came back.",
+      "latestEndSec": 209.76999999999998
+    },
+    {
+      "id": "036",
+      "startSec": 209.85,
+      "text": "TCP numbers every byte.",
+      "latestEndSec": 212.38
+    },
+    {
+      "id": "037",
+      "startSec": 212.46,
+      "text": "Each packet says where its bytes belong, so the phone can put them back in order, even after a scrambled arrival.",
+      "latestEndSec": 219.32999999999998
+    },
+    {
+      "id": "038",
+      "startSec": 219.41,
+      "text": "In this model, each packet gets an acknowledgment: I have everything up to here. That returning number tells the sender how far the receiver got.",
+      "latestEndSec": 227.83999999999997,
+      "speed": 1.012
+    },
+    {
+      "id": "039",
+      "startSec": 227.92,
+      "text": "The server starts carefully: ten packets.",
+      "latestEndSec": 230.45,
+      "speed": 1.055
+    },
+    {
+      "id": "040",
+      "startSec": 230.53,
+      "text": "Each acknowledgment that comes back lets it send two more.",
+      "latestEndSec": 234.79
+    },
+    {
+      "id": "041",
+      "startSec": 234.87,
+      "text": "Twenty packets in the second round trip: this is slow start.",
+      "latestEndSec": 239.57999999999998
+    },
+    {
+      "id": "042",
+      "startSec": 239.66,
+      "text": "Forty in the third: the window doubles each round.",
+      "latestEndSec": 243.92
+    },
+    {
+      "id": "043",
+      "startSec": 244.0,
+      "text": "And in the fourth, eighty packets.",
+      "latestEndSec": 247.2
+    },
+    {
+      "id": "044",
+      "startSec": 247.28,
+      "text": "Then a packet is lost.",
+      "latestEndSec": 249.38
+    },
+    {
+      "id": "045",
+      "startSec": 249.46,
+      "text": "The phone keeps what follows, but cannot hand it to the app. Those later bytes must wait: there is a hole in the stream.",
+      "latestEndSec": 256.33000000000004,
+      "speed": 0.98
+    },
+    {
+      "id": "046",
+      "startSec": 256.41,
+      "text": "Its acknowledgments repeat the same number. Three repeats, and the server sends that missing packet again,",
+      "latestEndSec": 262.86
+    },
+    {
+      "id": "047",
+      "startSec": 262.94,
+      "text": "and cuts its window. TCP treats this loss as congestion, and sends less at once.",
+      "latestEndSec": 268.62
+    },
+    {
+      "id": "048",
+      "startSec": 268.7,
+      "text": "One more round trip, and",
+      "latestEndSec": 270.79
+    },
+    {
+      "id": "049",
+      "startSec": 270.87,
+      "text": "the hole is filled. The picture is complete: every byte, in order.",
+      "latestEndSec": 276.01
+    },
+    {
+      "id": "050",
+      "startSec": 276.09,
+      "text": "That is TCP's promise: bytes go in at one end, and the same bytes come out at the other, in order. The application works with a stream, while TCP handles the missing pieces underneath.",
+      "latestEndSec": 288.29
+    },
+    {
+      "id": "051",
+      "startSec": 288.37,
+      "text": "On that stream, the two programs can finally talk.",
+      "latestEndSec": 292.2
+    },
+    {
+      "id": "052",
+      "startSec": 292.28,
+      "text": "Their language is HTTP. Version one uses plain text.",
+      "latestEndSec": 296.55
+    },
+    {
+      "id": "053",
+      "startSec": 296.63,
+      "text": "A request: a method, GET; a path, which says what is wanted;",
+      "latestEndSec": 301.76
+    },
+    {
+      "id": "054",
+      "startSec": 301.84,
+      "text": "then headers, one per line. Finally, an empty line marks the end of the headers. This GET request needs no body.",
+      "latestEndSec": 308.95,
+      "speed": 0.98
+    },
+    {
+      "id": "055",
+      "startSec": 309.03,
+      "text": "The server reads the path, finds the function in charge,",
+      "latestEndSec": 313.3
+    },
+    {
+      "id": "056",
+      "startSec": 313.38,
+      "text": "and answers in the same style: a status line, headers, an empty line, and the body.",
+      "latestEndSec": 320.26
+    },
+    {
+      "id": "057",
+      "startSec": 320.34,
+      "text": "Here, L\u00e9a's delivery course, as JSON.",
+      "latestEndSec": 323.54
+    },
+    {
+      "id": "058",
+      "startSec": 323.62,
+      "text": "The status code says how it went. Two hundred: fine.",
+      "latestEndSec": 327.88
+    },
+    {
+      "id": "059",
+      "startSec": 327.96,
+      "text": "Four hundred and four: the caller asked for something that does not exist.",
+      "latestEndSec": 333.54
+    },
+    {
+      "id": "060",
+      "startSec": 333.62,
+      "text": "Four hundred and one: the request lacks valid credentials to identify the caller.",
+      "latestEndSec": 338.75,
+      "speed": 0.985
+    },
+    {
+      "id": "061",
+      "startSec": 338.83,
+      "text": "Five hundred: the server itself failed.",
+      "latestEndSec": 341.36
+    },
+    {
+      "id": "062",
+      "startSec": 341.44,
+      "text": "So read the first digit. Four means a client error. Five means a server error. That is the first clue.",
+      "latestEndSec": 347.69,
+      "speed": 1.03
+    },
+    {
+      "id": "063",
+      "startSec": 347.77,
+      "text": "HTTP is stateless: nothing in the protocol ties a request to the one before it.",
+      "latestEndSec": 353.77000000000004
+    },
+    {
+      "id": "064",
+      "startSec": 353.85,
+      "text": "So each request carries its own context, including who is asking. This token identifies the caller, and the server checks it every time.",
+      "latestEndSec": 362.27000000000004,
+      "speed": 1.065
+    },
+    {
+      "id": "065",
+      "startSec": 362.35,
+      "text": "Opening a connection for every request costs two round trips each time.",
+      "latestEndSec": 367.49
+    },
+    {
+      "id": "066",
+      "startSec": 367.57,
+      "text": "Keep the connection, and the next request costs one: that is keep-alive.",
+      "latestEndSec": 372.7
+    },
+    {
+      "id": "067",
+      "startSec": 372.78,
+      "text": "HTTP two goes further: several requests travel at once on the same connection. The third lane shows them overlapping.",
+      "latestEndSec": 382.32
+    },
+    {
+      "id": "068",
+      "startSec": 382.4,
+      "text": "There is a problem. Those packets cross networks belonging to strangers: a caf\u00e9's Wi-Fi, then several operators along the route.",
+      "latestEndSec": 390.14000000000004,
+      "speed": 1.032
+    },
+    {
+      "id": "069",
+      "startSec": 390.22,
+      "text": "Anyone on the path can read every byte: the path, the answer,",
+      "latestEndSec": 395.36
+    },
+    {
+      "id": "070",
+      "startSec": 395.44,
+      "text": "and the token. Copying it is enough to pass for L\u00e9a. The server accepts the stolen token and answers.",
+      "latestEndSec": 401.69,
+      "speed": 0.992
+    },
+    {
+      "id": "071",
+      "startSec": 401.77,
+      "text": "They can also change bytes on the way.",
+      "latestEndSec": 405.16
+    },
+    {
+      "id": "072",
+      "startSec": 405.24,
+      "text": "Twenty-four euros forty becomes two forty-four. The phone cannot detect that the amount has changed. Reliable delivery does not prevent tampering.",
+      "latestEndSec": 414.05,
+      "speed": 1.065
+    },
+    {
+      "id": "073",
+      "startSec": 414.13,
+      "text": "HTTPS slips TLS into the stack, securing the connection.",
+      "latestEndSec": 420.14000000000004
+    },
+    {
+      "id": "074",
+      "startSec": 420.22,
+      "text": "It begins with a handshake of its own.",
+      "latestEndSec": 423.62
+    },
+    {
+      "id": "075",
+      "startSec": 423.7,
+      "text": "Each side invents a secret number, and sends the other a public value computed from it. The secret stays on its own machine.",
+      "latestEndSec": 432.02000000000004
+    },
+    {
+      "id": "076",
+      "startSec": 432.1,
+      "text": "Mixing its own secret with the other's public value, each side arrives at the same key. Both results match.",
+      "latestEndSec": 438.97
+    },
+    {
+      "id": "077",
+      "startSec": 439.05,
+      "text": "The eavesdropper saw both public values, but lacks the secrets needed to compute the key.",
+      "latestEndSec": 444.43
+    },
+    {
+      "id": "078",
+      "startSec": 444.51,
+      "text": "But a key shared with whom? The server must also prove its name.",
+      "latestEndSec": 449.65000000000003
+    },
+    {
+      "id": "079",
+      "startSec": 449.73,
+      "text": "It presents a certificate, signed by an authority,",
+      "latestEndSec": 453.13
+    },
+    {
+      "id": "080",
+      "startSec": 453.21,
+      "text": "itself signed by a root that the phone already trusts. That root comes from the trusted authorities installed on the system, shown here as the grid below.",
+      "latestEndSec": 462.26,
+      "speed": 0.978
+    },
+    {
+      "id": "081",
+      "startSec": 462.34,
+      "text": "The chain holds, and the name matches the server being contacted.",
+      "latestEndSec": 466.42
+    },
+    {
+      "id": "082",
+      "startSec": 466.5,
+      "text": "One thing is still missing: a certificate is public. Anyone can copy it.",
+      "latestEndSec": 472.07
+    },
+    {
+      "id": "083",
+      "startSec": 472.15,
+      "text": "So the server signs the handshake with the matching private key, which never leaves it. The signature proves it holds that key.",
+      "latestEndSec": 479.7
+    },
+    {
+      "id": "084",
+      "startSec": 479.78,
+      "text": "An impostor can copy the certificate, but not that private key.",
+      "latestEndSec": 484.05
+    },
+    {
+      "id": "085",
+      "startSec": 484.13,
+      "text": "Here, it tries a certificate of its own making. No trusted authority vouches for it, so the chain breaks.",
+      "latestEndSec": 490.57,
+      "speed": 0.991
+    },
+    {
+      "id": "086",
+      "startSec": 490.65,
+      "text": "The handshake stops right there, with an error pointing to the identity check: certificate verify failed. The request never goes through.",
+      "latestEndSec": 498.63,
+      "speed": 0.982
+    },
+    {
+      "id": "087",
+      "startSec": 498.71,
+      "text": "From then on, every application byte is sealed.",
+      "latestEndSec": 501.68
+    },
+    {
+      "id": "088",
+      "startSec": 501.76,
+      "text": "On the wire, the same request becomes unreadable noise.",
+      "latestEndSec": 505.16
+    },
+    {
+      "id": "089",
+      "startSec": 505.24,
+      "text": "Flip a single bit, and the receiver rejects the whole record. It detects the change.",
+      "latestEndSec": 509.94,
+      "speed": 1.062
+    },
+    {
+      "id": "090",
+      "startSec": 510.02,
+      "text": "What still shows: the two addresses, the size of the messages,",
+      "latestEndSec": 514.7199999999999
+    },
+    {
+      "id": "091",
+      "startSec": 514.8,
+      "text": "and, in this handshake, the server's name, in a field called SNI.",
+      "latestEndSec": 520.15
+    },
+    {
+      "id": "092",
+      "startSec": 520.23,
+      "text": "The price, with TLS one point three: one more round trip when the connection opens.",
+      "latestEndSec": 526.67
+    },
+    {
+      "id": "093",
+      "startSec": 526.75,
+      "text": "In exchange: privacy, tamper detection, and proof of the server's identity. The conversation stays the same, protected inside the stream.",
+      "latestEndSec": 536.37
+    },
+    {
+      "id": "094",
+      "startSec": 536.45,
+      "text": "In production, a load balancer receives the request. Often, the sealed pipe ends here, before the request passes onward.",
+      "latestEndSec": 543.76,
+      "speed": 1.065
+    },
+    {
+      "id": "095",
+      "startSec": 543.84,
+      "text": "Behind it, the balancer opens its own connection to an application server, which opens others: to a solver, to a database. Every link has its own endpoints.",
+      "latestEndSec": 554.4799999999999
+    },
+    {
+      "id": "096",
+      "startSec": 554.56,
+      "text": "Each link is a separate TCP connection, kept open and reused whenever possible.",
+      "latestEndSec": 560.14
+    },
+    {
+      "id": "097",
+      "startSec": 560.22,
+      "text": "Not all speak HTTP: a database has its own language for requests and results.",
+      "latestEndSec": 565.3499999999999,
+      "speed": 1.061
+    },
+    {
+      "id": "098",
+      "startSec": 565.43,
+      "text": "But underneath, it is the same reliable stream of bytes, with separate endpoints for each connection.",
+      "latestEndSec": 570.8199999999999,
+      "speed": 1.074
+    },
+    {
+      "id": "099",
+      "startSec": 570.9,
+      "text": "So when something breaks, the chain tells us where.",
+      "latestEndSec": 574.7299999999999
+    },
+    {
+      "id": "100",
+      "startSec": 574.81,
+      "text": "The application is down: its port refuses, and the balancer answers five zero two, or five zero three with some products.",
+      "latestEndSec": 583.86
+    },
+    {
+      "id": "101",
+      "startSec": 583.94,
+      "text": "The solver takes three point four seconds, but the balancer only waits three: five zero four. Its deadline expires before the reply.",
+      "latestEndSec": 592.43,
+      "speed": 1.012
+    },
+    {
+      "id": "102",
+      "startSec": 592.51,
+      "text": "And every hop costs time.",
+      "latestEndSec": 594.61
+    },
+    {
+      "id": "103",
+      "startSec": 594.69,
+      "text": "A round trip to Singapore: a hundred and five milliseconds, at best.",
+      "latestEndSec": 599.8299999999999
+    },
+    {
+      "id": "104",
+      "startSec": 599.91,
+      "text": "A new secure connection needs three of them before the answer comes;",
+      "latestEndSec": 605.04
+    },
+    {
+      "id": "105",
+      "startSec": 605.12,
+      "text": "an open one, just one.",
+      "latestEndSec": 607.2199999999999
+    },
+    {
+      "id": "106",
+      "startSec": 607.3,
+      "text": "So keep connections open, and put servers close to their users. Shorter distances reduce the delay on every round trip.",
+      "latestEndSec": 614.8,
+      "speed": 1.02
+    },
+    {
+      "id": "107",
+      "startSec": 614.88,
+      "text": "Back to the five lines.",
+      "latestEndSec": 616.9799999999999
+    },
+    {
+      "id": "108",
+      "startSec": 617.06,
+      "text": "The first asks a directory for an address.",
+      "latestEndSec": 620.4499999999999
+    },
+    {
+      "id": "109",
+      "startSec": 620.53,
+      "text": "The second opens a connection: TCP, a reliable stream of bytes, on top of IP, packets with no guarantee.",
+      "latestEndSec": 628.7099999999999
+    },
+    {
+      "id": "110",
+      "startSec": 628.79,
+      "text": "The third seals it: TLS, a private stream with a proven identity.",
+      "latestEndSec": 633.93
+    },
+    {
+      "id": "111",
+      "startSec": 634.01,
+      "text": "The last two speak HTTP: send a request, and read a response.",
+      "latestEndSec": 639.38
+    },
+    {
+      "id": "112",
+      "startSec": 639.46,
+      "text": "And each line fails in its own way.",
+      "latestEndSec": 642.86
+    },
+    {
+      "id": "113",
+      "startSec": 642.94,
+      "text": "The first: the name is unknown.",
+      "latestEndSec": 645.4699999999999
+    },
+    {
+      "id": "114",
+      "startSec": 645.55,
+      "text": "The second: a refusal, if nothing listens; a timeout, if nothing answers.",
+      "latestEndSec": 650.6899999999999
+    },
+    {
+      "id": "115",
+      "startSec": 650.77,
+      "text": "The third: a certificate that does not check out.",
+      "latestEndSec": 654.5999999999999
+    },
+    {
+      "id": "116",
+      "startSec": 654.68,
+      "text": "The last two: a status code.",
+      "latestEndSec": 657.2099999999999
+    },
+    {
+      "id": "117",
+      "startSec": 657.29,
+      "text": "Find the line that failed, and the error points to the layer that needs attention. Start investigating there.",
+      "latestEndSec": 663.3,
+      "speed": 1.069
+    },
+    {
+      "id": "118",
+      "startSec": 663.38,
+      "text": "One request, four layers: each one simpler because of the one below it. Unreliable packets become a meaningful, protected conversation.",
+      "latestEndSec": 672.7199999999999
+    },
+    {
+      "id": "119",
+      "startSec": 672.8,
+      "text": "Packets carry bytes. TCP puts them in order. TLS protects the stream.",
+      "latestEndSec": 678.0699999999999
+    },
+    {
+      "id": "120",
+      "startSec": 678.15,
+      "text": "HTTP gives it meaning. Four layers, one conversation. Thanks for watching.",
+      "latestEndSec": 683.3
+    }
+  ]
+}

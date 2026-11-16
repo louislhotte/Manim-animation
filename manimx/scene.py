@@ -31,7 +31,8 @@ Three ways to pace captions, from simplest to most deliberate:
   and the hold waits only for what is left of the caption's reading time (Yjs);
 * ``tell(caption, vo)`` + ``cue("phrase")``: a film made to be narrated. A beat lasts
   as long as its voice-over line; the picture changes when the narrator reaches a
-  word. ``MX_TRACE_DIR`` + ``tools/voiceover.py`` produce the timed script (Terraform).
+  word. ``voice(vo)`` is the same beat with no caption at all.
+  ``MX_TRACE_DIR`` + ``tools/voiceover.py`` produce the timed script (Terraform).
 """
 
 from __future__ import annotations
@@ -297,13 +298,47 @@ class ExplainerMixin:
         )
         return self.cap(caption, need=need, note=vo, **kw)
 
+    def voice(self, vo, at=0.0):
+        """Start a narrated beat that has *no* caption: the picture and the voice
+        carry it (a film whose text steps back). The running caption, if there is
+        one, leaves first. ``cue`` / ``hold`` / ``settle`` then work as after
+        ``tell``, and the line goes to the trace for ``tools/voiceover.py``."""
+        old = self._cap
+        if old is not None and old in self.mobjects:
+            self.play(FadeOut(old, shift=UP * 0.1), run_time=0.35)
+        self._cap = None
+        self._vo = vo
+        self._vo_t0 = self._cap_t0 = self.renderer.time + at
+        self._cap_need = len(vo.split()) / self.WPS + self.VO_PAD
+        self._note("", at, vo)
+
+    def until(self, phrase, lead=0.3):
+        """Seconds from now until the narrator reaches ``phrase`` in the current line."""
+        i = self._vo.index(phrase)
+        t = len(self._vo[:i].split()) / self.WPS - lead
+        return self._vo_t0 + t - self.renderer.time
+
+    def time_left(self, extra=0.0):
+        """Seconds left of the current line (plus ``extra``)."""
+        t = self._cap_need + extra - (self.renderer.time - self._cap_t0)
+        return min(t, 0.6) if self.pace.quick else t
+
+    def span(self, phrase=None, floor=0.5, lead=0.3, cap=None):
+        """How long a motion should last to end when the narrator reaches ``phrase``
+        (or, without one, the end of the line), never less than ``floor``: the
+        picture keeps moving while the voice talks, instead of finishing early and
+        freezing until the cue. ``self.play(clock.run(210, self.span("twenty")))``."""
+        rt = self.until(phrase, lead) if phrase else self.time_left()
+        rt = max(floor, rt)
+        if cap is not None:
+            rt = min(rt, cap)
+        return min(rt, 0.5) if self.pace.quick else rt
+
     def cue(self, phrase, lead=0.3, ambient=None):
         """Wait until the narrator reaches ``phrase`` in the current line, so the
         picture changes on the right word (``lead`` seconds early). ``ambient(rt)``
         fills the wait with motion, as in ``hold``."""
-        i = self._vo.index(phrase)
-        t = len(self._vo[:i].split()) / self.WPS - lead
-        left = self._vo_t0 + t - self.renderer.time
+        left = self.until(phrase, lead)
         if self.pace.quick:
             left = min(left, 0.12)
         if ambient is not None and left >= 0.8:

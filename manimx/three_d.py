@@ -43,6 +43,29 @@ class Painter(Mobject):
         raise NotImplementedError
 
 
+class Layer(Painter):
+    """A painter with an ``alpha`` that Manim's fades understand (``FadeIn``,
+    ``FadeOut``, ``wipe()``), and that is repainted on every frame: its picture
+    usually depends on plain attributes that something else animates (``Tween``,
+    a clock)."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.alpha = 1.0
+        self.add_updater(lambda m: None)  # never baked into the static background
+
+    def fade(self, darkness=0.5, family=True):
+        self.alpha = self.alpha * (1 - darkness)
+        return self
+
+    def set_opacity(self, opacity, family=True):
+        self.alpha = float(opacity)
+        return self
+
+    def interpolate_color(self, mobject1, mobject2, alpha):
+        self.alpha = (1 - alpha) * mobject1.alpha + alpha * mobject2.alpha
+
+
 class PainterCameraMixin:
     """Adds ``Painter`` mobjects to a Cairo camera."""
 
@@ -57,8 +80,18 @@ class PainterCameraMixin:
         mobjects.sort(key=lambda m: not getattr(m, "underlay", False))
         for kind, group in it.groupby(mobjects, self.type_or_raise):
             if kind is Painter:
+                # Manim and the painters share one Cairo context. Manim leaves its
+                # last vector path in it (it only ever strokes and fills with
+                # ``_preserve``), so a painter's first ``stroke()`` would redraw that
+                # path in its own colour; and a painter's line caps, joins and dashes
+                # would stay set for every vector mobject drawn after it.
+                ctx = self.get_cairo_context(self.pixel_array)
                 for m in group:
+                    ctx.save()
+                    ctx.new_path()
                     m.paint(self, self.pixel_array)
+                    ctx.restore()
+                    ctx.new_path()
             else:
                 self.display_funcs[kind](list(group), self.pixel_array)
 
