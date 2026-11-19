@@ -296,8 +296,9 @@ def jlines(obj, fold=(), keep=None, inline=44, indent=2, _path="", _depth=0):
     ``fold``: paths (``"params._meta"``) printed as ``{ … }`` / ``[ … ]``;
     ``keep``: ``{path: [keys]}``, the keys of that object to print, the others
     becoming one ``…`` entry; a container whose one-line form is at most ``inline``
-    characters stays on one line. What is left out is always marked with an ellipsis:
-    nothing is silently dropped.
+    characters stays on one line, and a ``"key": "long string"`` that would pass
+    ``inline`` breaks after its colon. What is left out is always marked with an
+    ellipsis: nothing is silently dropped.
     """
     pad = " " * (indent * _depth)
     if not isinstance(obj, (dict, list)):
@@ -318,7 +319,12 @@ def jlines(obj, fold=(), keep=None, inline=44, indent=2, _path="", _depth=0):
         sub = f"{_path}.{key}" if key is not None else f"{_path}[{i}]"
         lines = jlines(value, fold, keep, inline, indent, sub.lstrip("."), _depth + 1)
         if key is not None:
-            lines[0] = f"{json.dumps(key)}: {lines[0]}"
+            head = f"{json.dumps(key)}: "
+            scalar = not isinstance(value, (dict, list))
+            if scalar and len(pad) + indent + len(head) + len(lines[0]) + 1 > inline:
+                lines = [head.rstrip(), " " * indent + lines[0]]
+            else:
+                lines[0] = head + lines[0]
         parts.append(lines)
     if cut:
         parts.append([ELLIPSIS])
