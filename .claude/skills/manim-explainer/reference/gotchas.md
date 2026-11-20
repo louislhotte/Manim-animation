@@ -221,6 +221,34 @@ handles the ones marked (lib).
   `Succession(Wait(0.25), FadeIn(b, run_time=0.4))` in the same play (no play-level
   `run_time`). `then()` and `cap()` in `manimx` do this.
 
+## Claims, conventions and scale (`animations/Certificates`, `animations/MCP`)
+- **Look a living standard up before writing a film about it.** The MCP film was
+  storyboarded from memory around the `initialize` handshake; the current revision
+  (2026-07-28) had removed it. A read-only search of the specification changed half
+  the film. Say which revision or ballot the film shows, on screen.
+- **Size glyphs for the frame from the start.** The first cut of Certificates had keys
+  0.6 wide, a browser 3.6 wide and a hero card over a third of the frame: every
+  contact sheet read "small things in an empty frame". Rule of thumb: a secondary
+  icon is about 1 unit, a hero panel 5 or more, body text 20 pt and up. Real metrics:
+  Menlo advances 0.0083 x font size per character (0.15 at 18 pt), Helvetica about
+  0.12 at 18 pt; a layout planned with smaller numbers does not fit.
+- **A colour convention must hold in failure states too.** "A seal has its signer's
+  colour": turning a broken seal red said "signed by the forger". Mark the failure
+  with a cross, do not recolour.
+- **An object that "never leaves" must not be animated leaving.** The private key
+  slid across the frame on the words "never leaves it". Move the other thing.
+- **A source note must be true of the picture above it.** One note for the whole film
+  ("fingerprints are real SHA-256") sat under scenes with no fingerprint. One note per
+  scene, saying what is real in *that* picture.
+- **A list said in one breath gives each item under a second on screen.** Three error
+  names in three seconds could not be read: give each item its own clause.
+- **Narration speed.** The voice-over is produced with a text-to-speech pipeline that
+  speaks about 2.8 words a second (measured on the Protocols takes). Films paced at 2.3
+  had lines padded afterwards: use `WPS = 2.6`, `VO_PAD = 0.7`.
+- **When nothing may be executed**, write the artifact by hand, label it as an
+  illustration on screen, and compute what plain Python can (`hashlib`, a real
+  function on seeded data), with asserts at import (`facts.py`, `wire.py`).
+
 ## Clock-driven pictures (`animations/Protocols`)
 When the data is a list of timed events (a packet leaves at 105.6 ms and arrives at
 158.1 ms, a queue overflows, an acknowledgment comes back), do not choreograph

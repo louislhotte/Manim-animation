@@ -1,0 +1,59 @@
+1
+00:00:00,000 --> 00:00:08,677
+Certificates. How does a server prove who it is? With a name, a key, and a signature that anyone can check.
+
+2
+00:00:13,983 --> 00:00:24,968
+Your browser connects to shop dot example, and a server answers with its public key. But anyone can make a key, and anyone can claim a name.
+
+3
+00:00:25,067 --> 00:00:32,205
+Two servers, two keys, the same claim. Nothing here tells the browser which one is the shop.
+
+4
+00:00:32,317 --> 00:00:41,378
+A certificate settles it. It is a statement that this key belongs to this name, signed by someone the browser already trusts.
+
+5
+00:00:43,100 --> 00:00:51,392
+Inside, four fields matter: the name, the public key, the dates between which it is valid, and who issued it.
+
+6
+00:00:51,500 --> 00:01:06,331
+The issuer is a certificate authority. Once it has checked that the shop controls the name, it hashes those fields into a fingerprint, and signs the fingerprint with its own private key. That signature is the seal.
+
+7
+00:01:06,433 --> 00:01:14,341
+Anyone holding the authority's public key can check the seal against the fingerprint. They agree: the certificate is intact.
+
+8
+00:01:14,450 --> 00:01:23,127
+Change a single letter, and nothing matches any more. And without the authority's private key, nobody can make a new seal.
+
+9
+00:01:24,433 --> 00:01:33,110
+But who vouches for the authority? Another certificate: its key is signed by a root authority. And the root signs itself.
+
+10
+00:01:33,200 --> 00:01:44,185
+That would prove nothing, except for one thing. The root is already on your device: operating systems and browsers ship with more than a hundred of them.
+
+11
+00:01:44,300 --> 00:01:53,746
+So the browser climbs. Each seal is checked with the key of the certificate above, until it reaches a root it already holds.
+
+12
+00:01:55,050 --> 00:02:07,188
+On every connection, the browser checks at least three things. The chain reaches a root it trusts. Today is inside the validity dates. The name matches the address you typed.
+
+13
+00:02:07,300 --> 00:02:18,669
+Fail any one of them, and the browser stops you: an issuer it does not know, a date that has passed, or a name that does not match.
+
+14
+00:02:18,783 --> 00:02:32,460
+One last thing: a certificate is public, so anyone can copy it. That is why the server must also sign this handshake, fresh random numbers included, with the private key that never leaves it.
+
+15
+00:02:32,567 --> 00:02:48,551
+And a site's certificate expires on purpose, sooner and sooner: two hundred days at most in twenty twenty-six, forty-seven from twenty twenty-nine. So renewal has to be automated: a program proves it controls the name, and collects a fresh certificate.
