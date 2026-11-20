@@ -354,11 +354,11 @@ def tap_ring(p, color=INK):
     )
 
 
-def glow(box, color, width=7):
-    """An outline lights up and dies down: "this one"."""
+def glow(box, color, width=7, rt=1.0):
+    """An outline lights up and dies down: "this one" (``rt`` seconds in all)."""
     halo = box.copy().set_fill(opacity=0).set_stroke(color, width=width, opacity=0.95)
     halo.set_z_index(Z_BAND)
-    return Succession(FadeIn(halo, run_time=0.25), FadeOut(halo, run_time=0.75))
+    return Succession(FadeIn(halo, run_time=0.25 * rt), FadeOut(halo, run_time=0.75 * rt))
 
 
 def spinner(center, r=0.22, color=LOOK_C):
@@ -401,6 +401,7 @@ ROW_STYLE = {
     "prose": {"fs": 18, "color": INK},
     "mono": {"fs": 17, "color": INK, "font": MONO},
     "dim": {"fs": 16, "color": MUTED},
+    "small": {"fs": 16, "color": INK},
 }
 
 
@@ -465,6 +466,19 @@ class ModelPanel:
     def drop(self, *blocks):
         for b in blocks:
             self.blocks.remove(b)
+
+    def shifted(self, dx):
+        """Put the whole panel ``dx`` to the right (and its future blocks with it)."""
+        for m in self.mobs():
+            m.shift(RIGHT * dx)
+        self.x += dx
+        return self
+
+    def slide(self, dx):
+        """The animations of that move."""
+        anims = [m.animate.shift(RIGHT * dx) for m in self.mobs()]
+        self.x += dx
+        return anims
 
     def furniture(self):
         return [*self.frame.mobs(), self.chip, self.ctx, self.rule]
@@ -644,7 +658,9 @@ class OrdersGrid:
 
     COLS, R = 37, 0.031
 
-    def __init__(self, top=1.5):
+    def __init__(self, top=1.5, weeks=None):
+        """``weeks``: the bands to draw (all of them by default)."""
+        sizes = {w: n for w, n in W.WEEK_SIZES.items() if weeks is None or w in weeks}
         x0, x1 = SERVER_X[0] + 0.24, SERVER_X[1] - 0.24
         self.x0, self.x1 = x0, x1
         pitch = (x1 - x0) / self.COLS
@@ -656,7 +672,7 @@ class OrdersGrid:
         self.title = VGroup(icon, name, rows)
         y = top - 0.52
         self.heads, self.centers, self.head_y = {}, {}, {}
-        for week, n in W.WEEK_SIZES.items():
+        for week, n in sizes.items():
             self.heads[week] = Chars(f"week {week}", fs=16, color=MUTED).at(x0, y - 0.1)
             self.head_y[week] = y - 0.1
             y -= 0.3
@@ -669,7 +685,7 @@ class OrdersGrid:
         self.base = dots([c for w in self.centers.values() for c in w], self.R, DOT_C)
         self.late_index = {
             week: [i for i, o in enumerate(W.db.where(week=week)) if o.late]
-            for week in W.WEEK_SIZES
+            for week in sizes
         }
 
     def furniture(self):
@@ -835,3 +851,95 @@ def name_words():
         lines.append(ln)
         caps.append(cap)
     return lines, caps
+
+
+# ---------------------------------------------------------------------------------- #
+# Compact actors: for the scenes about the wire, and about many hosts and servers
+# ---------------------------------------------------------------------------------- #
+def host_tile(center, name="host", w=3.1, h=1.8):
+    """A host, small: its frame, its user and its model, a client port on the edge."""
+    cx, cy = center
+    k = min(1.0, h / 1.8)
+    fr = Frame((cx - w / 2, cx + w / 2), HOST_C, name, top=cy + h / 2, bot=cy - h / 2, fs=19)
+    who = avatar(0.3 * k).move_to([cx - 0.6, cy - 0.06, 0])
+    chip = model_chip(0.6 * k).move_to([cx + 0.5, cy - 0.06, 0])
+    port = client_port(s=0.34).move_to([cx + w / 2, cy, 0])
+    g = VGroup(fr.box, fr.tag, who, chip, port)
+    g.box, g.port = fr.box, port
+    return g
+
+
+def server_tile(center, name="server", label=None, color=SERVER_C, w=3.1, h=1.45):
+    """A server, small: its frame, what it runs, its socket on the edge."""
+    cx, cy = center
+    fr = Frame((cx - w / 2, cx + w / 2), color, name, top=cy + h / 2, bot=cy - h / 2, fs=19)
+    parts = [fr.box, fr.tag]
+    if label:
+        parts.append(gear_icon(0.2, color).move_to([cx - w / 2 + 0.5, cy - 0.06, 0]))
+        parts.append(Chars(label, fs=18, color=INK, font=MONO).at(cx - w / 2 + 0.88, cy - 0.06))
+    else:
+        parts.append(gear_icon(0.24, color).move_to([cx, cy - 0.06, 0]))
+    sock = socket_glyph(color).move_to([cx - w / 2 - 0.17, cy, 0])
+    g = VGroup(*parts, sock)
+    g.box, g.socket = fr.box, sock
+    return g
+
+
+def balancer(center, s=0.62):
+    """A load balancer: one way in, several ways out."""
+    c = np.array([center[0], center[1], 0.0])
+    box = RoundedRectangle(width=s, height=s, corner_radius=0.12)
+    box.set_stroke(STEEL, width=3).set_fill(PANEL, opacity=1).move_to(c)
+    fan = VGroup(
+        *[
+            Line(c + LEFT * s * 0.28, c + RIGHT * s * 0.28 + UP * dy)
+            for dy in (s * 0.24, 0.0, -s * 0.24)
+        ]
+    ).set_stroke(STEEL, width=2.5)
+    return VGroup(box, fan)
+
+
+def struck(text, fs=17):
+    """A name the protocol no longer has: greyed, struck through."""
+    t = Chars(text, fs=fs, color=MUTED, font=MONO)
+    line = Line(t.body.get_left() + LEFT * 0.07, t.body.get_right() + RIGHT * 0.07)
+    return VGroup(t, line.set_stroke(HOSTILE_C, width=3))
+
+
+def badge(who):
+    """Who decided: the user, the application or the model, as a small mark."""
+    if who == "user":
+        return avatar(0.13)
+    if who == "model":
+        return model_chip(0.26)
+    win = RoundedRectangle(width=0.32, height=0.25, corner_radius=0.05)
+    win.set_stroke(HOST_C, width=2).set_fill(mix(HOST_C, BG, 0.8), opacity=1)
+    bar = Line(win.get_corner(UL) + DOWN * 0.08, win.get_corner(UR) + DOWN * 0.08)
+    return VGroup(win, bar.set_stroke(HOST_C, width=2))
+
+
+def badge_on(block, who):
+    """That mark, in the top right corner of a block of the context."""
+    return badge(who).move_to(
+        [block.box.get_right()[0] - 0.28, block.box.get_top()[1] - 0.22, 0]
+    )
+
+
+def door_offers():
+    """The two other things the server offers: (prompt, resource)."""
+    return (
+        offer("prompt", W.PROMPT["name"], WIRE_Y - 0.74),
+        offer("resource", W.SCHEMA_URI, WIRE_Y - 1.48, name_fs=16),
+    )
+
+
+def slash_menu(host):
+    """The menu a "/" opens above the input bar: the prompt the server listed.
+    Returns (box, item)."""
+    bar = host.bar
+    box = RoundedRectangle(width=bar.width, height=0.5, corner_radius=0.1)
+    box.set_stroke(USER_C, width=2).set_fill(PANEL, opacity=1)
+    box.move_to([bar.get_center()[0], bar.get_top()[1] + 0.37, 0])
+    item = Chars("/" + W.PROMPT["name"], fs=16, color=INK, font=MONO)
+    item.at(box.get_left()[0] + 0.2, box.get_center()[1])
+    return box, item

@@ -98,9 +98,9 @@ def orders_schema() -> str:
     return "orders(" + ", ".join(f.name for f in fields(Order)) + ")"
 
 
-def weekly_report(week: str) -> str:
+def week_report(week: str) -> str:
     """Draft the weekly shipping report."""
-    return f"Write the week {week} shipping report."
+    return f"Write the week {week} report."
 
 
 SCHEMA_URI = "db://orders/schema"
@@ -181,8 +181,8 @@ def text(s: str) -> dict:
 
 
 PROMPT = {
-    "name": weekly_report.__name__,
-    "description": inspect.getdoc(weekly_report),
+    "name": week_report.__name__,
+    "description": inspect.getdoc(week_report),
     "arguments": [{"name": "week", "description": "ISO week number", "required": True}],
 }
 RESOURCE = {
@@ -191,7 +191,7 @@ RESOURCE = {
     "description": inspect.getdoc(orders_schema),
     "mimeType": "text/plain",
 }
-PROMPT_TEXT = weekly_report(str(WEEK))
+PROMPT_TEXT = week_report(str(WEEK))
 SCHEMA_TEXT = orders_schema()
 
 # (request, response), in the order the film sends them

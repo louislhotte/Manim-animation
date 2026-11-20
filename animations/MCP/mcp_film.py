@@ -1,7 +1,7 @@
 """MCP, the Model Context Protocol: how an AI application plugs into tools and data.
 
 A film made to be narrated: the voice carries the explanation, the screen carries the
-real artifacts (the model's context, JSON-RPC messages, a function, a table) and two
+real artifacts (the model's context, JSON-RPC messages, a function, a table) and five
 captions. Flat scenes, no camera. One stage, three actors, in the order a request
 crosses them:
 
@@ -59,6 +59,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -91,6 +92,24 @@ SPEC_NOTE = (
     "Not captured from a running system."
 )
 DATA_NOTE = f"The table is synthetic: {len(W.db)} orders generated with a fixed seed."
+TRUST_NOTE = (
+    'MCP specification: "... should be considered untrusted, '
+    'unless obtained from a trusted server."'
+)
+PROMPT_ROWS = [(W.PROMPT_TEXT, "prose")]
+RESOURCE_ROWS = [(ln, "mono") for ln in textwrap.wrap(W.SCHEMA_TEXT, 26)]
+assert " ".join(r for r, _ in RESOURCE_ROWS) == W.SCHEMA_TEXT and len(RESOURCE_ROWS) == 2
+# the stranger's tool, as its definition reads in the context: the description is cut
+# into lines here, nothing is added or removed
+POISON_LINES = textwrap.wrap(W.POISONED["description"], 36)
+assert " ".join(POISON_LINES) == W.POISONED["description"] and len(POISON_LINES) == 3
+assert POISON_LINES[0].endswith("Before any answer,")
+POISON_ROWS = [
+    ("{}({})".format(W.POISONED["name"], ", ".join(W.POISONED["inputSchema"]["properties"])), "mono"),
+    *[(ln, "small") for ln in POISON_LINES],
+]
+STOLEN_TOOL, STOLEN_ARGS = W.STOLEN_CALL
+STOLEN_ROWS = [(STOLEN_TOOL, "mono"), (json.dumps(STOLEN_ARGS), "mono")]
 
 
 class _Common(NarratedMixin):
@@ -219,13 +238,65 @@ class _Common(NarratedMixin):
         s.mobs += [s.ask, s.call, s.res, s.ans, s.q, s.reply, s.lit, s.late, s.n_rows, s.n_late]
         return s
 
+    def st_doors(self):
+        """End of scene 4: the server's three offers, and what each one put into the
+        context, with a mark for whoever decided."""
+        model, host, link = ModelPanel(), HostFrame(), Link()
+        server = ServerFrame(grid=OrdersGrid(top=0.15, weeks=(W.WEEK,)))
+        prompt_offer, resource_offer = door_offers()
+        tools = model.block("tools", TOOLS_ROWS, "server")
+        prompt = model.block("prompt", PROMPT_ROWS, "server")
+        resource = model.block("resource", RESOURCE_ROWS, "server")
+        call = model.block("tool call", CALL_ROWS, "model")
+        res = model.block("tool result", RESULT_ROWS, "server")
+        marks = [badge_on(prompt, "user"), badge_on(resource, "app"), badge_on(call, "model")]
+        left = [
+            *model.furniture(), tools, prompt, resource, call, res, *marks,
+            *host.furniture(), *link.mobs(),
+        ]  # fmt: skip
+        right = [*server.furniture(), prompt_offer, resource_offer]
+        return SimpleNamespace(
+            model=model, host=host, link=link, server=server,
+            left=left, right=right, mobs=left + right,
+        )  # fmt: skip
+
+    def exchange(self, link, method, n, flash=None, rt=0.45, arrive=()):
+        """A request crosses the wire and its result comes back. Returns the letter
+        that has just come back (it is at the client's port) and the two labels still
+        on screen: the caller turns the letter into what it carried. ``flash``: the
+        offer that answers; ``arrive``: what else happens when the request arrives."""
+        out = link.letter().move_to(link.port.get_center())
+        m_lab, i_lab = link.method(method), link.ident(n)
+        self.play(
+            FadeIn(out, scale=0.4),
+            FadeIn(m_lab, shift=UP * 0.1),
+            FadeIn(i_lab, shift=DOWN * 0.1),
+            run_time=0.25,
+        )
+        self.play(out.animate.move_to(link.plug.body.get_center()), run_time=rt)
+        back = link.letter(back=True).move_to(link.plug.body.get_center())
+        r_lab = link.method("result", SERVER_C)
+        self.play(
+            FadeOut(out, run_time=0.2),
+            FadeIn(back, run_time=0.2),
+            FadeOut(m_lab, run_time=0.2),
+            Succession(Wait(0.2), FadeIn(r_lab, run_time=0.2)),
+            *([glow(flash.box, LOOK_C, 5, rt=0.4)] if flash is not None else []),
+            *arrive,
+        )
+        self.play(back.animate.move_to(link.port.get_center()), run_time=rt)
+        return back, [r_lab, i_lab]
+
 
 class _Flat(_Common, Scene):
     # ====================================================================== #
     # 1 · A model alone
     # ====================================================================== #
     def scene_alone(self):
-        model, grid = ModelPanel(), OrdersGrid()
+        # a model alone: in the middle of the frame, until the world it cannot reach
+        # appears and it takes its place on the left of the stage
+        middle = -(MODEL_X[0] + MODEL_X[1]) / 2
+        model, grid = ModelPanel().shifted(middle), OrdersGrid()
 
         # ---- 1.1 it reads, it writes ----------------------------------------------- #
         self.voice(
@@ -263,6 +334,7 @@ class _Flat(_Common, Scene):
         foot = self.note(DATA_NOTE)
         self.foot = foot
         self.play(
+            *model.slide(-middle),
             FadeIn(grid.title, shift=LEFT * 0.2),
             LaggedStart(*[FadeIn(h) for h in grid.heads.values()], lag_ratio=0.3),
             DotsReveal(grid.base, rate_func=smooth),
@@ -314,9 +386,9 @@ class _Flat(_Common, Scene):
 
         # ---- 2.1 three roles ------------------------------------------------------------ #
         self.voice(
-            "It names three roles. The application you talk to is the host. Each "
-            "outside system is wrapped by a small program, a server. And inside the "
-            "host, one client per server speaks the protocol."
+            "It names three roles. The application you talk to, a chat window or a code "
+            "editor, is the host. Each outside system is wrapped by a small program, a "
+            "server. And inside the host, one client per server speaks the protocol."
         )
         self.play(
             *self.chapter("2 · One protocol", HOST_C, SPEC_NOTE),
@@ -326,8 +398,12 @@ class _Flat(_Common, Scene):
             run_time=0.7,
         )
         model.drop(s.ask, s.reply)
-        self.cue("is the host")
-        self.play(Create(host.frame.box), FadeIn(host.frame.tag), run_time=0.9)
+        self.cue("The application")  # the frame is drawn while the sentence names it
+        self.play(
+            Create(host.frame.box),
+            FadeIn(host.frame.tag),
+            run_time=self.span("is the host", floor=0.9, cap=3.2),
+        )
         self.play(
             LaggedStart(
                 FadeIn(host.avatar, scale=0.6),
@@ -352,7 +428,16 @@ class _Flat(_Common, Scene):
         )
         self.play(Create(link.cable), link.plug.animate.move_to(home), run_time=0.8)
         self.play(glow(link.socket[0], LOOK_C, width=5), run_time=0.7)
-        self.hold(ambient=lambda rt: [Throb(link.port, rt, amp=0.12)])
+        self.hold(
+            ambient=lambda rt: [
+                Throb(link.port, rt, amp=0.2),
+                ShowPassingFlash(
+                    link.cable.copy().set_stroke(LOOK_C, width=7).set_z_index(Z_LINK + 1),
+                    time_width=0.5,
+                    run_time=rt,
+                ),
+            ]
+        )
 
         # ---- 2.2 a request, a response, one id ------------------------------------------- #
         self.voice(
@@ -494,8 +579,11 @@ class _Flat(_Common, Scene):
             run_time=0.6,
         )
         ask = model.block("user", Q_BLOCK, "user")
-        self.play(TransformFromCopy(q.box, ask.box), FadeIn(ask, shift=LEFT * 0.4), run_time=0.6)
-        self.cue("The model reads", ambient=lambda rt: [Throb(model.chip, rt, amp=0.12)])
+        self.play(FadeIn(ask, shift=LEFT * 0.4), run_time=0.6)  # the host puts it in the context
+        self.cue(
+            "The model reads",
+            ambient=lambda rt: [Throb(model.chip, rt, amp=0.2), Throb(ask, rt, amp=0.03)],
+        )
         self.play(model.reading(self.span("and writes", floor=0.9, cap=2.0)))
         call = model.block("tool call", CALL_ROWS, "model")
         typing = call.typed(1.3)
@@ -503,7 +591,7 @@ class _Flat(_Common, Scene):
         self.play(typing, Throb(model.chip, 1.3, amp=0.14, period=0.65))
         self.cue("Still only text")
         self.play(glow(call.box, MODEL_C), run_time=1.0)
-        self.hold(ambient=lambda rt: [Throb(call, rt, amp=0.02)])
+        self.hold(ambient=lambda rt: [Throb(call, rt, amp=0.04), Throb(model.chip, rt, amp=0.2)])
 
         # ---- 3.2 the host asks the user -------------------------------------------------------- #
         self.voice(
@@ -520,7 +608,13 @@ class _Flat(_Common, Scene):
         self.remove(ghost)
         self.cue("asks you")
         self.play(Throb(host.avatar, 1.0, amp=0.25, period=0.5), glow(card.box, LOOK_C))
-        self.cue("able to say no", ambient=lambda rt: [Throb(host.avatar, rt, amp=0.1)])
+        self.cue(
+            "able to say no",
+            ambient=lambda rt: [
+                Throb(host.avatar, rt, amp=0.25),
+                *throbs([card.deny, card.allow], rt, amp=0.06),
+            ],
+        )
         self.play(Indicate(card.deny, color=HOSTILE_C, scale_factor=1.12), run_time=0.9)
         self.hold(ambient=lambda rt: [Throb(card.allow, rt, amp=0.05)])
         on = card.pressed("allow")
@@ -602,8 +696,9 @@ class _Flat(_Common, Scene):
 
         # ---- 3.5 the answer --------------------------------------------------------------------- #
         self.voice(
-            "The model reads again, and answers. It never touched the database. It "
-            "wrote a request, the host carried it, and the server did the work."
+            "The model reads again, and answers. It never touched the database, and "
+            "never saw its password. It wrote a request, the host carried it, and the "
+            "server did the work."
         )
         self.play(model.reading(1.1), Throb(model.chip, 1.1, amp=0.12, period=0.55))
         ans = model.block("assistant", ANSWER_ROWS, "model")
@@ -620,8 +715,499 @@ class _Flat(_Common, Scene):
         self.play(glow(host.frame.box, HOST_C), run_time=1.0)
         self.cue("the server did")
         self.play(glow(server.frame.box, SERVER_C), run_time=1.0)
-        self.settle(ambient=lambda rt: [Throb(n_late, rt, amp=0.08)])
+        self.settle(ambient=lambda rt: [Throb(n_late, rt, amp=0.12), Throb(reply, rt, amp=0.04)])
         self.close(self.st_call)
+
+    # ====================================================================== #
+    # 4 · Three doors
+    # ====================================================================== #
+    def scene_doors(self):
+        s = self.enter(self.st_call)
+        model, host, server, link = s.model, s.host, s.server, s.link
+        table = OrdersGrid(top=0.15, weeks=(W.WEEK,))
+        prompt_offer, resource_offer = door_offers()
+        for n, method in ((3, "prompts/list"), (4, "resources/list"), (5, "prompts/get"),
+                          (6, "resources/read"), (7, "tools/call")):  # fmt: skip
+            assert W.exchange(n)[0]["method"] == method
+
+        # ---- 4.1 three things a server can offer ----------------------------------------------- #
+        self.voice(
+            "Tools are one of three things a server can offer. What separates them is "
+            "who decides to use them."
+        )
+        gone = [s.ask, s.call, s.res, s.ans, s.q, s.reply, s.lit, s.late, s.n_rows, s.n_late]
+        self.play(
+            *self.chapter("4 · Three doors", USER_C, SPEC_NOTE),
+            *[FadeOut(m) for m in (*gone, *s.grid.furniture())],
+            run_time=0.6,
+        )
+        model.drop(s.ask, s.call, s.res, s.ans)
+        self.play(*[FadeIn(m) for m in table.furniture()], run_time=0.5)
+        for method, n, offered in (("prompts/list", 3, prompt_offer), ("resources/list", 4, resource_offer)):
+            back, labs = self.exchange(
+                link, method, n, arrive=[FadeIn(offered, shift=LEFT * 0.2, run_time=0.4)]
+            )
+            self.play(
+                FadeOut(back, target_position=host.bar.get_center(), scale=0.3),
+                *[FadeOut(m) for m in labs],
+                run_time=0.3,
+            )
+        self.cue("who decides")
+        self.play(
+            LaggedStart(
+                glow(host.avatar[0], USER_C, 6),
+                glow(host.frame.box, HOST_C),
+                glow(model.frame.box, MODEL_C),
+                lag_ratio=0.45,
+            ),
+            run_time=1.6,
+        )
+        self.hold(ambient=lambda rt: throbs([prompt_offer, resource_offer], rt, amp=0.03))
+
+        # ---- 4.2 a prompt: the user decides ------------------------------------------------------ #
+        self.voice("A prompt is a ready-made message. The user picks it, like a slash command.")
+        slash = Chars("/", fs=17, color=INK, font=MONO).at(host.field_x, host.field_y)
+        menu, item = slash_menu(host)
+        self.play(Throb(host.avatar, 0.5, amp=0.3, period=0.25), FadeIn(slash, scale=1.5), run_time=0.5)
+        self.play(
+            FadeIn(menu, shift=UP * 0.1),
+            FadeIn(item, shift=UP * 0.1),
+            glow(prompt_offer.box, LOOK_C, 5, rt=0.6),
+            run_time=0.6,
+        )
+        self.cue("The user picks", ambient=lambda rt: [Throb(item, rt, amp=0.06)])
+        typed = Chars("/" + W.PROMPT["name"], fs=17, color=INK, font=MONO)
+        typed.at(host.field_x, host.field_y)
+        self.play(tap_ring(item.get_center()))
+        self.play(
+            FadeOut(menu),
+            FadeOut(item),
+            FadeOut(slash, run_time=0.15),
+            Succession(Wait(0.15), FadeIn(typed, run_time=0.25)),
+        )
+        back, labs = self.exchange(link, "prompts/get", 5, flash=prompt_offer)
+        prompt = model.block("prompt", PROMPT_ROWS, "server")
+        by_user = badge_on(prompt, "user")
+        self.play(
+            FadeTransform(back, prompt),
+            FadeIn(by_user, scale=0.5),
+            FadeOut(typed),
+            *[FadeOut(m) for m in labs],
+            run_time=0.6,
+        )
+        self.hold(ambient=lambda rt: [Throb(by_user, rt, amp=0.25)])
+
+        # ---- 4.3 a resource: the application decides ----------------------------------------------- #
+        self.voice(
+            "A resource is data with an address: here, the table's schema. The "
+            "application decides to attach it."
+        )
+        self.cue("data with an address")
+        address = mark(resource_offer.label)
+        self.play(FadeIn(address), run_time=0.3)
+        self.cue("The application decides", ambient=lambda rt: [Throb(address, rt, amp=0.04)])
+        ring = Circle(radius=0.25, stroke_color=HOST_C, stroke_width=3.5).move_to(host.clip)
+        self.play(
+            FadeIn(ring, scale=1.8), glow(host.frame.box, HOST_C, rt=0.7), FadeOut(address), run_time=0.7
+        )
+        back, labs = self.exchange(link, "resources/read", 6, flash=resource_offer)
+        resource = model.block("resource", RESOURCE_ROWS, "server")
+        by_app = badge_on(resource, "app")
+        self.play(
+            FadeTransform(back, resource),
+            FadeIn(by_app, scale=0.5),
+            FadeOut(ring),
+            *[FadeOut(m) for m in labs],
+            run_time=0.6,
+        )
+        self.hold(ambient=lambda rt: [Throb(by_app, rt, amp=0.25)])
+
+        # ---- 4.4 a tool: the model decides ---------------------------------------------------------- #
+        self.voice("And a tool, as we saw, runs when the model decides.")
+        self.play(model.reading(0.7), Throb(model.chip, 0.7, amp=0.2, period=0.35))
+        call = model.block("tool call", CALL_ROWS, "model")
+        typing, by_model = call.typed(0.6), badge_on(call, "model")
+        self.play(FadeIn(call, shift=RIGHT * 0.2), FadeIn(by_model, scale=0.5), run_time=0.3)
+        self.play(typing)
+        back, labs = self.exchange(link, "tools/call", 7, flash=server.tool, rt=0.35)
+        res = model.block("tool result", RESULT_ROWS, "server")
+        self.play(FadeTransform(back, res), *[FadeOut(m) for m in labs], run_time=0.5)
+        self.hold(ambient=lambda rt: [Throb(by_model, rt, amp=0.25)])
+
+        # ---- 4.5 one place ------------------------------------------------------------------------- #
+        self.voice("Three doors, and all of them lead to the same place: the model's context.")
+        self.play(
+            self.aside("Prompts: the user decides. Resources: the application. Tools: the model."),
+            FadeOut(self.foot),
+            LaggedStart(
+                glow(prompt.box, USER_C), glow(resource.box, HOST_C), glow(call.box, MODEL_C),
+                lag_ratio=0.5,
+            ),  # fmt: skip
+            run_time=2.0,
+        )
+        self.cue("the model's context")
+        self.play(glow(model.frame.box, LOOK_C), Throb(model.chip, 1.0, amp=0.2, period=0.5))
+        self.settle(ambient=lambda rt: throbs([by_user, by_app, by_model], rt, amp=0.25))
+        self.close(self.st_doors)
+
+    # ====================================================================== #
+    # 5 · Anywhere
+    # ====================================================================== #
+    def scene_anywhere(self):
+        s = self.enter(self.st_doors)
+        y = 0.95
+        ht = host_tile((-5.0, y))
+        st = server_tile((0.75, y), label=W.TOOL["name"])
+        near, far = st.get_center().copy(), np.array([5.05, y, 0.0])
+        machine = Frame((-6.75, 2.6), STEEL, "your machine", top=y + 1.3, bot=y - 1.25, fs=18)
+        p0, p1 = ht.port.get_right(), st.socket.get_left()
+        lanes = VGroup(
+            Line(p0 + UP * 0.1, p1 + UP * 0.1), Line(p1 + DOWN * 0.1, p0 + DOWN * 0.1)
+        ).set_stroke(STEEL, width=3)
+        mid = (p0 + p1) / 2
+        names = [
+            Chars(t, fs=17, color=c, font=MONO).at(mid[0] - 0.4, y + dy)
+            for t, c, dy in (("stdin", HOST_C, 0.45), ("stdout", SERVER_C, -0.45))
+        ]
+
+        def one_line(message, key):
+            """A message as it goes down the pipe: one line, its payload folded."""
+            text = W.on_one_line(message)
+            assert "\n" not in text
+            return text[: text.index(f'"{key}":') + len(key) + 3] + "{…}}"
+
+        (req1, res1), (req2, _) = W.exchange(1), W.exchange(2)
+        lines = []
+        for i, (message, key, color) in enumerate(
+            ((req1, "params", HOST_C), (res1, "result", SERVER_C), (req2, "params", HOST_C))
+        ):
+            ln = Chars(one_line(message, key) + "\\n", fs=17, font=MONO)
+            paint_json(ln).tint("\\n", LOOK_C)
+            ln.at(-3.7, -1.0 - 0.5 * i)
+            lines.append(VGroup(Dot(radius=0.07, color=color).move_to([-4.0, -1.0 - 0.5 * i, 0]), ln))
+
+        # ---- 5.1 on your machine: a child process, two pipes ------------------------------------- #
+        self.voice(
+            "Where does a server run? On your own machine, the host starts it as a "
+            "child process, and they exchange lines of JSON over standard input and "
+            "output."
+        )
+        self.play(
+            *self.chapter("5 · Anywhere", STEEL, SPEC_NOTE),
+            FadeTransform(VGroup(*s.left), ht),
+            *[FadeOut(m, scale=0.7) for m in s.right],
+            run_time=1.0,
+        )
+        self.cue("On your own machine", ambient=lambda rt: [Throb(ht, rt, amp=0.03)])
+        self.play(Create(machine.box), FadeIn(machine.tag), run_time=0.8)
+        self.cue("starts it as a child", ambient=lambda rt: [Throb(ht.port, rt, amp=0.3, period=0.7)])
+        st.save_state()
+        st.scale(0.15).move_to(ht.port.get_center())
+        self.play(Restore(st), Create(lanes), run_time=0.9)
+        self.play(*[FadeIn(n, shift=UP * 0.05) for n in names], run_time=0.3)
+
+        def flowing(rt):
+            return [
+                stream(lanes[0], HOST_C, n=max(2, round(rt * 1.4)), run_time=rt, lag=0.18),
+                stream(lanes[1], SERVER_C, n=max(2, round(rt * 1.4)), run_time=rt, lag=0.18),
+            ]
+
+        self.cue("lines of JSON", ambient=flowing)
+        self.play(
+            LaggedStart(*[FadeIn(ln, shift=UP * 0.15) for ln in lines], lag_ratio=0.5),
+            *flowing(1.2),
+            run_time=1.2,
+        )
+        self.hold(ambient=flowing)
+
+        # ---- 5.2 or far away: HTTP, and a token ----------------------------------------------------- #
+        self.voice(
+            "Or far away. Then every message is an HTTP POST, and an access token says "
+            "who is asking."
+        )
+        q1 = p1 + (far - near)
+        cable = Line(p0, q1).set_stroke(STEEL, width=5)
+        alone = Frame((-6.75, -3.0), STEEL, "your machine", top=y + 1.3, bot=y - 1.25, fs=18)
+        lock = lock_icon(0.4, STEEL).move_to((p0 + q1) / 2)
+        https = Chars("HTTPS", fs=17, color=MUTED, font=MONO)
+        https.at((p0 + q1)[0] / 2 - https.body.width / 2, y + 0.48)
+        self.play(
+            st.animate.move_to(far),
+            Transform(machine.box, alone.box),
+            ReplacementTransform(lanes, cable),
+            *[FadeOut(m) for m in (*names, *lines)],
+            run_time=1.1,
+        )
+        self.play(FadeIn(lock, scale=1.6), FadeIn(https), run_time=0.4)
+        rows = [W.HTTP_HEAD[i] for i in (0, 2, 5, 6, 7)] + ["…"]
+        post = MsgCard(
+            rows, at=(-2.75, 0.15), fs=19, kind="http", title="one request, over the network", edge=HOST_C
+        )
+        self.play(post.fade_in(), run_time=0.5)
+        self.cue("an HTTP POST")
+        hot = post.mark("POST")
+        self.play(FadeIn(hot), run_time=0.3)
+        self.cue("an access token", ambient=lambda rt: [Throb(hot, rt, amp=0.08)])
+        self.play(Transform(hot, mark(post.line("Authorization")).set_z_index(Z_CARD + 1)), run_time=0.4)
+        self.hold(ambient=lambda rt: [Throb(hot, rt, amp=0.03), Throb(lock, rt, amp=0.2)])
+
+        # ---- 5.3 nothing to remember: every request says it all ------------------------------------ #
+        self.voice(
+            "Since the July twenty twenty-six revision, there is no handshake and no "
+            "session. Every request carries the protocol version and what the client "
+            "supports."
+        )
+        folded = W.META_KEYS[1]
+        body = MsgCard(
+            W.jlines(W.meta(), fold=(folded,), inline=64), at=(-4.6, -0.8), fs=17,
+            title="in every request: params._meta", edge=HOST_C,
+        )  # fmt: skip
+        gone = [struck("initialize", 18), struck("Mcp-Session-Id", 18)]
+        gone[0].move_to([-0.6, 0.2, 0])
+        gone[1].next_to(gone[0], RIGHT, buff=0.7)
+        self.play(post.fade_out(), FadeOut(hot), run_time=0.4)
+        self.play(body.fade_in(), run_time=0.5)
+        self.cue("no handshake")
+        self.play(FadeIn(gone[0], shift=DOWN * 0.1), run_time=0.4)
+        self.cue("no session")
+        self.play(FadeIn(gone[1], shift=DOWN * 0.1), run_time=0.4)
+        self.cue("the protocol version", ambient=lambda rt: throbs(gone, rt, amp=0.05))
+        hot = mark(body.line(W.META_KEYS[0])).set_z_index(Z_CARD + 1)
+        self.play(FadeIn(hot), *[FadeOut(g) for g in gone], run_time=0.4)
+        self.cue("what the client supports", ambient=lambda rt: [Throb(hot, rt, amp=0.02)])
+        self.play(Transform(hot, mark(body.line(W.META_KEYS[2])).set_z_index(Z_CARD + 1)), run_time=0.4)
+        self.hold(ambient=lambda rt: [Throb(hot, rt, amp=0.02)])
+
+        # ---- 5.4 so any copy can answer -------------------------------------------------------------- #
+        self.voice(
+            "So a busy server can run as many copies as it needs behind a load balancer. "
+            "Any copy can answer any request, and if one disappears, nothing is lost."
+        )
+        ys = (2.1, 0.4, -1.3)  # a clear gap between a copy's name and the copy above
+        copies = [server_tile((far[0], yy), label=W.TOOL["name"]) for yy in ys]
+        lb = balancer((1.9, 0.4), s=0.7)
+        trunk = Line(p0, lb.get_left()).set_stroke(STEEL, width=5)
+        legs = [Line(lb.get_right(), c.socket.get_left()).set_stroke(STEEL, width=4) for c in copies]
+        self.play(
+            body.fade_out(),
+            *[FadeOut(m) for m in (hot, lock, https)],
+            ReplacementTransform(st, copies[0]),
+            ReplacementTransform(cable, trunk),
+            run_time=0.8,
+        )
+        self.play(
+            FadeIn(lb, scale=0.5),
+            *[Create(leg) for leg in legs],
+            *[FadeIn(c, shift=UP * 0.3) for c in copies[1:]],
+            run_time=0.7,
+        )
+        tally = Chars("answered", fs=18, color=MUTED).at(-6.6, -0.95)
+        ticks = [
+            Dot(radius=0.1, color=USER_C).move_to([-5.15 + 0.34 * k, -0.95, 0]) for k in range(10)
+        ]
+
+        def trips(order, first):
+            """Requests dealt to the copies in ``order``; each answer adds a dot."""
+            runs = []
+            for i, k in enumerate(order):
+                way = polyline(p0, lb.get_center(), copies[k].socket.get_left())
+                home = polyline(copies[k].socket.get_left(), lb.get_center(), p0)
+                runs.append(
+                    Succession(
+                        Travel(envelope(HOST_C, 0.3, 0.2), way, run_time=0.7),
+                        Travel(envelope(SERVER_C, 0.3, 0.2), home, run_time=0.7),
+                        FadeIn(ticks[first + i], scale=2.5, run_time=0.15),
+                    )
+                )
+            return LaggedStart(*runs, lag_ratio=0.3)
+
+        self.play(FadeIn(tally), trips((0, 1, 2, 0, 1, 2), 0))
+        self.cue("if one disappears")
+        dead = make_cross(BAD, sw=7, scale=1.3).move_to(copies[1])
+        self.play(
+            copies[1].animate.fade(0.8),  # fade(), not set_opacity(): frames have no fill
+            legs[1].animate.set_stroke(opacity=0.15),
+            FadeIn(dead, scale=1.6),
+            run_time=0.5,
+        )
+        self.play(trips((0, 2, 0, 2), 6))
+        self.settle(ambient=lambda rt: throbs(ticks, rt, amp=0.3))
+        self.wipe()
+
+    # ====================================================================== #
+    # 6 · Trust
+    # ====================================================================== #
+    def scene_trust(self):
+        assert (W.BESPOKE, W.SHARED) == (12, 7), "the narration says seven, not twelve"
+        hosts = [
+            host_tile((-5.0, yy), name=n, h=1.35)
+            for yy, n in zip((1.85, 0.2, -1.45), W.HOSTS, strict=True)
+        ]
+        servers = [
+            server_tile((5.05, yy), name=n, h=1.0)
+            for yy, n in zip((2.05, 0.8, -0.45, -1.7), W.SYSTEMS, strict=True)
+        ]
+        cables = [
+            Line(h.port.get_right(), sv.socket.get_left()).set_stroke(STEEL, width=2.5, opacity=0.8)
+            for h in hosts
+            for sv in servers
+        ]
+
+        # ---- 6.1 the payoff ----------------------------------------------------------------------- #
+        self.voice(
+            "That is the payoff. Wrap a system once, and every host that speaks the "
+            "protocol can use it. Three hosts and four systems: seven pieces to build, "
+            "not twelve."
+        )
+        self.play(
+            *self.chapter("6 · Trust", HOSTILE_C),
+            LaggedStart(*[FadeIn(sv, shift=LEFT * 0.3) for sv in servers], lag_ratio=0.2),
+            run_time=1.2,
+        )
+        self.cue("every host", ambient=lambda rt: throbs(servers, rt, amp=0.03))
+        self.play(
+            LaggedStart(*[FadeIn(h, shift=RIGHT * 0.3) for h in hosts], lag_ratio=0.2),
+            LaggedStart(*[Create(c) for c in cables], lag_ratio=0.08),
+            run_time=1.6,
+        )
+        self.cue("Three hosts", ambient=lambda rt: throbs(hosts, rt, amp=0.03))
+        self.play(*[glow(h.box, HOST_C, rt=0.8) for h in hosts], run_time=0.8)
+        self.cue("four systems")
+        self.play(*[glow(sv.box, SERVER_C, rt=0.8) for sv in servers], run_time=0.8)
+        self.cue("seven pieces")
+        seven = txt(f"{W.SHARED} pieces to build", fs=30, color=LOOK_C, weight="BOLD")
+        twelve = txt(f"not {W.BESPOKE}", fs=24, color=MUTED)
+        VGroup(seven, twelve).arrange(RIGHT, buff=0.5, aligned_edge=DOWN).move_to([0, -2.72, 0])
+        self.play(
+            FadeIn(seven, shift=UP * 0.15),
+            *[glow(h.port, LOOK_C, 6, rt=0.9) for h in hosts],
+            *[glow(sv.socket[0], LOOK_C, 6, rt=0.9) for sv in servers],
+            run_time=0.9,
+        )
+        self.cue("not twelve")
+        self.play(FadeIn(twelve, shift=UP * 0.1), run_time=0.4)
+        self.hold(ambient=lambda rt: [Throb(seven, rt, amp=0.05)])
+
+        # ---- 6.2 what you are plugging in ------------------------------------------------------------- #
+        self.voice(
+            "But look at what you are plugging in. A server's descriptions are text your "
+            "model will read. Its tools are code that runs with your access."
+        )
+        model, host, link = ModelPanel(), HostFrame(), Link()
+        tools = model.block("tools", TOOLS_ROWS, "server")
+        frame = Frame(SERVER_X, SERVER_C, "server")
+        its_tool = offer("tool", W.POISONED["name"], WIRE_Y)
+        cx = (SERVER_X[0] + SERVER_X[1]) / 2
+        unknown = Text("?", font_size=150, color=FAINT, weight="BOLD").move_to([cx, -0.35, 0])
+        whose = Chars("found online, not reviewed", fs=17, color=MUTED)
+        whose.at(cx - whose.body.width / 2, -2.2)
+        stage = [*model.furniture(), tools, *host.furniture(), *frame.mobs(), its_tool, unknown, whose]
+        home = link.plug.get_center().copy()
+        link.plug.move_to(link.port.get_center() + RIGHT * 0.22)
+        self.play(*[FadeOut(m) for m in self.mobjects if m.z_index < Z_HEAD], run_time=0.5)
+        self.foot = self.note(SPEC_NOTE)
+        self.play(
+            *[FadeIn(m) for m in stage],
+            FadeIn(link.port),
+            FadeIn(link.name),
+            FadeIn(link.socket),
+            FadeIn(self.foot),
+            run_time=0.7,
+        )
+        self.play(Create(link.cable), link.plug.animate.move_to(home), run_time=0.7)
+        self.cue("A server's descriptions", ambient=lambda rt: [Throb(unknown, rt, amp=0.08)])
+        back, labs = self.exchange(link, "tools/list", 1, flash=its_tool)
+        evil = model.block("tools", POISON_ROWS, "server")
+        self.play(FadeTransform(back, evil), *[FadeOut(m) for m in labs], run_time=0.7)
+        self.cue("Its tools are code", ambient=lambda rt: [Throb(evil, rt, amp=0.02)])
+        self.play(model.reading(0.8), Throb(model.chip, 0.8, amp=0.2, period=0.4))
+        steal = model.block("tool call", STOLEN_ROWS, "model")
+        typing = steal.typed(1.0)
+        self.play(FadeIn(steal, shift=RIGHT * 0.2), run_time=0.3)
+        self.play(typing, Throb(model.chip, 1.0, amp=0.14, period=0.5))
+        self.hold(ambient=lambda rt: [Throb(steal, rt, amp=0.02)])
+
+        # ---- 6.3 untrusted, unless you trust the server ---------------------------------------------- #
+        self.voice(
+            "A dishonest server can hide an instruction there. So the specification "
+            "says: treat it as untrusted, unless you trust the server. Connect only "
+            "servers you trust, and keep a human in the loop."
+        )
+        self.cue("hide an instruction")
+        order = [
+            mark(evil.rows[1], "Before any answer,", HOSTILE_C),
+            mark(evil.rows[2], color=HOSTILE_C),
+            mark(evil.rows[3], color=HOSTILE_C),
+        ]
+        self.play(LaggedStart(*[FadeIn(m) for m in order], lag_ratio=0.3), run_time=0.8)
+        self.play(glow(steal.box, HOSTILE_C), run_time=0.8)
+        self.cue("treat it as untrusted", ambient=lambda rt: throbs(order, rt, amp=0.03))
+        verdict = stamp("UNTRUSTED", HOSTILE_C, fs=30).move_to([cx, -0.35, 0])
+        quote = self.note(TRUST_NOTE)
+        self.play(
+            FadeIn(verdict, scale=1.5),
+            FadeOut(self.foot, run_time=0.3),
+            Succession(Wait(0.3), FadeIn(quote, run_time=0.4)),
+        )
+        self.foot = quote
+        self.cue("Connect only servers", ambient=lambda rt: [Throb(verdict, rt, amp=0.05)])
+        card = host.consent("files", STOLEN_TOOL, STOLEN_ARGS["path"], edge=HOSTILE_C, danger=True)
+        self.play(*[FadeIn(m, shift=UP * 0.1) for m in card.mobs()], run_time=0.5)
+        no = card.pressed("deny")
+        self.play(tap_ring(card.deny.get_center()), Succession(Wait(0.12), FadeIn(no, run_time=0.2)))
+        dim = [*frame.mobs(), its_tool, unknown, whose, link.socket]
+        self.play(
+            *[FadeOut(m) for m in (*card.mobs(), no)],
+            steal.animate.fade(0.75),
+            link.plug.animate.move_to(link.port.get_center() + RIGHT * 0.22),
+            Uncreate(link.cable),
+            *[m.animate.fade(0.7) for m in dim],
+            run_time=0.8,
+        )
+        self.cue("keep a human")
+        kept = make_tick(USER_C, sw=7, scale=1.0).next_to(host.who, RIGHT, buff=0.25)
+        self.play(
+            self.aside("Connect only the servers you trust."),
+            FadeOut(self.foot),
+            Throb(host.avatar, 1.0, amp=0.3, period=0.5),
+            FadeIn(kept, scale=1.6),
+            run_time=1.0,
+        )
+        self.settle(ambient=lambda rt: [Throb(host.avatar, rt, amp=0.15)])
+        self.wipe()
+
+    # ====================================================================== #
+    # 7 · The whole picture
+    # ====================================================================== #
+    def scene_recap(self):
+        s = self.st_call()
+        self.voice(
+            "A model that only reads and writes text. A host that carries its requests. "
+            "Servers that do the work. And one protocol between them."
+        )
+        self.play(
+            *self.chapter("7 · The whole picture", LOOK_C),
+            *[FadeIn(m) for m in s.mobs],
+            run_time=0.9,
+        )
+        self.play(glow(s.model.frame.box, MODEL_C), Throb(s.model.chip, 1.0, amp=0.2, period=0.5))
+        self.cue("A host that carries", ambient=lambda rt: [Throb(s.model.chip, rt, amp=0.12)])
+        self.play(glow(s.host.frame.box, HOST_C), Throb(s.host.avatar, 1.0, amp=0.2, period=0.5))
+        self.cue("Servers that do", ambient=lambda rt: [Throb(s.link.port, rt, amp=0.2)])
+        self.play(glow(s.server.frame.box, SERVER_C), Throb(s.n_late, 1.0, amp=0.15, period=0.5))
+        self.cue("And one protocol", ambient=lambda rt: [Throb(s.n_late, rt, amp=0.1)])
+        flash = s.link.cable.copy().set_stroke(LOOK_C, width=9).set_z_index(Z_LINK + 2)
+        self.play(
+            self.aside("MCP: the Model Context Protocol."),
+            ShowPassingFlash(flash, time_width=0.7),
+            glow(s.link.port, LOOK_C, 6),
+            glow(s.link.socket[0], LOOK_C, 6),
+            run_time=1.0,
+        )
+        self.settle(
+            ambient=lambda rt: [Throb(s.link.port, rt, amp=0.25), Throb(s.link.plug, rt, amp=0.12)]
+        )
+        self.wipe()
 
 
 # ---- renderable scenes ---------------------------------------------------------------- #
@@ -648,6 +1234,26 @@ class Protocol(_Flat):
 class Call(_Flat):
     def construct(self):
         self.scene_call()
+
+
+class Doors(_Flat):
+    def construct(self):
+        self.scene_doors()
+
+
+class Anywhere(_Flat):
+    def construct(self):
+        self.scene_anywhere()
+
+
+class Trust(_Flat):
+    def construct(self):
+        self.scene_trust()
+
+
+class Recap(_Flat):
+    def construct(self):
+        self.scene_recap()
 
 
 class Outro(_Flat):
