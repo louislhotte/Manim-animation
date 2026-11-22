@@ -26,6 +26,10 @@ handles the ones marked (lib).
   `SurroundingRectangle`). `Readout` in `animations/MIP/kit.py` is the pattern for
   label-over-value HUD numbers (`fresh(text)` gives the next value in place).
 - **Soft wrap**: a single `Text` longer than ~100 characters wraps by itself. Split it.
+  The limit is the frame's width *in pixels*, so it moves with the render quality: a
+  125-character source note sat on one line in 1080p and broke in two in the 480p
+  `--check` render (MCP). Keep notes and captions at 100 characters or less, and look
+  at the bottom line of a check sheet before trusting a long one.
 - **Never `Transform` a number `Text` into another number**: it crossfades into mush.
   Use `live_number` (redraw) or `FadeOut`/`FadeIn` with a small shift.
 - **`DecimalNumber`/`Integer` need LaTeX** and render digits in a LaTeX font; they also
@@ -101,6 +105,20 @@ handles the ones marked (lib).
 - **`family_members_with_points()` skips mobjects that have no points yet.** A part
   that builds its faces in `refresh()` must walk `get_family()`, or the faces never get
   their first points and nothing is drawn.
+- **A frame whose name interrupts its border** (a plate in the background colour under
+  the name) breaks in three ways, all seen only at full size in the MCP film: a glow
+  drawn above the plate strikes through the name (give the halo a z-index between the
+  box and the plate, `box.z_index + 0.5`); a glow that starts while the name is still
+  fading in shows through the half-transparent plate (name first, then glow); and
+  `fade()` on the whole frame makes the plate translucent, so the dimmed border runs
+  through the dimmed name (fade the title, keep the plate: `Transform` to a copy).
+- **`move_to` moves a group by its bounding box.** A tile with a name sticking out of
+  its top has its box centre a little above its own centre: moved "to (x, y)" it lands
+  low, and the cable to its socket came out slanted by 13 px. Move by a shift
+  (`near + RIGHT * dx`), or build the thing at its destination.
+- **A highlight box around a Menlo token** needs a hair of padding (0.035, not 0.06) or
+  it lands on the next glyph; take the trailing comma or the quotes into the token so
+  the box closes in free space (`mark('"id": 1,')`).
 - **Identity colours that sit side by side** (three writers, three series): run the
   `dataviz` skill's `validate_palette.js` on the film surface (`--mode dark --surface
   "#0E1117" --pairs all`). The house `SKY` / `LILAC` pair fails colour-vision
@@ -247,7 +265,21 @@ handles the ones marked (lib).
   had lines padded afterwards: use `WPS = 2.6`, `VO_PAD = 0.7`.
 - **When nothing may be executed**, write the artifact by hand, label it as an
   illustration on screen, and compute what plain Python can (`hashlib`, a real
-  function on seeded data), with asserts at import (`facts.py`, `wire.py`).
+  function on seeded data), with asserts at import (`facts.py`, `wire.py`). The label
+  must cover the *actors* too: "messages written from the specification" said nothing
+  about the model whose replies were typed on screen ("no model, client or server was
+  run").
+- **Every piece of a mechanism must be on screen before it is used.** In the MCP trust
+  scene the model called `read_file`, a tool that was in nobody's context, and the
+  consent card named a server that appeared nowhere: the attack could not be followed.
+  Walk the scene as a viewer who only has the pixels: where did each name come from?
+- **A label lands on the word that names it.** Drawing the host's frame *with* its
+  name put "host" on screen four seconds before the narrator said it, then left a 3.6 s
+  freeze. Draw the thing while the sentence describes it, fade its name in on the word
+  (`cue("is the host")`), and the wait disappears with it.
+- **"Nothing is lost" is a claim.** A stateless server lets another copy answer the
+  next request; the one in flight on the copy that died is lost and re-sent. Say what
+  the picture shows ("the others carry on").
 
 ## Clock-driven pictures (`animations/Protocols`)
 When the data is a list of timed events (a packet leaves at 105.6 ms and arrives at

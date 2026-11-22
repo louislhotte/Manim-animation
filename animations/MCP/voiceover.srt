@@ -23,81 +23,81 @@ It names three roles. The application you talk to, a chat window or a code edito
 They exchange plain JSON messages. A request names a method and carries an id. The response comes back with the same id.
 
 7
-00:01:05,300 --> 00:01:18,977
-This first request asks: what can you do? The server answers with its tools. Each one is a name, a description, and a schema for its arguments, often built straight from a function's signature.
+00:01:05,300 --> 00:01:19,362
+This first request asks: which tools do you have? The server answers with its list. Each tool is a name, a description, and a schema for its arguments, often built straight from a function's signature.
 
 8
-00:01:19,083 --> 00:01:30,837
+00:01:19,467 --> 00:01:31,221
 The host places those definitions in the model's context. That is the context in the name: the protocol exists to put the right text in front of the model.
 
 9
-00:01:32,183 --> 00:01:42,014
+00:01:32,567 --> 00:01:42,397
 Now the same question. The model reads it, sees a tool that fits, and writes a call: a name and arguments. Still only text.
 
 10
-00:01:42,117 --> 00:01:50,409
+00:01:42,500 --> 00:01:50,792
 The host catches it, and first asks you. The specification wants a human in the loop, able to say no.
 
 11
-00:01:51,117 --> 00:02:01,717
-Then the client sends the call. The server runs its function against the real table: four hundred and twelve orders that week, twenty-nine of them late.
+00:01:51,500 --> 00:02:01,715
+Then the client sends the call. The server runs its function against the table: four hundred and twelve orders that week, twenty-nine of them late.
 
 12
-00:02:01,833 --> 00:02:08,587
+00:02:01,817 --> 00:02:08,571
 The result travels back under the same id, and lands in the context as more text.
 
 13
-00:02:08,700 --> 00:02:20,838
+00:02:08,683 --> 00:02:20,822
 The model reads again, and answers. It never touched the database, and never saw its password. It wrote a request, the host carried it, and the server did the work.
 
 14
-00:02:21,883 --> 00:02:29,791
+00:02:21,867 --> 00:02:29,774
 Tools are one of three things a server can offer. What separates them is who decides to use them.
 
 15
-00:02:29,900 --> 00:02:35,885
+00:02:29,883 --> 00:02:35,868
 A prompt is a ready-made message. The user picks it, like a slash command.
 
 16
-00:02:35,983 --> 00:02:43,122
+00:02:36,350 --> 00:02:43,488
 A resource is data with an address: here, the table's schema. The application decides to attach it.
 
 17
-00:02:43,217 --> 00:02:48,047
+00:02:43,583 --> 00:02:48,414
 And a tool, as we saw, runs when the model decides.
 
 18
-00:02:48,150 --> 00:02:54,135
+00:02:48,517 --> 00:02:54,501
 Three doors, and all of them lead to the same place: the model's context.
 
 19
-00:02:55,183 --> 00:03:06,553
+00:02:55,550 --> 00:03:06,919
 Where does a server run? On your own machine, the host starts it as a child process, and they exchange lines of JSON over standard input and output.
 
 20
-00:03:06,667 --> 00:03:14,190
-Or far away. Then every message is an HTTP POST, and an access token says who is asking.
+00:03:07,033 --> 00:03:14,941
+Or far away. Then every request is an HTTP POST, and an access token can say who is asking.
 
 21
-00:03:14,300 --> 00:03:24,131
+00:03:15,050 --> 00:03:24,881
 Since the July twenty twenty-six revision, there is no handshake and no session. Every request carries the protocol version and what the client supports.
 
 22
-00:03:24,233 --> 00:03:35,987
-So a busy server can run as many copies as it needs behind a load balancer. Any copy can answer any request, and if one disappears, nothing is lost.
+00:03:24,983 --> 00:03:37,122
+So a busy server can run as many copies as it needs behind a load balancer. Any copy can answer any request, and if one disappears, the others carry on.
 
 23
-00:03:38,217 --> 00:03:49,971
+00:03:39,633 --> 00:03:51,387
 That is the payoff. Wrap a system once, and every host that speaks the protocol can use it. Three hosts and four systems: seven pieces to build, not twelve.
 
 24
-00:03:50,083 --> 00:04:00,683
-But look at what you are plugging in. A server's descriptions are text your model will read. Its tools are code that runs with your access.
+00:03:51,500 --> 00:04:02,869
+But look at what you are plugging in. A server's tools are code that can run with your access. And its descriptions are text your model will read.
 
 25
-00:04:00,800 --> 00:04:14,092
-A dishonest server can hide an instruction there. So the specification says: treat it as untrusted, unless you trust the server. Connect only servers you trust, and keep a human in the loop.
+00:04:02,967 --> 00:04:23,182
+A dishonest server can hide an instruction there, and the model may follow it, using a tool from a server you trust. So the specification says: treat a description as untrusted, unless you trust the server it came from. Keep a human in the loop, and connect only servers you trust.
 
 26
-00:04:15,400 --> 00:04:25,231
+00:04:24,483 --> 00:04:34,314
 A model that only reads and writes text. A host that carries its requests. Servers that do the work. And one protocol between them.

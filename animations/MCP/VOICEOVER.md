@@ -1,6 +1,6 @@
 # Voice-over script: MCP, the Model Context Protocol
 
-Film length **4:38** (278.2 s), 26 lines, 614 words. Timecodes are from the 1080p60 render; every line starts when its caption appears.
+Film length **4:47** (287.3 s), 26 lines, 636 words. Timecodes are from the 1080p60 render; every line starts when its caption appears.
 
 *Room* is the time until the next line starts. The pacing assumes 156 words a minute, so a line of *n* words wants about n / 2.6 seconds. A line marked **TIGHT** has less than that.
 
@@ -36,27 +36,27 @@ Film length **4:38** (278.2 s), 26 lines, 614 words. Timecodes are from the 1080
 
 > They exchange plain JSON messages. A request names a method and carries an id. The response comes back with the same id.
 
-**1:05.3**  room 13.8 s, 34 words (about 13.1 s)
+**1:05.3**  room 14.2 s, 35 words (about 13.5 s)
 
-> This first request asks: what can you do? The server answers with its tools. Each one is a name, a description, and a schema for its arguments, often built straight from a function's signature.
+> This first request asks: which tools do you have? The server answers with its list. Each tool is a name, a description, and a schema for its arguments, often built straight from a function's signature.
 
-**1:19.1**  room 13.1 s, 29 words (about 11.2 s)
+**1:19.5**  room 13.1 s, 29 words (about 11.2 s)
 
 > The host places those definitions in the model's context. That is the context in the name: the protocol exists to put the right text in front of the model.
 
 ## Call  (1:32 to 2:21)
 
-**1:32.2**  room 9.9 s, 24 words (about 9.2 s)
+**1:32.6**  room 9.9 s, 24 words (about 9.2 s)
 
 > Now the same question. The model reads it, sees a tool that fits, and writes a call: a name and arguments. Still only text.
 
-**1:42.1**  room 9.0 s, 20 words (about 7.7 s)
+**1:42.5**  room 9.0 s, 20 words (about 7.7 s)
 
 > The host catches it, and first asks you. The specification wants a human in the loop, able to say no.
 
-**1:51.1**  room 10.7 s, 26 words (about 10.0 s)
+**1:51.5**  room 10.3 s, 25 words (about 9.6 s)
 
-> Then the client sends the call. The server runs its function against the real table: four hundred and twelve orders that week, twenty-nine of them late.
+> Then the client sends the call. The server runs its function against the table: four hundred and twelve orders that week, twenty-nine of them late.
 
 **2:01.8**  room 6.9 s, 16 words (about 6.2 s)
 
@@ -72,60 +72,60 @@ Film length **4:38** (278.2 s), 26 lines, 614 words. Timecodes are from the 1080
 
 > Tools are one of three things a server can offer. What separates them is who decides to use them.
 
-**2:29.9**  room 6.1 s, 14 words (about 5.4 s)
+**2:29.9**  room 6.5 s, 14 words (about 5.4 s)
 
 > A prompt is a ready-made message. The user picks it, like a slash command.
 
-**2:36.0**  room 7.2 s, 17 words (about 6.5 s)
+**2:36.4**  room 7.2 s, 17 words (about 6.5 s)
 
 > A resource is data with an address: here, the table's schema. The application decides to attach it.
 
-**2:43.2**  room 4.9 s, 11 words (about 4.2 s)
+**2:43.6**  room 4.9 s, 11 words (about 4.2 s)
 
 > And a tool, as we saw, runs when the model decides.
 
-**2:48.1**  room 7.0 s, 14 words (about 5.4 s)
+**2:48.5**  room 7.0 s, 14 words (about 5.4 s)
 
 > Three doors, and all of them lead to the same place: the model's context.
 
-## Anywhere  (2:55 to 3:38)
+## Anywhere  (2:55 to 3:39)
 
-**2:55.2**  room 11.5 s, 28 words (about 10.8 s)
+**2:55.6**  room 11.5 s, 28 words (about 10.8 s)
 
 > Where does a server run? On your own machine, the host starts it as a child process, and they exchange lines of JSON over standard input and output.
 
-**3:06.7**  room 7.6 s, 18 words (about 6.9 s)
+**3:07.0**  room 8.0 s, 19 words (about 7.3 s)
 
-> Or far away. Then every message is an HTTP POST, and an access token says who is asking.
+> Or far away. Then every request is an HTTP POST, and an access token can say who is asking.
 
-**3:14.3**  room 9.9 s, 24 words (about 9.2 s)
+**3:15.1**  room 9.9 s, 24 words (about 9.2 s)
 
 > Since the July twenty twenty-six revision, there is no handshake and no session. Every request carries the protocol version and what the client supports.
 
-**3:24.2**  room 14.0 s, 29 words (about 11.2 s)
+**3:25.0**  room 14.6 s, 30 words (about 11.5 s)
 
-> So a busy server can run as many copies as it needs behind a load balancer. Any copy can answer any request, and if one disappears, nothing is lost.
+> So a busy server can run as many copies as it needs behind a load balancer. Any copy can answer any request, and if one disappears, the others carry on.
 
-## Trust  (3:38 to 4:15)
+## Trust  (3:39 to 4:24)
 
-**3:38.2**  room 11.9 s, 29 words (about 11.2 s)
+**3:39.6**  room 11.9 s, 29 words (about 11.2 s)
 
 > That is the payoff. Wrap a system once, and every host that speaks the protocol can use it. Three hosts and four systems: seven pieces to build, not twelve.
 
-**3:50.1**  room 10.7 s, 26 words (about 10.0 s)
+**3:51.5**  room 11.5 s, 28 words (about 10.8 s)
 
-> But look at what you are plugging in. A server's descriptions are text your model will read. Its tools are code that runs with your access.
+> But look at what you are plugging in. A server's tools are code that can run with your access. And its descriptions are text your model will read.
 
-**4:00.8**  room 14.6 s, 33 words (about 12.7 s)
+**4:03.0**  room 21.5 s, 51 words (about 19.6 s)
 
-> A dishonest server can hide an instruction there. So the specification says: treat it as untrusted, unless you trust the server. Connect only servers you trust, and keep a human in the loop.
+> A dishonest server can hide an instruction there, and the model may follow it, using a tool from a server you trust. So the specification says: treat a description as untrusted, unless you trust the server it came from. Keep a human in the loop, and connect only servers you trust.
 
-## Recap  (4:15 to 4:26)
+## Recap  (4:24 to 4:35)
 
-**4:15.4**  room 11.1 s, 24 words (about 9.2 s)
+**4:24.5**  room 11.1 s, 24 words (about 9.2 s)
 
 > A model that only reads and writes text. A host that carries its requests. Servers that do the work. And one protocol between them.
 
-## Outro  (4:26 to 4:38)
+## Outro  (4:35 to 4:47)
 
-**4:26.5**  no narration (11.7 s).
+**4:35.6**  no narration (11.7 s).

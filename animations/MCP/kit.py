@@ -117,9 +117,12 @@ def small(text, fs=16, color=MUTED, **kw):
     return txt(text, fs=fs, color=color, **kw)
 
 
-def mark(line, token=None, color=LOOK_C, buff=0.06, nth=0):
-    """A box around a token of a ``Chars`` line (or around the whole line)."""
+def mark(line, token=None, color=LOOK_C, buff=None, nth=0):
+    """A box around a token of a ``Chars`` line (or around the whole line). Menlo is
+    set tight: with more than a hair of padding the box lands on the next glyph."""
     target = line.span(token, nth) if token else line.body
+    if buff is None:
+        buff = 0.035 if line.cell is not None else 0.06
     box = SurroundingRectangle(target, buff=buff, corner_radius=0.07, color=color)
     return box.set_stroke(color, width=2.5).set_fill(color, opacity=0.14)
 
@@ -355,9 +358,11 @@ def tap_ring(p, color=INK):
 
 
 def glow(box, color, width=7, rt=1.0):
-    """An outline lights up and dies down: "this one" (``rt`` seconds in all)."""
+    """An outline lights up and dies down: "this one" (``rt`` seconds in all). The
+    halo sits just above its box: over what the box holds, but under the plate that
+    carries a frame's name, so a glowing frame never strikes through its own name."""
     halo = box.copy().set_fill(opacity=0).set_stroke(color, width=width, opacity=0.95)
-    halo.set_z_index(Z_BAND)
+    halo.set_z_index(box.z_index + 0.5)
     return Succession(FadeIn(halo, run_time=0.25 * rt), FadeOut(halo, run_time=0.75 * rt))
 
 
@@ -544,7 +549,8 @@ class Consent:
         self.args = Chars(
             arguments, fs=16, color=HOSTILE_C if danger else J_STR, font=MONO
         ).at(x, y_top - 1.22)
-        self.deny = button("Deny", HOSTILE_C if danger else MUTED)
+        # saying no is the user's right, not a hostile act: never drawn in red
+        self.deny = button("Deny", INK if danger else MUTED)
         self.allow = button("Allow", USER_C)
         self.deny.move_to([cx - 0.6, y_top - 1.69, 0])
         self.allow.move_to([cx + 0.6, y_top - 1.69, 0])
@@ -555,8 +561,8 @@ class Consent:
     def pressed(self, which="allow"):
         """The button after the tap, to fade in over the idle one."""
         idle = self.allow if which == "allow" else self.deny
-        color = USER_C if which == "allow" else HOSTILE_C
-        return button(idle.label.text, color, pressed=True).move_to(idle)
+        text, color = ("Allow", USER_C) if which == "allow" else ("Deny", INK)
+        return button(text, color, pressed=True).move_to(idle)
 
     def mobs(self):
         return [self.box, self.ask, self.server, self.tool, self.args, self.deny, self.allow]
@@ -667,9 +673,13 @@ class OrdersGrid:
         self.pitch = pitch
         icon = cylinder_icon().move_to([x0 + 0.13, top - 0.2, 0])
         name = Chars("orders", fs=17, color=INK, font=MONO).at(x0 + 0.38, top - 0.2)
-        rows = small(f"{len(W.db):,} rows", fs=16)
+        shown = sum(sizes.values())
+        count = f"{len(W.db):,} rows" if weeks is None else f"{shown} of {len(W.db):,} rows"
+        rows = small(count, fs=16)
         rows.move_to([x1 - rows.width / 2, top - 0.2, 0])
         self.title = VGroup(icon, name, rows)
+        # the table is behind credentials that only the server holds
+        self.lock = lock_icon(0.26, STEEL).move_to([name.x_right() + 0.28, top - 0.2, 0])
         y = top - 0.52
         self.heads, self.centers, self.head_y = {}, {}, {}
         for week, n in sizes.items():
@@ -689,7 +699,7 @@ class OrdersGrid:
         }
 
     def furniture(self):
-        return [self.title, *self.heads.values(), self.base]
+        return [self.title, self.lock, *self.heads.values(), self.base]
 
     def lit(self, week=W.WEEK, color=STEEL):
         """Every order of a week, lit."""
@@ -748,6 +758,12 @@ class Link:
 
     def mobs(self):
         return [self.cable, self.socket, self.plug, self.port, self.name]
+
+    def parked(self):
+        """Where the plug's centre is when it is out of the socket: beside its port,
+        a gap apart (``plug.move_to(link.parked())``)."""
+        dx = self.port.get_right()[0] + 0.07 - self.plug.body.get_left()[0]
+        return self.plug.get_center() + RIGHT * dx
 
     def path(self, back=False, stop=1.0):
         """The way of a message along the cable (``stop``: how far it goes)."""
@@ -856,16 +872,21 @@ def name_words():
 # ---------------------------------------------------------------------------------- #
 # Compact actors: for the scenes about the wire, and about many hosts and servers
 # ---------------------------------------------------------------------------------- #
-def host_tile(center, name="host", w=3.1, h=1.8):
-    """A host, small: its frame, its user and its model, a client port on the edge."""
+def host_tile(center, name="host", w=3.1, h=1.8, clients=1):
+    """A host, small: its frame, its user and its model, and its clients on the edge:
+    one port per server it talks to (``ports`` lists them, top to bottom)."""
     cx, cy = center
     k = min(1.0, h / 1.8)
     fr = Frame((cx - w / 2, cx + w / 2), HOST_C, name, top=cy + h / 2, bot=cy - h / 2, fs=19)
     who = avatar(0.3 * k).move_to([cx - 0.6, cy - 0.06, 0])
     chip = model_chip(0.6 * k).move_to([cx + 0.5, cy - 0.06, 0])
-    port = client_port(s=0.34).move_to([cx + w / 2, cy, 0])
-    g = VGroup(fr.box, fr.tag, who, chip, port)
-    g.box, g.port = fr.box, port
+    side, pitch = (0.34, 0.0) if clients == 1 else (0.2, 0.27)
+    ports = [
+        client_port(s=side).move_to([cx + w / 2, cy + pitch * ((clients - 1) / 2 - i), 0])
+        for i in range(clients)
+    ]
+    g = VGroup(fr.box, fr.tag, who, chip, *ports)
+    g.box, g.port, g.ports = fr.box, ports[0], ports
     return g
 
 

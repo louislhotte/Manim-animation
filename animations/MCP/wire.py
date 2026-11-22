@@ -98,7 +98,7 @@ def orders_schema() -> str:
     return "orders(" + ", ".join(f.name for f in fields(Order)) + ")"
 
 
-def week_report(week: str) -> str:
+def report(week: str) -> str:
     """Draft the weekly shipping report."""
     return f"Write the week {week} report."
 
@@ -181,8 +181,8 @@ def text(s: str) -> dict:
 
 
 PROMPT = {
-    "name": week_report.__name__,
-    "description": inspect.getdoc(week_report),
+    "name": report.__name__,
+    "description": inspect.getdoc(report),
     "arguments": [{"name": "week", "description": "ISO week number", "required": True}],
 }
 RESOURCE = {
@@ -191,7 +191,7 @@ RESOURCE = {
     "description": inspect.getdoc(orders_schema),
     "mimeType": "text/plain",
 }
-PROMPT_TEXT = week_report(str(WEEK))
+PROMPT_TEXT = report(str(WEEK))
 SCHEMA_TEXT = orders_schema()
 
 # (request, response), in the order the film sends them
@@ -274,7 +274,21 @@ POISONED = {
     },
 }
 POISON_AT = POISONED["description"].index("Before")  # where the hidden order starts
-STOLEN_CALL = ("read_file", {"path": "~/.ssh/id_rsa"})  # what the model then asks for
+# The attack needs a second server, one the user does trust: its tool can read files.
+# The stranger's description steers the model into calling THAT tool; the stolen text
+# would then leave in the "notes" argument of the stranger's own tool.
+FILES_SERVER = "files"  # one of SYSTEMS below
+FILES_TOOL = {
+    "name": "read_file",
+    "description": "Read a file.",
+    "inputSchema": {
+        "type": "object",
+        "properties": {"path": {"type": "string"}},
+        "required": ["path"],
+    },
+}
+USER_ASKS = "Summarize report.pdf"  # all the user wanted
+STOLEN_CALL = (FILES_TOOL["name"], {"path": "~/.ssh/id_rsa"})  # what the model asks for
 
 # The ecosystem of the last scene: implementations to write, with and without a
 # shared protocol.
@@ -396,6 +410,12 @@ def _check():
     assert re.fullmatch(r"[a-z][a-z0-9+.-]*://\S+", SCHEMA_URI)  # RFC 3986 scheme
     assert (BESPOKE, SHARED) == (12, 7)
     assert POISONED["description"][POISON_AT:].startswith("Before any answer")
+    # the attack: the stranger's text names a path, and the model asks the server the
+    # user trusts for it, with a call that server would accept
+    stolen_tool, stolen_args = STOLEN_CALL
+    assert stolen_tool == FILES_TOOL["name"] and _valid(stolen_args, FILES_TOOL["inputSchema"])
+    assert stolen_args["path"] in POISONED["description"] and FILES_SERVER in SYSTEMS
+    assert USER_ASKS.split()[0].lower() in POISONED["description"].lower()
     assert HTTP_HEAD[-2:] == ["Mcp-Method: tools/call", "Mcp-Name: late_orders"]
 
 
@@ -419,3 +439,7 @@ if __name__ == "__main__":
     print("folded for the screen:")
     print("\n".join(jlines(exchange(1)[0], fold=("params._meta",))))
     print("\n".join(jlines(exchange(1)[1], fold=("result.tools",), keep={"result": ["tools"]})))
+    print()
+    print("scene 6, an illustration of tool poisoning (scripted, nothing run):")
+    print("\n".join(jlines(POISONED)))
+    print(f"the user asks {USER_ASKS!r}; the model then asks {FILES_SERVER!r} for {STOLEN_CALL}")
