@@ -45,6 +45,7 @@ from .layout import (
     SAFE,
     fit_in_frame,
     keep_inside,
+    put,
 )
 from .motion import (
     Breathe,
@@ -55,6 +56,7 @@ from .motion import (
     Throb,
     Travel,
     Tween,
+    glow,
     glow_dot,
     mix,
     polyline,
@@ -91,7 +93,15 @@ from .scene import (
     NarratedMixin,
     rule_under,
 )
-from .three_d import ExplainerStageScene, HudCamera, Layer, Painter, PainterCamera
+from .three_d import (
+    ExplainerStageScene,
+    HudCamera,
+    Layer,
+    Painter,
+    PainterCamera,
+    ink,
+    rgb,
+)
 from .text import (
     TEXT_BASE,
     BaseText,
@@ -159,6 +169,8 @@ __all__ = [
     "Painter",
     "Layer",
     "PainterCamera",
+    "rgb",
+    "ink",
     # glyphs, code, data, layout
     "chip",
     "pill",
@@ -188,6 +200,7 @@ __all__ = [
     "CAPTION_W",
     "keep_inside",
     "fit_in_frame",
+    "put",
     # motion
     "mix",
     "Clock",
@@ -199,6 +212,7 @@ __all__ = [
     "Do",
     "Pop",
     "Travel",
+    "glow",
     "glow_dot",
     "stream",
     "polyline",

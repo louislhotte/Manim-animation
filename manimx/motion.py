@@ -185,6 +185,17 @@ def ripple(*mobs, color=GOOD, buff=0.14, grow=1.07, run_time=0.8, margin=0.22):
     )
 
 
+def glow(box, color, width=7, rt=1.0):
+    """An outline lights up and dies down: "this one" (``rt`` seconds in all). The
+    halo sits just above its box: over what the box holds, but under a plate that
+    carries the box's name, so a glowing frame never strikes through its own name."""
+    halo = box.copy().set_fill(opacity=0).set_stroke(color, width=width, opacity=0.95)
+    halo.set_z_index(box.z_index + 0.5)
+    return Succession(
+        FadeIn(halo, run_time=0.25 * rt), FadeOut(halo, run_time=0.75 * rt)
+    )
+
+
 class Do(Animation):
     """Run ``fn()`` at a point in a ``Succession`` (re-aim a caret, flip a flag...)."""
 

@@ -20,10 +20,23 @@ from __future__ import annotations
 import itertools as it
 
 import numpy as np
-from manim import DEGREES, TAU, Mobject, ThreeDCamera
+from manim import DEGREES, TAU, ManimColor, Mobject, ThreeDCamera
 from manim.camera.camera import Camera
 
 from .scene import Explainer3DScene
+
+
+def rgb(color):
+    """A colour as three floats in 0..1 (painters keep them, not hex strings)."""
+    return tuple(float(c) for c in ManimColor(color).to_rgb())
+
+
+def ink(ctx, color, a=1.0):
+    """Set a painter's Cairo colour. Manim's frame is BGRA to Cairo: red and blue
+    are swapped here, once, so a painter passes ordinary colours (a hex string, or
+    the tuple ``rgb()`` returns)."""
+    r, g, b = color if isinstance(color, tuple) else rgb(color)
+    ctx.set_source_rgba(b, g, r, a)
 
 
 class Painter(Mobject):

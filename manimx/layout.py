@@ -23,6 +23,12 @@ def frame_h() -> float:
     return config.frame_height
 
 
+def put(mob, x, y):
+    """Place ``mob`` with its left edge at ``x`` and its middle at ``y`` (rows of a
+    table, a label beside a glyph: with ``line_txt`` the baselines then agree)."""
+    return mob.shift([x - mob.get_left()[0], y - mob.get_center()[1], 0])
+
+
 def keep_inside(mob, margin=SAFE):
     """Shift ``mob`` (no scaling) so its bounding box sits inside the safe area."""
     xr, yr = config.frame_x_radius - margin, config.frame_y_radius - margin
