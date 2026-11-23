@@ -310,6 +310,53 @@ that instant:
   Protocols kit); never hundreds. Give mass glyphs a colour that carries their
   content instead (a packet tinted by the pixels it carries).
 
+## A clock that never stops (`animations/HuggingFaceIncident`)
+A film about things that are alive the whole time (agents working, traffic on
+wires) does not need a scene to run its clock: let an updater do it.
+
+- **`Ticker`**: a mobject whose updater takes `dt` and adds it to `world.t`. Manim
+  then renders every `wait()` and `cue()` as animation instead of repeating one
+  frame, and painters that read `world.t` keep pulsing and flowing while the
+  narrator talks: scenes came out 88 to 100 % moving with almost no `ambient=`.
+  Story packets stay explicit (`Send(net, wire)`, an `Animation` that owns one packet
+  for the length of its play); background traffic is a `Flow` with a `gain` to tween.
+- **Switch the cache off** for such a film (`disable_caching = True` in its
+  `manim.cfg`): a play is keyed on the mobjects, not on the clock, so two waits with
+  the same mobjects would share one clip.
+- **A scene with nothing alive still freezes** (a chart, a timeline): there, a wait
+  needs its `ambient=` as before. `tools/motioncheck.py` finds them.
+- **Per-item state lives in NumPy arrays** the painter reads (`heat`, `mood`, `seal`,
+  one entry per sandbox). `ArrTween(obj, "heat", 0.0, idx=..., lag=0.6)` tweens some
+  entries, one after the other with `lag`: a wave across thirty items is one line.
+- **A label is drawn *under* a painter with a higher z-index.** Layers sit at z 1
+  and 2; a `Text` left at z 0 was hidden by the sandbox floor painted over it (it
+  only showed as a dark ghost in a full-size frame). Give the labels of a painter
+  scene a z-index of their own.
+- **Pull back without a camera**: `Hive.view(k, zoom, at)` gives every position and
+  size as seen from close to item `k`; tweening both arrays back to the real ones
+  is a zoom-out. Content then slides under the header and the source line: `dip([
+  header, note], rt)` takes them out for the length of the move.
+- **Assert the layout where it is built.** `assert label.get_right()[0] < panel_right
+  - 0.25` next to the label: every overflow of the later passes failed at import,
+  with a line number, instead of being found in a frame.
+- **The story's date readout must not lie.** A beat the source does not date was
+  playing under "12 July 2026". `world.vague = True` shows the month only.
+
+What the independent review found there (a fresh agent, given the source page, the
+script and the cue sheets; all fixed), as a list of things to look for next time:
+a hedge flattened ("all", "the agents" for "in many cases", "a few" for "some"); two
+facts joined by a "But" that made one the cause of the other; a side effect told as
+an action ("wipes the board"); a state drawn over a period the source supports for
+part of it only (two "not running" tracks from May, where the source says "on these
+evaluations"); "more than a day before" drawn 6 px before (enlarge that stretch of
+the axis); a recap that overstated (every server orange); an identity colour reused
+as a verdict (a green tick in a film where green means "inside the rules"); a
+quotation cut without an ellipsis; a blog post called "the report"; a context that
+changes the reading left out (the alert was about the company's own network). And:
+**regenerate the cue sheets after a narration change** before anyone reads them
+(`tools/cuesheet.py` takes the phrases from the source and the frames from the last
+render: the two can disagree).
+
 ## Arrows
 - **`Arrow(mobject, mobject)` comes out diagonal**: Manim takes the farthest bezier point,
   not the mid-edge. (lib) `arr()` only accepts points: `arr(a.get_right(), b.get_left())`.

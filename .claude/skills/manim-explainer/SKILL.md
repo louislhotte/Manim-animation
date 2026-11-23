@@ -102,14 +102,14 @@ class _Base(ExplainerScene):              # Explainer3DScene for 3D; ExplainerMi
 | Captions | `caption(text)` (swap + hold), `say(text)` (mobject only), `clear_cap()`, `cite(src)`, `takeaway(l1, l2)` |
 | Timed captions | `cap(text)` (the swap as an animation, played under the motion), `hold(ambient=)` / `settle(ambient=)` (wait only for what is left of the reading time), `lead(text)`, `then(anim, after)` (leave, then arrive) |
 | Narrated film | `class _Common(NarratedMixin)`: `tell(caption, vo)` (a beat lasts as long as its line takes to say), `voice(vo)` (the same beat with no caption), `cue("phrase", ambient=)` (wait for the narrator to reach a word), `span("phrase")` (how long a motion must last to end on that word), `over_card(vo)`, `header()`, `note()`; `tools/voiceover.py` writes the timed script |
-| A clock drives the picture | `Clock` (`clock.run(to, run_time)`) + `Layer` painters that draw the state at `clock.t` (hundreds of packets, a picture filling in, a live plot); flat scenes take `camera_class=PainterCamera`: `reference/gotchas.md`, "Clock-driven pictures" |
+| A clock drives the picture | `Clock` (`clock.run(to, run_time)`) + `Layer` painters that draw the state at `clock.t` (hundreds of packets, a picture filling in, a live plot); `rgb(color)` / `ink(ctx, color, a)` for a painter's Cairo colours; flat scenes take `camera_class=PainterCamera`: `reference/gotchas.md`, "Clock-driven pictures" and "A clock that never stops" (an updater advances it: every wait moves) |
 | 3D with a HUD | `ExplainerStageScene` (`hud_root`, `billboard`, `sway`, camera `screen_shift`); `Painter` = a mobject that draws itself on the frame (a textured ground, a swarm): `reference/3d.md` |
-| Motion | `Tween(obj, attr=...)`, `Breathe`, `Throb` / `throbs` (one per member), `Travel` / `stream` (packets), `ripple`, `Do`, `Pop`, `glow_dot`, `polyline`, `mix` |
+| Motion | `Tween(obj, attr=...)`, `Breathe`, `Throb` / `throbs` (one per member), `Travel` / `stream` (packets), `ripple`, `glow(box, color)` (an outline lights up and dies down), `Do`, `Pop`, `glow_dot`, `polyline`, `mix` |
 | Text | `Text` (crisp), `txt(s, fs, color)`, `mono(s)`, `mtext([...])` formulas, `safe_t2c`, `clamp_width`; `line_txt` + `align_baselines` for rows, columns and changing values (shared baseline) |
 | Glyphs | `chip`, `pill`, `stamp`, `plate`, `arr(p, q)` (points only), `wire`, `make_tick`, `make_cross`, `dot_label` |
 | Data | `heatmap`, `vcells`, `prob_bars`, `live_number(tracker)` (LaTeX-free counter) |
 | Code | `code_panel(spec, t2c_table, title)` -> `(panel, lines)`, then `self.focus(panel, lines, [i])` |
-| Layout | `keep_inside(m)`, `fit_in_frame(m)`, `SAFE`, `CAPTION_Y`, `HEADER_CLEAR_Y` |
+| Layout | `keep_inside(m)`, `fit_in_frame(m)`, `put(m, x, y)` (left edge at x, middle at y), `SAFE`, `CAPTION_Y`, `HEADER_CLEAR_Y` |
 | Cards | `play_intro()` / `play_outro()` from `TITLE SUBTITLE TAGLINE RECAP`; `intro_emblem()` hook |
 | Palette | `BG PANEL INK MUTED FAINT GOLD GOOD BAD` + hues `SKY MINT LILAC AMBER` (alias them: `Q_C = SKY`) |
 
