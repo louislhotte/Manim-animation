@@ -1,0 +1,103 @@
+1
+00:00:00,100 --> 00:00:10,830
+MCP, the Model Context Protocol. How does an AI application reach the tools and data it needs? Follow one question, from a model to a database and back.
+
+2
+00:00:14,083 --> 00:00:20,251
+A language model does one thing. It reads the text in its context, and writes more text.
+
+3
+00:00:21,333 --> 00:00:29,593
+Ask it how many orders shipped late in week forty-six, and it cannot know. The answer sits in a database it cannot reach.
+
+4
+00:00:30,783 --> 00:00:38,009
+The Model Context Protocol, MCP, is a standard way to bring that outside world into the model's context.
+
+5
+00:00:39,650 --> 00:00:55,225
+It names three roles. The application you talk to, a chat window or a code editor, is the host. Each outside system is wrapped by a small program, a server. And inside the host, one client per server speaks the protocol.
+
+6
+00:00:56,133 --> 00:01:04,650
+They exchange plain JSON messages. A request names a method and carries an id. The response comes back with the same id.
+
+7
+00:01:05,300 --> 00:01:18,805
+This first request asks: which tools do you have? The server answers with its list. Each tool is a name, a description, and a schema for its arguments, often built straight from a function's signature.
+
+8
+00:01:19,534 --> 00:01:29,100
+The host places those definitions in the model's context. That is the context in the name: the protocol exists to put the right text in front of the model.
+
+9
+00:01:32,567 --> 00:01:42,101
+Now the same question. The model reads it, sees a tool that fits, and writes a call: a name and arguments. Still only text.
+
+10
+00:01:42,600 --> 00:01:49,730
+The host catches it, and first asks you. The specification wants a human in the loop, able to say no.
+
+11
+00:01:51,600 --> 00:02:00,913
+Then the client sends the call. The server runs its function against the table: four hundred and twelve orders that week, twenty-nine of them late.
+
+12
+00:02:02,262 --> 00:02:07,469
+The result travels back under the same id, and lands in the context as more text.
+
+13
+00:02:08,683 --> 00:02:19,569
+The model reads again, and answers. It never touched the database, and never saw its password. It wrote a request, the host carried it, and the server did the work.
+
+14
+00:02:21,967 --> 00:02:28,752
+Tools are one of three things a server can offer. What separates them is who decides to use them.
+
+15
+00:02:29,883 --> 00:02:34,625
+A prompt is a ready-made message. The user picks it, like a slash command.
+
+16
+00:02:36,641 --> 00:02:43,027
+A resource is data with an address: here, the table's schema. The application decides to attach it.
+
+17
+00:02:43,683 --> 00:02:47,012
+And a tool, as we saw, runs when the model decides.
+
+18
+00:02:48,617 --> 00:02:54,131
+Three doors, and all of them lead to the same place: the model's context.
+
+19
+00:02:55,650 --> 00:03:06,435
+Where does a server run? On your own machine, the host starts it as a child process, and they exchange lines of JSON over standard input and output.
+
+20
+00:03:07,033 --> 00:03:14,105
+Or far away. Then every request is an HTTP POST, and an access token can say who is asking.
+
+21
+00:03:15,050 --> 00:03:24,669
+Since the July twenty twenty-six revision, there is no handshake and no session. Every request carries the protocol version and what the client supports.
+
+22
+00:03:26,019 --> 00:03:36,301
+So a busy server can run as many copies as it needs behind a load balancer. Any copy can answer any request, and if one disappears, the others carry on.
+
+23
+00:03:39,733 --> 00:03:51,027
+That is the payoff. Wrap a system once, and every host that speaks the protocol can use it. Three hosts and four systems: seven pieces to build, not twelve.
+
+24
+00:03:52,889 --> 00:04:01,881
+But look at what you are plugging in. A server's tools are code that can run with your access. And its descriptions are text your model will read.
+
+25
+00:04:03,248 --> 00:04:22,727
+A dishonest server can hide an instruction there, and the model may follow it, using a tool from a server you trust. So the specification says: treat a description as untrusted, unless you trust the server it came from. Keep a human in the loop, and connect only servers you trust.
+
+26
+00:04:24,583 --> 00:04:33,524
+A model that only reads and writes text. A host that carries its requests. Servers that do the work. And one protocol between them.
