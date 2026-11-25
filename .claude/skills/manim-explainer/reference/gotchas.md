@@ -357,6 +357,73 @@ changes the reading left out (the alert was about the company's own network). An
 (`tools/cuesheet.py` takes the phrases from the source and the frames from the last
 render: the two can disagree).
 
+## Charts of a study (`animations/DunningKruger`)
+A film about a published result: two marks (a solid dot = measured, a ring =
+believed) on a percentile line, then on a chart. What cost a round:
+
+- **Draw only the numbers the paper prints.** The paper printed numbers for two of
+  four groups; the other two exist as points in its figures, and one of them dips
+  under the straight line a chart would draw between the ends. Compare the groups
+  you have numbers for, draw no line or area between them, and say so on screen
+  ("the paper prints numbers for these two quarters only", not "the others are not
+  printed": they are, as points).
+- **A claim rests on all the samples, not on the prettiest one.** "The weakest are
+  not the most confident" was shown on 11 and 13 people whose guesses did not
+  follow their scores at all. Every sample that prints both numbers went into a
+  list beside the chart instead. Read the paragraph around a number, not only the
+  number: the limits of a result are usually printed two sentences later.
+- **A simulation must not be tuned to its comparison.** "Pure noise" centred on 65
+  matched the study's +50 / -18 because 65 was the midpoint of the two numbers it
+  was compared with. Take the parameter from the source (the students' average
+  guess, 61, is printed), say on screen where it comes from, and say what the
+  simulation cannot reproduce. `np.clip` piled sixty dots on the chart's top edge:
+  redraw out-of-range samples instead.
+- **A cartoon gets its own axes.** The popular curve was first drawn through
+  percentiles the meme never had. It now replaces the data for its beat, on axes
+  named as the meme names them and without numbers, then leaves.
+- **A number sits beside its mark, never on the line the mark sits on.** A plate
+  under a number on a rail left a stub of rail in front of it: "-12". Numbers go in
+  a row above the marks.
+- **No running counter on a mark that moves between two data values**: 29, 45, 58
+  on the way from 12 to 62 are nobody's data, and the narrator is saying "sixty-two"
+  meanwhile. Hide the number while the mark travels (`Pair.gn`), show it when it
+  lands; leave a faint mark where it was when the move is the message
+  (`Pair.remember()` + a label of the difference).
+- **A mobject added before the line it sits on is drawn under it.** Pairs were added
+  to the scene before `Create(rail)`: in four lanes of five the rail ran through
+  the bar and the numbers (the first lane, whose rail came first, was fine, so it
+  looked data-dependent). Give such objects a z-index when they are built.
+- **Expose parts, add parts.** A `Track` or `Chart` whose halves come in apart never
+  goes on stage itself; `track.at(p)` reads the rail's current end points, so a
+  hero rail can be stretched into a lane and its pair follows.
+- **One object, two views.** `Series.stand` (0..1) lays a gap along x like a pair on
+  a track or stands it upright on the diagonal; tweening it is the hand-off from
+  the line to the chart. Bring the y axis in *during* the swing: lying pairs on a
+  numbered y axis read as values.
+- **A hold the eye and `motioncheck.py` both see.** A 3 to 5 % `Throb` of one shape
+  changes too few pixels to count. What worked: the dashes of a dashed outline
+  marching round it (`Rotate` of a `DashedVMobject` about its centre, linear, for
+  the whole wait), a painted cloud whose dots twinkle on a clock its own updater
+  advances, a bar that swells (`beat` + `Breathe`), a wave along a row (`RowWave`).
+- **A curve drawn while it is described** takes its rate function from the sentence:
+  `np.interp(a, [0, t_peak, t_floor, 1], [0, 0.2, 0.6, 1])` with `t_peak =
+  until("A peak") / total`, so the tip is on the peak when the narrator says it.
+- **Panel text beside a chart runs off the frame without a sound** (two lines did,
+  found by the edge scan). Place such text with a helper that asserts its right
+  edge (`panel()` in the film), and assert the length of source lines (<= 100).
+- **Do not overwrite the clips a reviewer is reading.** Quick re-renders replaced
+  the real-pace clips while the review agent was pulling frames by timecode. Give
+  the reviewer a copy, or render fixes to another media dir until it reports.
+- **The second pass is the first reviewer, resumed.** After the rewrite, the script
+  (every `voice` line with the on-screen strings and source lines of its beat,
+  pulled out of the film with `ast` into one text file) went back to the same
+  agent, which still had the paper in its context: three tool calls, five more
+  corrections ("only twelve did worse" said of the worst quarter; "the weakest
+  quarter" for the half of it that got the lesson; "in every sample" for four).
+- **A statistic of a group is not a statement about its members.** "The 12th
+  percentile" of the bottom quarter is the rank of its average member; a sentence
+  built on it ("only twelve did worse") must still be true of the group.
+
 ## Arrows
 - **`Arrow(mobject, mobject)` comes out diagonal**: Manim takes the farthest bezier point,
   not the mid-edge. (lib) `arr()` only accepts points: `arr(a.get_right(), b.get_left())`.
@@ -376,6 +443,13 @@ render: the two can disagree).
   render nothing. (lib) the shared venv lives in `~/.cache/manimx/venv`.
 - **OneDrive stalls long media writes**: HD renders of long films go to a local
   `MEDIA_DEFAULT` (e.g. `/private/tmp/<film>-media`) or `MX_MEDIA_DIR`.
+- **Older film folders can be cloud-only** (`ls -lO` shows `dataless`): every read
+  then times out while OneDrive cannot fetch them, so an earlier film may not be
+  available as a template (`manimx/`, `tools/` and this skill were local). A render
+  can also sit for minutes before Manim starts, with no child process (bash reading
+  the scripts through the file provider): send the output to a log
+  (`> log 2>&1; echo "exit $?" >> log`) rather than through `grep | tail`, which
+  shows nothing until the end, and run long renders in the background.
 - **Pillow 13 rejects the `mode=` manim 0.21 passes** for `ImageMobject`: pinned `<13`
   in `tools/requirements-render.txt`.
 - **`.gitignore` blocks `*.png`**: bake photos as `.jpg`, or `git add -f` on purpose.

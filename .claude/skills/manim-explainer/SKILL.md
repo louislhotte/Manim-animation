@@ -178,7 +178,10 @@ means something, from an oblique drawing of flat sheets (`Sheets` in
 **Content.** Real data when it exists (`reference/real-data.md`); a paper's table or
 figure is shown as a cropped screenshot, never rebuilt. Concrete artifact over
 metaphor. Every number on screen is computed or cited, and the source is on screen
-(`cite`) and in the README.
+(`cite`) and in the README. A film about a published study draws only the numbers
+the paper prints, rests a claim on all its samples, and never tunes a simulation
+to the result it is compared with: `reference/gotchas.md`, "Charts of a study"
+(`animations/DunningKruger`).
 
 **Bookends.** Every film opens with `play_intro()` and closes with `play_outro()`
 ("Created by Ptolémé"); spec and the matplotlib variant in `reference/bookends.md`.
