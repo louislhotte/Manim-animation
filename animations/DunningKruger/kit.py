@@ -8,7 +8,7 @@ Two kinds of picture, by what they have to do:
   scene tweens, and a clock that never stops (``World.t``, run by ``Ticker``), so
   the dots twinkle and the fence marches while the narrator talks.
 * **Ordinary mobjects** for whatever has a face or must be read: the one who learns
-  (``Buddy``, a face drawn from nine numbers, so that a mood is a tween), the chess
+  (``Buddy``, a face drawn from ten numbers, so that a mood is a tween), the chess
   board, the two gauges, the chart.
 
 Colour is an identity, and it holds in every scene: **gold is what you believe**
@@ -40,6 +40,7 @@ C_FELT, C_REAL, C_THREAT, C_FRIEND = rgb(FELT_C), rgb(REAL_C), rgb(THREAT_C), rg
 C_NIGHT, C_WARM, C_RIM, C_EYE = rgb(NIGHT), rgb(WARM), rgb(RIM), rgb(EYE)
 C_MUTED, C_FAINT, C_INK = rgb(MUTED), rgb(FAINT), rgb(INK)
 C_WHITE = (1.0, 1.0, 1.0)
+EDGE_PAD = 0.034  # the fence and the true edge are drawn this far outside the last dot
 
 
 # --------------------------------------------------------------------------- #
@@ -117,9 +118,13 @@ class FogMap(Layer):
     ``know``     radius of the light, 0..1 of the field: inside it the dots are known (blue)
     ``sight``    0..1: the fence is drawn, and the dots between the light and the
                  fence, which you know you have not learned (hollow, gold)
+    ``wall``     0..1: the fence alone (``None``: it comes and goes with ``sight``)
     ``fog``      0..1: the fog is lifted *for the viewer*: the dots nobody on the map
                  can see, and the true edge of the field
-    ``help``     0..1: somebody else's light shows you the rest of the field
+    ``ping``     0..1: a ring leaves the fence for the true edge and fades: all that is missing
+    ``flash``    0..1: the edge lights up: the fence has reached it
+    ``tint``     0..1: somebody else's light is seen on the field (it changes nothing else:
+                 what moves the fence is ``know``)
     ``guess``    radius of a light somebody *imagines* here (gold, dashed), ``guess_a`` its opacity
     ``mark``     0..1: gold brackets, "this one"
     ``orb``      0..1: the one who carries the light is drawn
@@ -135,8 +140,11 @@ class FogMap(Layer):
         self.cx, self.cy, self.R = float(at[0]), float(at[1]), float(R)
         self.know = 0.0
         self.sight = 0.0
+        self.wall = None
         self.fog = 0.0
-        self.help = 0.0
+        self.ping = 0.0
+        self.flash = 0.0
+        self.tint = 0.0
         self.guess = 0.0
         self.guess_a = 0.0
         self.mark = 0.0
@@ -155,18 +163,28 @@ class FogMap(Layer):
     # ---- what the picture says ------------------------------------------------ #
     def edge(self):
         """How far the learner can tell the field goes (0..1)."""
-        e = float(M.horizon(max(0.0, self.know)))
-        return e + (1.0 - e) * self.help
+        return float(M.horizon(max(0.0, self.know)))
 
     def fence_r(self):
         """Where the fence is drawn, in frame units: just outside the last dot in sight."""
-        e = self.edge()
-        return (e + 0.034 * (1 - ease((e - 0.55) / 0.42))) * self.R
+        return (self.edge() + EDGE_PAD) * self.R
 
     def counts(self):
         """(lit, in sight, in all), read off the dots."""
         lit = int((self.rad < self.know).sum())
         return lit, max(lit, int((self.rad < self.edge()).sum())), self.num
+
+    def spot_of(self, i):
+        """Where dot ``i`` is, in frame units."""
+        return np.array([
+            self.cx + self.R * self.rad[i] * math.cos(self.ang[i]),
+            self.cy + self.R * self.rad[i] * math.sin(self.ang[i]),
+            0.0,
+        ])  # fmt: skip
+
+    def glimpsed(self):
+        """The dots in sight that are not known."""
+        return np.flatnonzero((self.rad < self.edge()) & (self.rad >= self.know))
 
     def calm(self):
         """Whatever is lit or in sight now has always been: no flash on the next frame."""
@@ -182,7 +200,7 @@ class FogMap(Layer):
         ctx = camera.get_cairo_context(pixels)
         t = self.world.t
         cx, cy, R = self.cx, self.cy, self.R
-        z = (R / 2.5) ** 0.45  # how much bigger things are drawn from close
+        z = (R / 2.5) ** 0.55  # how much bigger things are drawn from close
         if self.window is not None:
             x0, y0, x1, y1 = self.window
             rr(ctx, x0, y0, x1 - x0, y1 - y0, 0.2)
@@ -191,11 +209,15 @@ class FogMap(Layer):
             ctx.clip()
         know, e, fr = max(0.0, self.know), self.edge(), self.fence_r()
         sight, fog = float(self.sight), float(self.fog)
+        wall = sight if self.wall is None else float(self.wall)
 
-        if sight > 0.003:  # the field as the learner pictures it
-            ink(ctx, C_FELT, 0.05 * sight * a)
+        if wall > 0.003:  # the field as the learner pictures it
+            ink(ctx, C_FELT, 0.05 * wall * a)
             ctx.arc(cx, cy, fr, 0, math.tau)
             ctx.fill()
+        if self.tint > 0.003:  # somebody else's light falls on the whole field
+            lamp(ctx, cx, cy, R * 1.12, C_FRIEND, 0.2 * float(self.tint) * a,
+                 stops=((0.0, 0.7), (0.8, 0.6), (1.0, 0.0)))  # fmt: skip
         if know > 0.002:  # the light
             lamp(ctx, cx, cy, know * R * 1.14, C_WARM, 0.25 * a,
                  stops=((0.0, 1.0), (0.7, 0.62), (0.9, 0.36), (1.0, 0.0)))  # fmt: skip
@@ -237,7 +259,7 @@ class FogMap(Layer):
                 f = float(f_seen[i])
                 ink(ctx, blend(C_FELT, C_WHITE, 0.5 * f), (0.85 + 0.15 * f) * sight * a)
                 ctx.new_sub_path()
-                ctx.arc(xs[i], ys[i], s * (0.95 + 0.9 * f), 0, math.tau)
+                ctx.arc(xs[i], ys[i], s * (0.95 + 0.6 * f), 0, math.tau)
                 ctx.stroke()
         idx = np.flatnonzero(lit & inside)  # what you know
         ink(ctx, C_REAL, 0.17 * a)
@@ -248,25 +270,38 @@ class FogMap(Layer):
         for i in idx:
             f, b = float(f_lit[i]), float(tw[i])
             if f > 0.02:
-                ink(ctx, C_REAL, 0.5 * f * a)
-                ctx.arc(xs[i], ys[i], s * (2.3 + 2.4 * f), 0, math.tau)
+                ink(ctx, C_REAL, 0.36 * f * a)
+                ctx.arc(xs[i], ys[i], s * (2.3 + 1.7 * f), 0, math.tau)
                 ctx.fill()
             ink(ctx, blend(C_REAL, C_WHITE, 0.22 + 0.28 * b + 0.45 * f), a)
             ctx.arc(xs[i], ys[i], s * (1.08 + 0.55 * f), 0, math.tau)
             ctx.fill()
 
         ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-        if sight > 0.003:  # the fence: as far as you can tell, the field ends here
-            ink(ctx, C_FELT, 0.95 * sight * a)
+        if wall > 0.003:  # the fence: as far as you can tell, the field ends here
+            ink(ctx, C_FELT, 0.95 * wall * a)
             ctx.set_line_width(0.036 * z)
             ctx.set_dash([0.15 * z, 0.14 * z], -t * 0.2)
             ctx.arc(cx, cy, fr, 0, math.tau)
             ctx.stroke()
             ctx.set_dash([])
+        full = R * (1 + EDGE_PAD)
+        if 0.003 < self.ping < 0.997:  # all that is missing, between the fence and the edge
+            q = float(self.ping)
+            ink(ctx, C_FELT, 0.75 * (1 - q) ** 1.3 * a)
+            ctx.set_line_width(0.05 * z)
+            ctx.arc(cx, cy, fr + (full - fr) * ease(q), 0, math.tau)
+            ctx.stroke()
+        if self.flash > 0.003:  # the fence has reached the edge
+            q = float(self.flash)
+            ink(ctx, blend(C_FELT, C_WHITE, 0.55), 0.9 * q * a)
+            ctx.set_line_width((0.05 + 0.07 * q) * z)
+            ctx.arc(cx, cy, full, 0, math.tau)
+            ctx.stroke()
         if fog > 0.003:  # the true edge
             ink(ctx, C_MUTED, 0.85 * fog * a)
             ctx.set_line_width(0.024 * max(0.75, z))
-            ctx.arc(cx, cy, R * 1.03, 0, math.tau)
+            ctx.arc(cx, cy, R * (1 + EDGE_PAD), 0, math.tau)
             ctx.stroke()
         if self.guess_a > 0.003 and self.guess > 0.003:  # a light somebody imagines here
             ga = float(self.guess_a) * a
@@ -282,7 +317,7 @@ class FogMap(Layer):
         if self.orb > 0.003:
             self._orb(ctx, cx, cy, 0.15 * (R / 2.5) ** 0.5, t, a * float(self.orb))
         if self.mark > 0.003:
-            h = R * 1.03 + 0.13 + 0.015 * math.sin(3.0 * t)
+            h = R * (1 + EDGE_PAD) + 0.13 + 0.015 * math.sin(3.0 * t)
             arm = 0.3 * R
             ink(ctx, C_FELT, float(self.mark) * a)
             ctx.set_line_width(0.04)
@@ -327,7 +362,9 @@ class FogMap(Layer):
 # --------------------------------------------------------------------------- #
 class Spot(Layer):
     """What a beginner sees of a chess board: ``dark`` (0..1) covers the rectangle,
-    except around ``lights`` (rows of x, y, radius), where it stays as it is."""
+    except around ``lights`` (rows of x, y, radius), where it stays as it is.
+    ``ring`` (x, y, radius) is a fence around the light, drawn on the rectangle only,
+    as bright as ``ring_a`` (0..1); its dashes march with the clock."""
 
     def __init__(self, world, rect, lights, tint=NIGHT):
         super().__init__()
@@ -335,15 +372,32 @@ class Spot(Layer):
         self.rect = rect  # (x0, y0, x1, y1)
         self.lights = np.array(lights, dtype=float)
         self.dark = 0.0
+        self.ring = None
+        self.ring_a = 0.0
         self.hue3 = rgb(tint)
         self.set_z_index(11)
 
     def paint(self, camera, pixels):
+        ctx = camera.get_cairo_context(pixels)
+        x0, y0, x1, y1 = self.rect
+        self._dark(ctx, x0, y0, x1, y1)
+        if self.ring is not None and self.ring_a * self.alpha > 0.003:
+            x, y, r = self.ring
+            ctx.rectangle(x0, y0, x1 - x0, y1 - y0)
+            ctx.clip()
+            ink(ctx, C_FELT, 0.95 * float(self.ring_a) * float(self.alpha))
+            ctx.set_line_width(0.045)
+            ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+            ctx.set_dash([0.17, 0.16], -0.2 * self.world.t)
+            ctx.arc(x, y, r, 0, math.tau)
+            ctx.stroke()
+            ctx.set_dash([])
+            ctx.reset_clip()
+
+    def _dark(self, ctx, x0, y0, x1, y1):
         a = float(self.alpha) * float(self.dark)
         if a <= 0.003:
             return
-        ctx = camera.get_cairo_context(pixels)
-        x0, y0, x1, y1 = self.rect
         breath = 1 + 0.03 * math.sin(1.6 * self.world.t)
         ctx.push_group()
         ink(ctx, self.hue3, 1.0)
@@ -364,7 +418,7 @@ class Spot(Layer):
 
 
 # --------------------------------------------------------------------------- #
-# the one who learns: a face drawn from nine numbers
+# the one who learns: a face drawn from ten numbers
 # --------------------------------------------------------------------------- #
 #            eye w  lid up  lid lo  brow tilt  brow a  brow y  mouth w  top sag  low sag  blush
 MOODS = {
@@ -388,7 +442,13 @@ class Buddy(VGroup):
     rebuilt from it on each frame, with a slow bob and a blink from the clock, so a
     change of mood is a tween (``feel``) and a wait is never a still face.
 
-    ``px, py`` its centre, ``rad`` its radius, ``pulse`` a swell (0..1)."""
+    ``refresh`` only ever sets points and stroke widths, never an opacity: a fade
+    works on copies of the mobject whose updaters keep running, and an updater that
+    sets an opacity undoes the fade on every frame (the cheeks stayed on screen after
+    a ``FadeOut``). So a part that is "not there" (no blush, no brows) has no size.
+
+    ``px, py`` its centre, ``rad`` its radius, ``pulse`` a swell (0..1), ``look_x,
+    look_y`` where the eyes look (about -1..1)."""
 
     def __init__(self, world, at, rad=0.9, mood="calm", hue=WARM, rim=RIM, phase=0.0, bob=1.0):
         super().__init__()
@@ -398,16 +458,18 @@ class Buddy(VGroup):
         self.pulse = 0.0
         self.bob = bob
         self.phase = phase
-        sw = 4.2 * rad
+        self.aim = None  # a mood to drift towards (set it from an updater)
+        self.look_x = self.look_y = 0.0
+        self._seen_t = world.t
         self.halo2 = VMobject().set_fill(hue, 0.07).set_stroke(width=0)
         self.halo1 = VMobject().set_fill(hue, 0.13).set_stroke(width=0)
-        self.body = VMobject().set_fill(hue, 1.0).set_stroke(rim, width=0.9 * sw)
+        self.body = VMobject().set_fill(hue, 1.0).set_stroke(rim, width=1)
         self.gleam = VMobject().set_fill(WHITE, 0.4).set_stroke(width=0)
-        self.blush = VGroup(*[VMobject().set_fill(BLUSH, 0.0).set_stroke(width=0) for _ in "lr"])
-        self.eyes = VGroup(*[VMobject().set_fill(EYE, 1.0).set_stroke(EYE, width=0.4 * sw) for _ in "lr"])
+        self.blush = VGroup(*[VMobject().set_fill(BLUSH, 0.5).set_stroke(width=0) for _ in "lr"])
+        self.eyes = VGroup(*[VMobject().set_fill(EYE, 1.0).set_stroke(EYE, width=1) for _ in "lr"])
         self.glints = VGroup(*[VMobject().set_fill(WHITE, 0.95).set_stroke(width=0) for _ in "lr"])
-        self.brows = VGroup(*[VMobject().set_stroke(EYE, width=1.15 * sw).set_fill(opacity=0) for _ in "lr"])
-        self.mouth = VMobject().set_fill(EYE, 1.0).set_stroke(EYE, width=sw)
+        self.brows = VGroup(*[VMobject().set_stroke(EYE, width=1).set_fill(opacity=0) for _ in "lr"])
+        self.mouth = VMobject().set_fill(EYE, 1.0).set_stroke(EYE, width=1)
         self.add(self.halo2, self.halo1, self.body, self.gleam, self.blush, self.eyes,
                  self.glints, self.brows, self.mouth)  # fmt: skip
         self.refresh()
@@ -424,6 +486,9 @@ class Buddy(VGroup):
 
     def refresh(self):
         t = self.world.t
+        dt, self._seen_t = max(0.0, t - self._seen_t), t
+        if self.aim is not None:
+            self.p += (np.array(MOODS[self.aim]) - self.p) * min(1.0, 7.0 * dt)
         k = self.rad * (1 + 0.07 * self.pulse)
         c = self.centre()
 
@@ -432,6 +497,9 @@ class Buddy(VGroup):
             out[:, :2] = np.asarray(pts)[:, :2] * k
             return out + c
 
+        sw = 4.2 * k  # strokes follow the size
+        self.body.set_stroke(width=0.9 * sw)
+        self.mouth.set_stroke(width=sw)
         self.halo2.set_points(place(_DISC * 1.5))
         self.halo1.set_points(place(_DISC * 1.24))
         self.body.set_points(place(_DISC))
@@ -445,7 +513,9 @@ class Buddy(VGroup):
         for s, eye, glint, brow, cheek in zip(
             (-1, 1), self.eyes, self.glints, self.brows, self.blush, strict=True
         ):
-            ex, ey = 0.34 * s, 0.15
+            ex, ey = 0.34 * s + 0.06 * self.look_x, 0.15 + 0.05 * self.look_y
+            eye.set_stroke(width=0.4 * sw)
+            brow.set_stroke(width=1.15 * sw * float(ba))  # no brows: no width
             top = np.column_stack([ex + ew * _U, ey + up_ * _ARCH])
             low = np.column_stack([ex + ew * _U[::-1], ey + lo_ * _ARCH[::-1]])
             eye.set_points_as_corners(place(np.vstack([top, low, top[:1]])))
@@ -453,13 +523,51 @@ class Buddy(VGroup):
             bx, byy = ex, ey + 0.32 + by
             ends = np.array([[bx - 0.15 * s, byy + 0.15 * bt], [bx + 0.15 * s, byy - 0.15 * bt]])
             brow.set_points_as_corners(place(ends))
-            brow.set_stroke(opacity=float(ba))
-            cheek.set_points(place(_DISC * [0.13, 0.075, 1] + [0.6 * s, -0.17, 0]))
-            cheek.set_fill(opacity=0.5 * float(bl))
-        my = -0.36
-        top = np.column_stack([mw * _U, my - mt * _SAG])
-        low = np.column_stack([mw * _U[::-1], my - mb * _SAG[::-1]])
+            size = math.sqrt(max(0.0, float(bl)))  # no blush: no size
+            cheek.set_points(place(_DISC * [0.13 * size, 0.075 * size, 1] + [0.6 * s, -0.17, 0]))
+        my = -0.36 + 0.02 * self.look_y
+        mx = 0.035 * self.look_x
+        top = np.column_stack([mx + mw * _U, my - mt * _SAG])
+        low = np.column_stack([mx + mw * _U[::-1], my - mb * _SAG[::-1]])
         self.mouth.set_points_as_corners(place(np.vstack([top, low, top[:1]])))
+
+
+class Sweep(Animation):
+    """Run a plain attribute from 0 to 1 again and again for the whole ``run_time``
+    (a ring that leaves, a scan): motion for a hold, as ``Breathe`` but one way."""
+
+    def __init__(self, obj, run_time, attr="ping", period=1.6):
+        self.obj, self.attr = obj, attr
+        self.cycles = max(1, round(run_time / period))
+        super().__init__(
+            Mobject(), run_time=run_time, rate_func=linear, remover=True, suspend_mobject_updating=False
+        )
+
+    def begin(self):
+        self.starting_mobject = Mobject()
+        self.interpolate(0)
+
+    def interpolate_mobject(self, alpha):
+        setattr(self.obj, self.attr, 0.0 if alpha >= 1 else (alpha * self.cycles) % 1.0)
+
+
+class Hop(Animation):
+    """Move a ``FogMap`` to ``x`` along an arc ``lift`` high: fields that change places
+    pass over each other instead of through."""
+
+    def __init__(self, fm, x, lift=0.5, run_time=1.2):
+        self.fm, self.x1, self.lift = fm, float(x), lift
+        super().__init__(Mobject(), run_time=run_time, remover=True, suspend_mobject_updating=False)
+
+    def begin(self):
+        self.x0, self.y0 = self.fm.cx, self.fm.cy
+        self.starting_mobject = Mobject()
+        self.interpolate(0)
+
+    def interpolate_mobject(self, alpha):
+        a = self.rate_func(alpha)
+        self.fm.cx = self.x0 + (self.x1 - self.x0) * a
+        self.fm.cy = self.y0 + self.lift * math.sin(math.pi * a)
 
 
 class Feel(Animation):
@@ -518,6 +626,11 @@ def thought(text, fs=25, toward=DL, hue=MUTED, color=INK):
 # --------------------------------------------------------------------------- #
 # the two gauges: how much it feels like, how much it really is
 # --------------------------------------------------------------------------- #
+def percent(v):
+    """A share as the whole number of percent a gauge shows (halves round up)."""
+    return int(math.floor(100 * v + 0.5 + 1e-9))
+
+
 class Gauge(VGroup):
     """A bar from "none of it" to "all of it", with its share as a number. ``v`` (0..1)
     is a plain attribute: tween it."""
@@ -537,7 +650,7 @@ class Gauge(VGroup):
         self.add_updater(lambda m: m.refresh())
 
     def _number(self, k):
-        m = Text(f"{k} %", font_size=34, color=self.hue, weight="BOLD")
+        m = Text(f"{k}%", font_size=34, color=self.hue, weight="BOLD")
         m.align_to(self.track, RIGHT)
         return m.shift(UP * (baseline_of(self.title) - m.get_bottom()[1]))
 
@@ -548,7 +661,7 @@ class Gauge(VGroup):
         box = RoundedRectangle(width=w, height=self.h, corner_radius=max(r, 1e-3), stroke_width=0)
         box.move_to(left + RIGHT * w / 2)
         self.bar.set_points(box.points)
-        k = int(round(100 * self.v))
+        k = percent(self.v)
         if k != self._shown:
             new = self._number(k)
             if len(self.pct) == 0:
@@ -603,11 +716,11 @@ class Board(VGroup):
                 squares.add(m.move_to(self.at(M.FILES[f] + str(r))))
         frame = Square(8 * sq + 0.1).move_to(self.c).set_stroke(FAINT, width=3).set_fill(opacity=0)
         marks = VGroup()
-        for f in range(8):
-            t = Text(M.FILES[f], font_size=17, color=MUTED)
+        for f in range(8):  # line_txt: the letters share a baseline (g and d would not)
+            t = line_txt(M.FILES[f], fs=17, color=MUTED)
             marks.add(t.move_to(self.at(M.FILES[f] + "8") + DOWN * (0.5 * sq + 0.24)))
         for r in range(1, 9):
-            t = Text(str(r), font_size=17, color=MUTED)
+            t = line_txt(str(r), fs=17, color=MUTED)
             marks.add(t.move_to(self.at("h" + str(r)) + LEFT * (0.5 * sq + 0.24)))
         self.squares, self.frame, self.marks = squares, frame, marks
         self.add(squares, frame, marks)
@@ -630,9 +743,9 @@ class Board(VGroup):
         kw = {"font": SYMFONT} if SYMFONT else {}
         m = Text(GLYPH[code[1]], font_size=96, **kw).scale(self.k)
         if code[0] == "w":
-            m.set_fill(PIECE_W, 1.0).set_stroke(PIECE_W_EDGE, width=1.3)
+            m.set_fill(PIECE_W, 1.0).set_stroke(PIECE_W_EDGE, width=0.8)
         else:
-            m.set_fill(PIECE_B, 1.0).set_stroke(PIECE_B_EDGE, width=1.3)
+            m.set_fill(PIECE_B, 1.0).set_stroke(PIECE_B_EDGE, width=0.9)
         return m.set_z_index(10)
 
     def setup(self, position):
@@ -661,7 +774,7 @@ class Board(VGroup):
 # --------------------------------------------------------------------------- #
 # the same run as a chart
 # --------------------------------------------------------------------------- #
-class Climb(VGroup):
+class ClimbChart(VGroup):
     """Two lines drawn as the light grows: how much of the field you feel you know
     (gold) and how much you really know (blue), against time spent learning. The
     lines are read from the same functions as the map (``model``), up to the map's
@@ -670,6 +783,7 @@ class Climb(VGroup):
     def __init__(self, fogmap, x0, y0, w, h, r_max=M.EXPERT):
         super().__init__()
         self.src, self.x0, self.y0, self.w, self.h, self.r_max = fogmap, x0, y0, w, h, r_max
+        self.upto = None  # draw up to this light instead of the map's
         self.rs = np.linspace(0.0, r_max, 600)
         self.fy = M.felt(np.maximum(self.rs, 1e-6))
         self.fy[0] = 0.0
@@ -687,13 +801,17 @@ class Climb(VGroup):
     def xy(self, r, v):
         return np.array([self.x0 + self.w * r / self.r_max, self.y0 + self.h * v, 0.0])
 
+    def now(self):
+        r = self.src.know if self.upto is None else self.upto
+        return min(self.r_max, max(0.0, float(r)))
+
     def tip(self, which="felt"):
-        r = min(self.r_max, max(0.0, self.src.know))
+        r = self.now()
         v = float(M.felt(r)) if (which == "felt" and r > 1e-6) else float(M.real(r))
         return self.xy(r, v)
 
     def refresh(self):
-        r = min(self.r_max, max(0.0, self.src.know))
+        r = self.now()
         k = int(np.searchsorted(self.rs, r))
         rs = np.append(self.rs[:k], r)
         fy = np.append(self.fy[:k], float(M.felt(r)) if r > 1e-6 else 0.0)

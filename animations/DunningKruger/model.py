@@ -15,9 +15,14 @@
      it reaches the true edge and stops (1).
 
    Nothing here is fitted to a study: the three numbers below were chosen so that
-   the picture reads well, and the film says so on screen. What the model is good
-   for is consistency: the dots on the map, the gauges and the chart are all read
-   from these functions, so they agree.
+   the picture reads well, and the film says so on screen. Two things were kept
+   in line with what Kruger and Dunning (1999) report, and are asserted below: the
+   beginner's feeling is far above the facts, and yet the beginner never feels
+   surer than the expert does. What the model is good for is consistency: the dots
+   on the map, the gauges, the bars and the chart are all read from these
+   functions. The pictures count dots (400 of them), the chart draws the formulas:
+   from the first peak on they agree to within a few points (below it, where a
+   handful of dots is lit, the count is coarser).
 
 2. **A real chess game**: the four-move checkmate known as the scholar's mate.
    ``python model.py`` replays it with python-chess when that is installed.
@@ -28,10 +33,9 @@ from __future__ import annotations
 import numpy as np
 
 # ---- the light and the field -------------------------------------------------------- #
-B0 = 0.15  # before lesson one: how big you imagine the subject (share of its radius)
+B0 = 0.23  # before lesson one: how big you imagine the subject (share of its radius)
 C, Q = 7.5, 3  # how fast what you can make out outruns what you know
 N_DOTS = 400  # things there are to know
-FIRST = 0.20  # the light after a few lessons (scene 2)
 EXPERT = 0.93  # nobody lights the whole field
 GOLDEN = np.pi * (3 - np.sqrt(5))
 
@@ -56,28 +60,41 @@ def felt(r):
 
 
 def scatter(n=N_DOTS, seed=7):
-    """``n`` dots spread evenly over the unit disc (a sunflower, shaken a little), so
-    that the number of dots within radius ``r`` is close to ``n * r**2``. Returns
-    ``(radius, angle)``; the very centre is left free for the one who holds the light."""
+    """``n`` dots spread evenly over the unit disc (a sunflower with shaken angles), so
+    that the number of dots within radius ``r`` is ``n * r**2`` to within a few
+    dots. Returns ``(radius, angle)``; the very centre is left free for the one who
+    holds the light, and no dot sits beyond 0.992."""
     rng = np.random.default_rng(seed)
     i = np.arange(n)
-    rad = np.sqrt((i + 2.5) / (n + 2.5)) + rng.normal(0, 0.012, n)
+    rad = np.sqrt((i + 2.5) / (n + 2.5)) + rng.normal(0, 0.003, n)
     ang = i * GOLDEN + rng.normal(0, 0.22, n) + rng.uniform(0, 2 * np.pi)
     return np.clip(rad, 0.06, 0.992), ang
 
 
-_r = np.linspace(0.001, 1.0, 2000)
+_r = np.linspace(0.001, 1.0, 4000)
 _f = felt(_r)
-_ip = int(np.argmax(_f[:800]))
+_ip = int(np.argmax(_f[:1600]))
 _iv = _ip + int(np.argmin(_f[_ip:]))
 R_PEAK, R_VALLEY = float(_r[_ip]), float(_r[_iv])
+FIRST = R_PEAK  # the light after a few lessons (scene 2): the first peak of the feeling
+# Where the film stops at the bottom: the first light from which every dot of the
+# field is in sight (no dot sits beyond 0.992). The feeling has just stopped falling.
+R_SEEN = float(_r[int(np.argmax(horizon(_r) > 0.9925))])
 
-# The shape the film talks about, asserted: a high peak very early, a deep valley
-# in the middle, and from there the feeling and the facts climb together.
-assert 0.15 < R_PEAK < 0.22 and felt(R_PEAK) > 0.85 and real(R_PEAK) < 0.05
+# The shape the film talks about, asserted.
+# A first peak very early: you feel you know most of it, and know a twentieth.
+assert 0.2 < R_PEAK < 0.3 and 0.7 < felt(R_PEAK) < 0.82 and real(R_PEAK) < 0.08
+# ... and yet the beginner never feels surer than the expert (as in the 1999 data).
+assert felt(R_PEAK) < felt(EXPERT) - 0.05
+# A deep valley in the middle, where the feeling meets the facts ...
 assert 0.45 < R_VALLEY < 0.60 and felt(R_VALLEY) < 0.32
 assert abs(felt(R_VALLEY) - real(R_VALLEY)) < 0.05
+assert R_VALLEY < R_SEEN < 0.6 and felt(R_SEEN) - felt(R_VALLEY) < 0.04
+assert abs(felt(R_SEEN) - real(R_SEEN)) < 0.01
+assert np.all(scatter()[0] < horizon(R_SEEN))  # ... and the whole field is in sight
+# ... and from there they climb together.
 assert np.all(_f[_r > 0.7] - real(_r[_r > 0.7]) < 0.01)
+assert np.all(np.diff(_f[_r > R_SEEN]) > 0)
 assert np.all(_f >= real(_r) - 1e-9)  # in this toy you never feel you know less than you do
 
 # ---- the chess game ------------------------------------------------------------------- #
@@ -114,12 +131,12 @@ assert _end["f7"] == "wQ" and _end["f6"] == "bN" and _end["c4"] == "wB" and _end
 
 
 if __name__ == "__main__":
-    print(f"peak   : light {R_PEAK:.3f}  feels {felt(R_PEAK):.0%}  really {real(R_PEAK):.1%}")
-    print(f"valley : light {R_VALLEY:.3f}  feels {felt(R_VALLEY):.0%}  really {real(R_VALLEY):.0%}")
+    for name, r in (("first peak", R_PEAK), ("valley", R_VALLEY), ("field in sight", R_SEEN), ("expert", EXPERT)):
+        print(f"{name:15s}: light {r:.3f}  feels {felt(r):.0%}  really {real(r):.1%}")
     rad, _ = scatter()
-    for r in (FIRST, R_VALLEY, EXPERT):
+    for r in (FIRST, R_SEEN, EXPERT):
         lit, seen = int((rad < r).sum()), int((rad < horizon(r)).sum())
-        print(f"light {r:.2f}: {lit} lit, {seen} in sight, {N_DOTS} in all")
+        print(f"light {r:.3f}: {lit} lit, {seen} in sight, {N_DOTS} in all  ({lit / seen:.0%} of what is in sight)")
     try:
         import chess
     except ImportError:
