@@ -44,11 +44,14 @@ beginner feels far surer than the facts allow, yet never surer than the expert; 
 expert's mistake is the smaller one; and what moves the fence is learning more.
 
 Scenes render alone (``./render.sh move --quick --check``) or stitched
-(``./render.sh``). Pacing: ``DK_WPS`` (the narrator's words per second), ``DK_QUICK``.
+(``./render.sh``). Pacing: the film is cut to its recorded voice (``narration/``:
+each beat lasts as long as its line, each cue lands on its word). ``DK_VOICE=0``
+paces it for a reader instead, at ``DK_WPS`` words a second; ``DK_QUICK`` for layout.
 """
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -103,6 +106,16 @@ def flow(a, b, color, rt, n=3, z=10.6, r=0.07):
     return LaggedStart(*[Travel(d, path, run_time=1.1) for d in dots], lag_ratio=0.45, run_time=rt)
 
 
+# The voice (narration/voice.json, written by narration/speak.py): for each line, how
+# long it takes to say and when each of its words starts. With it, the film is cut to
+# its voice: a beat lasts as long as its line, and a cue waits for the word as it is
+# really said ("So beginners misjudge themselves." is four words and two seconds).
+# Without it, or with DK_VOICE=0, the film is paced for a reader at DK_WPS words a
+# second, as a film made to be narrated by somebody else should be.
+_VOICE_FILE = Path(__file__).resolve().parent / "narration" / "voice.json"
+VOICE = json.loads(_VOICE_FILE.read_text()) if _VOICE_FILE.exists() and os.environ.get("DK_VOICE", "1") != "0" else None
+
+
 class _Common(NarratedMixin):
     pace = Pace.from_env("DK", read=2.6, delay=1.0, anim_slow=1.0, end_hold=2.0)
     TITLE = "The Dunning-Kruger Effect"
@@ -111,8 +124,29 @@ class _Common(NarratedMixin):
     RECAP = "Feeling sure is about your light, not about the size of the dark."
     RULE_COLOR = FELT_C
     TRACE_ENV = "DK_TRACE"
-    WPS = float(os.environ.get("DK_WPS", 2.6))  # the narrator: 156 words a minute
+    # words a second: the recorded voice's, or a reader's (156 words a minute)
+    WPS = VOICE["words_a_second"] if VOICE else float(os.environ.get("DK_WPS", 2.6))
     VO_PAD = 0.7
+
+    def _said(self, vo):
+        """The recorded timing of a line, if the voice has said it."""
+        return VOICE["lines"].get(vo) if VOICE else None
+
+    def tell(self, caption, vo, **kw):
+        said = self._said(vo)
+        if said is None:
+            return super().tell(caption, vo, **kw)
+        self._vo = vo
+        self._vo_t0 = self.renderer.time + kw.get("at", 0.0)
+        need = max(len(caption) / self.READ_CPS + self.READ_BASE, VOICE["lead_in"] + said["length"] + self.VO_PAD)
+        return self.cap(caption, need=need, note=vo, **kw)
+
+    def until(self, phrase, lead=0.3):
+        said = self._said(self._vo)
+        if said is None:
+            return super().until(phrase, lead)
+        word = len(self._vo[: self._vo.index(phrase)].split())
+        return self._vo_t0 + VOICE["lead_in"] + said["words"][word] - lead - self.renderer.time
 
     def intro_emblem(self):
         g = face_glyph(0.3)

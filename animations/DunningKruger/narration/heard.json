@@ -1,0 +1,295 @@
+{
+ "recogniser": "mlx-community/whisper-large-v3-turbo-asr-fp16",
+ "video": "DunningKruger_1080p60-narrated.mp4",
+ "script_words": 580,
+ "heard_words": 582,
+ "differences": [],
+ "written_over_silence": [
+  {
+   "heard": "thank you",
+   "at": 229.66
+  }
+ ],
+ "word_median_offset": -0.014,
+ "word_95pct_spread": 0.096,
+ "word_max_spread": 0.346,
+ "cues": [
+  {
+   "phrase": "You play black",
+   "picture": 16.117,
+   "placed": 16.417,
+   "heard": 16.422
+  },
+  {
+   "phrase": "Three moves in",
+   "picture": 17.533,
+   "placed": 17.845,
+   "heard": 17.805
+  },
+  {
+   "phrase": "its queen",
+   "picture": 19.817,
+   "placed": 20.197,
+   "heard": 20.18
+  },
+  {
+   "phrase": "a bishop",
+   "picture": 20.767,
+   "placed": 20.972,
+   "heard": 20.98
+  },
+  {
+   "phrase": "Move the knight",
+   "picture": 23.5,
+   "placed": 23.795,
+   "heard": 23.775
+  },
+  {
+   "phrase": "it attacks",
+   "picture": 24.467,
+   "placed": 24.77,
+   "heard": 24.76
+  },
+  {
+   "phrase": "What a move",
+   "picture": 26.15,
+   "placed": 26.449,
+   "heard": 26.47
+  },
+  {
+   "phrase": "one move later",
+   "picture": 30.817,
+   "placed": 31.121,
+   "heard": 31.12
+  },
+  {
+   "phrase": "the queen takes",
+   "picture": 31.75,
+   "placed": 32.046,
+   "heard": 32.08
+  },
+  {
+   "phrase": "with the bishop",
+   "picture": 33.333,
+   "placed": 33.631,
+   "heard": 33.642
+  },
+  {
+   "phrase": "Checkmate",
+   "picture": 36.133,
+   "placed": 36.433,
+   "heard": 36.095
+  },
+  {
+   "phrase": "To your eyes",
+   "picture": 40.267,
+   "placed": 40.566,
+   "heard": 40.562
+  },
+  {
+   "phrase": "That is",
+   "picture": 46.833,
+   "placed": 47.133,
+   "heard": 47.112
+  },
+  {
+   "phrase": "everything there is",
+   "picture": 52.733,
+   "placed": 52.845,
+   "heard": 52.74
+  },
+  {
+   "phrase": "as a dark field",
+   "picture": 55.083,
+   "placed": 55.445,
+   "heard": 55.2
+  },
+  {
+   "phrase": "What you have learned",
+   "picture": 56.567,
+   "placed": 56.933,
+   "heard": 56.95
+  },
+  {
+   "phrase": "your light reaches",
+   "picture": 59.058,
+   "placed": 59.433,
+   "heard": 59.38
+  },
+  {
+   "phrase": "you can make out",
+   "picture": 62.15,
+   "placed": 62.45,
+   "heard": 62.45
+  },
+  {
+   "phrase": "And beyond those",
+   "picture": 65.167,
+   "placed": 65.464,
+   "heard": 65.49
+  },
+  {
+   "phrase": "Call that line",
+   "picture": 68.9,
+   "placed": 69.202,
+   "heard": 69.178
+  },
+  {
+   "phrase": "you can only compare",
+   "picture": 73.483,
+   "placed": 73.78,
+   "heard": 73.79
+  },
+  {
+   "phrase": "22 things",
+   "picture": 76.533,
+   "placed": 76.833,
+   "heard": 76.645
+  },
+  {
+   "phrase": "Most of it",
+   "picture": 79.067,
+   "placed": 79.368,
+   "heard": 79.335
+  },
+  {
+   "phrase": "lift the fog",
+   "picture": 81.233,
+   "placed": 81.516,
+   "heard": 81.5
+  },
+  {
+   "phrase": "You know",
+   "picture": 85.058,
+   "placed": 85.379,
+   "heard": 85.407
+  },
+  {
+   "phrase": "Gold is",
+   "picture": 99.433,
+   "placed": 99.495,
+   "heard": 99.44
+  },
+  {
+   "phrase": "Blue is",
+   "picture": 101.75,
+   "placed": 102.28,
+   "heard": 102.15
+  },
+  {
+   "phrase": "the feeling races",
+   "picture": 105.767,
+   "placed": 106.063,
+   "heard": 106.083
+  },
+  {
+   "phrase": "This is the first peak",
+   "picture": 110.683,
+   "placed": 110.988,
+   "heard": 110.96
+  },
+  {
+   "phrase": "the fence has reached",
+   "picture": 126.267,
+   "placed": 126.566,
+   "heard": 126.582
+  },
+  {
+   "phrase": "It is where",
+   "picture": 134.333,
+   "placed": 134.633,
+   "heard": 134.65
+  },
+  {
+   "phrase": "the feeling and the facts",
+   "picture": 138.617,
+   "placed": 138.909,
+   "heard": 138.922
+  },
+  {
+   "phrase": "This time",
+   "picture": 142.983,
+   "placed": 143.292,
+   "heard": 143.268
+  },
+  {
+   "phrase": "Here is someone",
+   "picture": 151.133,
+   "placed": 151.433,
+   "heard": 151.425
+  },
+  {
+   "phrase": "you assume",
+   "picture": 157.233,
+   "placed": 157.53,
+   "heard": 157.517
+  },
+  {
+   "phrase": "So the expert",
+   "picture": 159.967,
+   "placed": 160.268,
+   "heard": 160.273
+  },
+  {
+   "phrase": "and places themselves",
+   "picture": 164.217,
+   "placed": 164.518,
+   "heard": 164.535
+  },
+  {
+   "phrase": "Line everyone up",
+   "picture": 171.917,
+   "placed": 172.217,
+   "heard": 172.138
+  },
+  {
+   "phrase": "at the very top",
+   "picture": 175.533,
+   "placed": 175.832,
+   "heard": 175.8
+  },
+  {
+   "phrase": "beginners",
+   "picture": 178.933,
+   "placed": 179.068,
+   "heard": 179.04
+  },
+  {
+   "phrase": "Experts",
+   "picture": 180.767,
+   "placed": 181.215,
+   "heard": 181.168
+  },
+  {
+   "phrase": "a big one",
+   "picture": 189.637,
+   "placed": 189.937,
+   "heard": 189.935
+  },
+  {
+   "phrase": "and small ones",
+   "picture": 191.825,
+   "placed": 192.125,
+   "heard": 192.11
+  },
+  {
+   "phrase": "Learning more does",
+   "picture": 203.733,
+   "placed": 204.028,
+   "heard": 203.995
+  },
+  {
+   "phrase": "and ask people",
+   "picture": 206.45,
+   "placed": 206.758,
+   "heard": 206.743
+  },
+  {
+   "phrase": "On its own",
+   "picture": 213.317,
+   "placed": 213.617,
+   "heard": 213.648
+  }
+ ],
+ "text": "Why is it so hard to tell how little we know? One of your first games of chess. You play black. Three moves in, white has already brought out its queen and a bishop. Then you spot it. Move the knight here and it attacks the queen. What a move! You are sure of it. So you play it. And one move later, the queen takes this pawn, with the bishop guarding her from across the board. Checkmate. The danger sat on the board the whole time. To your eyes, it was not there. The less you know, the harder it is to see how little you know. That is the idea behind the Dunning-Kruger effect. Now picture everything there is to know about a subject as a dark field. What you have learned so far is the small part your light reaches. Just past the light, you can make out a few things you have not learned yet. And beyond those, as far as you can tell, there is nothing. Call that line your fence. So when you ask yourself how much you know, you can only compare the light to what you can see. 22 things out of 29. Most of it. Now let us lift the fog. The field was this big all along. You know 22 things out of 400. And you cannot count what you cannot see. To notice how much is missing, you would need the very knowledge that is missing. Now, the whole journey. Gold is how much of the field you feel you know. Blue is how much you really know. With the first lessons, the feeling races ahead. A small light in a field that looks small. This is the first peak of confidence, and you have barely started. Then every answer shows you three new questions. The fence runs away faster than your light can follow, and your confidence falls. But look at the field. The fence has reached the true edge. For the first time, you can see all of it. So the bottom is not where you know least. It is where you start being right about yourself. And from here on, the feeling and the facts climb together. Confidence comes back. This time it is earned. At the other end there is a smaller mistake and it points the other way. Here is someone who has lit almost the whole field. When something has become easy for you, you assume it is easy for everyone. So the expert pictures everybody else with a light as big as their own and places themselves above the middle of the pack but well short of the top. In truth, most lights are small. line everyone up by what they really know and the expert stands at the very top without knowing it so beginners misjudge themselves experts misjudge everyone else and none of this is about foolish people each of us carries many lights a big one for what we do every day and small ones for almost everything else and from the inside a small light can feel almost as complete as a big one. A small light cannot show you where the field ends. Learning more does. So keep learning and ask people who know more to teach you what you are missing. Because feeling sure tells you about your light. On its own, it cannot tell you the size of the dark. Thank you."
+}
