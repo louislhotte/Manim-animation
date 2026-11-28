@@ -1,0 +1,515 @@
+{
+ "fps": 60,
+ "wps": 3.26,
+ "scenes": [
+  {
+   "scene": "Intro",
+   "length": 13.9833,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "Why is it so hard to tell how little we know?",
+     "anchors": []
+    }
+   ]
+  },
+  {
+   "scene": "Move",
+   "length": 37.85,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "One of your first games of chess. You play black. Three moves in, white has already brought out its queen and a bishop.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "You play black",
+       "word": 7,
+       "t": 2.1333,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Three moves in",
+       "word": 10,
+       "t": 3.55,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "its queen",
+       "word": 18,
+       "t": 5.8333,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "a bishop",
+       "word": 21,
+       "t": 6.7833,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 8.1667,
+     "text": "Then you spot it. Move the knight here, and it attacks the queen. What a move! You are sure of it.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "Move the knight",
+       "word": 4,
+       "t": 9.5167,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "it attacks",
+       "word": 9,
+       "t": 10.4833,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "What a move",
+       "word": 13,
+       "t": 12.1667,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 15.3333,
+     "text": "So you play it. And one move later, the queen takes this pawn, with the bishop guarding her from across the board. Checkmate.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "one move later",
+       "word": 5,
+       "t": 16.8333,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "the queen takes",
+       "word": 8,
+       "t": 17.7667,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "with the bishop",
+       "word": 13,
+       "t": 19.35,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Checkmate",
+       "word": 22,
+       "t": 22.15,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 23.7667,
+     "text": "The danger sat on the board the whole time. To your eyes, it was not there.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "To your eyes",
+       "word": 9,
+       "t": 26.2833,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 29.0667,
+     "text": "The less you know, the harder it is to see how little you know. That is the idea behind the Dunning-Kruger effect.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "That is",
+       "word": 14,
+       "t": 32.85,
+       "lead": 0.3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "length": 45.4,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "Now picture everything there is to know about a subject as a dark field. What you have learned so far is the small part your light reaches.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "everything there is",
+       "word": 2,
+       "t": 0.9,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "as a dark field",
+       "word": 10,
+       "t": 3.25,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "What you have learned",
+       "word": 14,
+       "t": 4.7333,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "your light reaches",
+       "word": 24,
+       "t": 7.225,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 9.2167,
+     "text": "Just past the light, you can make out a few things you have not learned yet. And beyond those, as far as you can tell, there is nothing. Call that line your fence.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "you can make out",
+       "word": 4,
+       "t": 10.3167,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "And beyond those",
+       "word": 16,
+       "t": 13.3333,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Call that line",
+       "word": 28,
+       "t": 17.0667,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 19.4833,
+     "text": "So when you ask yourself how much you know, you can only compare the light to what you can see. 22 things out of 29. Most of it!",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "you can only compare",
+       "word": 9,
+       "t": 21.65,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "22 things",
+       "word": 20,
+       "t": 24.7,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Most of it",
+       "word": 25,
+       "t": 27.2333,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 28.9,
+     "text": "Now let us lift the fog. The field was this big all along. You know 22 things out of 400.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "lift the fog",
+       "word": 3,
+       "t": 29.4,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "You know",
+       "word": 13,
+       "t": 33.225,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 36.4167,
+     "text": "And you cannot count what you cannot see. To notice how much is missing, you would need the very knowledge that is missing.",
+     "anchors": []
+    }
+   ]
+  },
+  {
+   "scene": "Climb",
+   "length": 49.35,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "Now, the whole journey. Gold is how much of the field you feel you know. Blue is how much you really know.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "Gold is",
+       "word": 4,
+       "t": 2.2,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Blue is",
+       "word": 15,
+       "t": 4.5167,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 7.25,
+     "text": "With the first lessons, the feeling races ahead: a small light, in a field that looks small. This is the first peak of confidence, and you have barely started.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "the feeling races",
+       "word": 4,
+       "t": 8.5333,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "This is the first peak",
+       "word": 17,
+       "t": 13.45,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 17.8833,
+     "text": "Then every answer shows you three new questions. The fence runs away faster than your light can follow, and your confidence falls.",
+     "anchors": []
+    },
+    {
+     "t0": 27.6333,
+     "text": "But look at the field: the fence has reached the true edge. For the first time, you can see all of it.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "the fence has reached",
+       "word": 5,
+       "t": 29.0333,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 34.6167,
+     "text": "So the bottom is not where you know least. It is where you start being right about yourself.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "It is where",
+       "word": 9,
+       "t": 37.1,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 40.4667,
+     "text": "And from here on, the feeling and the facts climb together. Confidence comes back. This time, it is earned.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "the feeling and the facts",
+       "word": 4,
+       "t": 41.3833,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "This time",
+       "word": 14,
+       "t": 45.7497,
+       "lead": 0.3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "scene": "Expert",
+   "length": 38.1167,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "At the other end, there is a smaller mistake, and it points the other way. Here is someone who has lit almost the whole field.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "Here is someone",
+       "word": 15,
+       "t": 4.55,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 8.5333,
+     "text": "When something has become easy for you, you assume it is easy for everyone. So the expert pictures everybody else with a light as big as their own, and places themselves above the middle of the pack, but well short of the top.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "you assume",
+       "word": 7,
+       "t": 10.65,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "So the expert",
+       "word": 14,
+       "t": 13.3833,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "and places themselves",
+       "word": 28,
+       "t": 17.6333,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 22.8667,
+     "text": "In truth, most lights are small. Line everyone up by what they really know, and the expert stands at the very top, without knowing it.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "Line everyone up",
+       "word": 6,
+       "t": 25.3333,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "at the very top",
+       "word": 18,
+       "t": 28.95,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 31.9,
+     "text": "So beginners misjudge themselves. Experts misjudge everyone else.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "beginners",
+       "word": 1,
+       "t": 32.35,
+       "lead": 0.3
+      },
+      {
+       "kind": "cue",
+       "phrase": "Experts",
+       "word": 4,
+       "t": 34.1833,
+       "lead": 0.3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "scene": "Everyone",
+   "length": 34.6167,
+   "lines": [
+    {
+     "t0": 0.0,
+     "text": "And none of this is about foolish people. Each of us carries many lights: a big one for what we do every day, and small ones for almost everything else.",
+     "anchors": [
+      {
+       "kind": "span",
+       "phrase": "a big one",
+       "word": 14,
+       "t": 4.937,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "and small ones",
+       "word": 23,
+       "t": 7.125,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 10.4333,
+     "text": "And from the inside, a small light can feel almost as complete as a big one.",
+     "anchors": []
+    },
+    {
+     "t0": 15.95,
+     "text": "A small light cannot show you where the field ends. Learning more does. So keep learning, and ask people who know more to teach you what you are missing.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "Learning more does",
+       "word": 10,
+       "t": 19.0333,
+       "lead": 0.3
+      },
+      {
+       "kind": "span",
+       "phrase": "and ask people",
+       "word": 16,
+       "t": 21.75,
+       "lead": 0.3
+      }
+     ]
+    },
+    {
+     "t0": 25.8167,
+     "text": "Because feeling sure tells you about your light. On its own, it cannot tell you the size of the dark.",
+     "anchors": [
+      {
+       "kind": "cue",
+       "phrase": "On its own",
+       "word": 8,
+       "t": 28.6167,
+       "lead": 0.3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "scene": "Outro",
+   "length": 11.6667,
+   "lines": []
+  }
+ ]
+}

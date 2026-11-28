@@ -6,8 +6,9 @@ of chess, then one picture that carries the rest of the film: everything there i
 to know about a subject is a dark field, and what you know is the part your light
 reaches.
 
-Made to be narrated, and readable without the voice: every beat has one short
-caption. The timed script is in `VOICEOVER.md` (and `voiceover.srt`).
+The film has a voice: a text-to-speech model that runs on this machine reads the
+narration, and the film is cut to it (see [The voice](#the-voice)). It still reads
+without sound: every beat has one short caption.
 
 ## The story, scene by scene
 
@@ -102,25 +103,86 @@ tells the authors' account, as a story.
 ```bash
 ./render.sh move --quick --check   # layout pass + edge scan + contact sheet
 ./render.sh                        # whole film, 480p
-./render.sh full -q h              # final 1080p60 (slow: run in background)
+./render.sh full -q h              # final 1080p60, without sound
 
-# the timed narration script
+# the timed script (VOICEOVER.md, voiceover.srt: each line and when its caption appears)
 MX_TRACE_DIR=$PWD/media/trace ./render.sh --stitch -q h
 python ../../tools/voiceover.py . -q h
 ```
 
-Pacing knobs: `DK_WPS` (the narrator's words per second, default 2.6), `DK_QUICK=1`
-/ `--quick` (collapse holds). `manim.cfg` switches Manim's cache off: the painters
+Pacing knobs: `DK_VOICE=0` (ignore the recorded voice and pace the film for a
+reader), `DK_WPS` (that reader's words per second, default 2.6), `DK_QUICK=1` /
+`--quick` (collapse holds). `manim.cfg` switches Manim's cache off: the painters
 read a clock that never stops, which the cache does not see.
 
-**Measured runtime:** 4 min 28 s (268.7 s at 1080p60): intro 14.0, Move 45.1, Light 55.1,
-Climb 56.9, Expert 44.2, Everyone 41.7, outro 11.7. 25 narrated lines, 575 words at 156
-words a minute; no line is tight. Each scene moves 91 to 100 % of the time
-(`tools/motioncheck.py`), with no still stretch of 2 s or more.
+**Measured runtime:** 3 min 51 s (231.0 s at 1080p60): intro 14.0, Move 37.9, Light
+45.4, Climb 49.4, Expert 38.1, Everyone 34.6, outro 11.7. 25 narrated lines, 575
+words. Every caption stays up for its whole line (5.3 to 14.3 s), never less than
+its reading time. Each scene moves 91 to 100 % of the time
+(`tools/motioncheck.py`), with no still stretch of 2 s or more. Paced for a reader
+instead (`DK_VOICE=0`, 156 words a minute) the film lasts 4 min 28 s.
+
+## The voice
+
+`media/DunningKruger_1080p60-narrated.mp4` is the film with its narration, and
+`DunningKruger_1080p60-narrated.srt` what is said and when, sentence by sentence
+(a copy sits next to the video, where players pick it up as subtitles).
+
+The voice is Kokoro (82M parameters, voice `af_heart`, speed 0.9), run locally by
+[mlx-audio](https://github.com/Blaizzy/mlx-audio): nothing is sent to a service.
+The sound is not kept in git (`media/` is ignored); the scripts in `narration/`
+rebuild it.
+
+**The film is cut to the voice, not the voice to the film.** A word count is a
+poor clock: "So beginners misjudge themselves." is four words and two seconds.
+So `narration/voice.json` holds the rhythm of the voice as it was really said (how
+long each line takes, when each word starts), and `dunning_kruger.py` follows it:
+a beat lasts as long as its line, and `cue("phrase")` waits for the phrase itself.
+Nothing is stretched or squeezed. Sentence pauses are brought to a narrator's
+0.6 s (the model's own run from almost nothing to 0.65 s), and where a picture is
+not ready for its word, the pause before it grows a little: the longest pause
+inside a line is 0.76 s. Between two lines the voice rests for about a second.
+
+```bash
+VOICE_PY=...    # a Python with mlx-audio, on Apple silicon; Kokoro-82M-bf16 and
+                # whisper-large-v3-turbo-asr-fp16 (mlx-community) in the Hugging Face cache
+MANIM_PY=~/.cache/manimx/venv/bin/python
+
+$MANIM_PY narration/cue_times.py   # the lines of the film (a few minutes, no video written)
+$VOICE_PY narration/speak.py       # says them: takes in media/narration/, and voice.json
+$MANIM_PY narration/cue_times.py   # the film follows voice.json now: when each picture lands
+MX_TRACE_DIR=$PWD/media/trace ./render.sh --stitch -q h
+$MANIM_PY narration/place.py       # the voice under the pictures: the narrated .mp4 and .srt
+$VOICE_PY narration/listen.py      # a speech recogniser listens to the result
+```
+
+After a change to the pictures only, the first two steps can be skipped.
+
+**What was checked, and how** (`narration/placement.json`, `narration/heard.json`):
+
+- Each of the 46 cues gets its word 0.06 to 0.53 s after its picture starts to
+  change (0.30 s in the middle), by the voice's own timing of its words.
+- A speech recogniser that does not know the script (Whisper large-v3-turbo, local)
+  was played the finished file. It wrote down every word of the script, in order
+  (580 of them once "22" is "twenty two" and "Dunning-Kruger" two words), and nothing else while the
+  voice speaks. Over the silent end card it added "Thank you": the track is
+  silent there, and filling a long silence with a film's usual last words is a
+  known habit of that recogniser. It hears each word 0.01 s from where it was
+  placed (median; 95 % within 0.10 s, all within 0.35 s), and each cue's word
+  0.29 s after its picture (from 0.04 s before to 0.40 s after).
+- The video stream of the narrated file is the silent film's, bit for bit; the
+  voice sits at -16 LUFS, true peak -2 dB.
+
+A recogniser checks words and timing. Whether the voice sounds right takes ears.
 
 ## Files
 
 - `dunning_kruger.py`: the storyboard (docstring) and the five scenes.
+- `narration/`: the voice. `speak.py` (the takes, and `voice.json`: the rhythm the
+  film follows), `cue_times.py` (`cues.json`: the lines, and when each picture
+  lands), `place.py` (the narrated film, its subtitles, `placement.json`),
+  `listen.py` (`heard.json`: what a recogniser hears in the result), `common.py`.
+- `VOICEOVER.md`, `voiceover.srt`: every line with the time its caption appears.
 - `kit.py`: the pictures. Painters for what is many and alive (`FogMap`, the field
   and the light; `Spot`, the dark over the chess board), ordinary mobjects for what
   has a face or must be read (`Buddy`, a face drawn from ten numbers so that a mood

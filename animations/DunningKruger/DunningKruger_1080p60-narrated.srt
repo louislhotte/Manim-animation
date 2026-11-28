@@ -1,0 +1,255 @@
+1
+00:00:01,800 --> 00:00:04,550
+Why is it so hard to tell how little we know?
+
+2
+00:00:14,237 --> 00:00:16,337
+One of your first games of chess.
+
+3
+00:00:16,417 --> 00:00:17,730
+You play black.
+
+4
+00:00:17,845 --> 00:00:22,085
+Three moves in, white has already brought out its queen and a bishop.
+
+5
+00:00:22,403 --> 00:00:23,728
+Then you spot it.
+
+6
+00:00:23,796 --> 00:00:26,410
+Move the knight here, and it attacks the queen.
+
+7
+00:00:26,450 --> 00:00:27,412
+What a move!
+
+8
+00:00:27,720 --> 00:00:29,157
+You are sure of it.
+
+9
+00:00:29,568 --> 00:00:30,893
+So you play it.
+
+10
+00:00:30,947 --> 00:00:33,591
+And one move later, the queen takes this pawn,
+
+11
+00:00:33,631 --> 00:00:36,393
+with the bishop guarding her from across the board.
+
+12
+00:00:36,433 --> 00:00:37,558
+Checkmate.
+
+13
+00:00:38,001 --> 00:00:40,526
+The danger sat on the board the whole time.
+
+14
+00:00:40,566 --> 00:00:42,904
+To your eyes, it was not there.
+
+15
+00:00:43,302 --> 00:00:47,093
+The less you know, the harder it is to see how little you know.
+
+16
+00:00:47,133 --> 00:00:50,471
+That is the idea behind the Dunning-Kruger effect.
+
+17
+00:00:52,158 --> 00:00:56,893
+Now picture everything there is to know about a subject as a dark field.
+
+18
+00:00:56,933 --> 00:01:00,958
+What you have learned so far is the small part your light reaches.
+
+19
+00:01:01,300 --> 00:01:05,424
+Just past the light, you can make out a few things you have not learned yet.
+
+20
+00:01:05,464 --> 00:01:09,162
+And beyond those, as far as you can tell, there is nothing.
+
+21
+00:01:09,202 --> 00:01:11,139
+Call that line your fence.
+
+22
+00:01:11,576 --> 00:01:13,741
+So when you ask yourself how much you know,
+
+23
+00:01:13,781 --> 00:01:16,793
+you can only compare the light to what you can see.
+
+24
+00:01:16,833 --> 00:01:19,246
+22 things out of 29.
+
+25
+00:01:19,368 --> 00:01:20,581
+Most of it!
+
+26
+00:01:21,004 --> 00:01:22,879
+Now let us lift the fog.
+
+27
+00:01:22,929 --> 00:01:25,339
+The field was this big all along.
+
+28
+00:01:25,379 --> 00:01:28,104
+You know 22 things out of 400.
+
+29
+00:01:28,500 --> 00:01:30,948
+And you cannot count what you cannot see.
+
+30
+00:01:30,988 --> 00:01:35,925
+To notice how much is missing, you would need the very knowledge that is missing.
+
+31
+00:01:37,566 --> 00:01:39,341
+Now, the whole journey.
+
+32
+00:01:39,495 --> 00:01:42,195
+Gold is how much of the field you feel you know.
+
+33
+00:01:42,280 --> 00:01:44,580
+Blue is how much you really know.
+
+34
+00:01:44,736 --> 00:01:48,948
+With the first lessons, the feeling races ahead: a small light,
+
+35
+00:01:48,988 --> 00:01:50,948
+in a field that looks small.
+
+36
+00:01:50,988 --> 00:01:54,963
+This is the first peak of confidence, and you have barely started.
+
+37
+00:01:55,367 --> 00:01:58,564
+Then every answer shows you three new questions.
+
+38
+00:01:58,604 --> 00:02:03,992
+The fence runs away faster than your light can follow, and your confidence falls.
+
+39
+00:02:05,121 --> 00:02:08,966
+But look at the field: the fence has reached the true edge.
+
+40
+00:02:09,006 --> 00:02:11,681
+For the first time, you can see all of it.
+
+41
+00:02:12,101 --> 00:02:14,593
+So the bottom is not where you know least.
+
+42
+00:02:14,633 --> 00:02:17,533
+It is where you start being right about yourself.
+
+43
+00:02:17,959 --> 00:02:21,337
+And from here on, the feeling and the facts climb together.
+
+44
+00:02:21,377 --> 00:02:23,239
+Confidence comes back.
+
+45
+00:02:23,292 --> 00:02:25,229
+This time, it is earned.
+
+46
+00:02:26,833 --> 00:02:31,393
+At the other end, there is a smaller mistake, and it points the other way.
+
+47
+00:02:31,433 --> 00:02:34,658
+Here is someone who has lit almost the whole field.
+
+48
+00:02:35,368 --> 00:02:40,228
+When something has become easy for you, you assume it is easy for everyone.
+
+49
+00:02:40,268 --> 00:02:44,478
+So the expert pictures everybody else with a light as big as their own,
+
+50
+00:02:44,518 --> 00:02:49,293
+and places themselves above the middle of the pack, but well short of the top.
+
+51
+00:02:49,704 --> 00:02:52,177
+In truth, most lights are small.
+
+52
+00:02:52,217 --> 00:02:56,805
+Line everyone up by what they really know, and the expert stands at the very top,
+
+53
+00:02:56,845 --> 00:02:58,345
+without knowing it.
+
+54
+00:02:58,893 --> 00:03:01,168
+So beginners misjudge themselves.
+
+55
+00:03:01,216 --> 00:03:03,478
+Experts misjudge everyone else.
+
+56
+00:03:04,950 --> 00:03:07,698
+And none of this is about foolish people.
+
+57
+00:03:07,738 --> 00:03:12,085
+Each of us carries many lights: a big one for what we do every day,
+
+58
+00:03:12,125 --> 00:03:14,975
+and small ones for almost everything else.
+
+59
+00:03:15,383 --> 00:03:20,508
+And from the inside, a small light can feel almost as complete as a big one.
+
+60
+00:03:20,903 --> 00:03:23,988
+A small light cannot show you where the field ends.
+
+61
+00:03:24,028 --> 00:03:25,593
+Learning more does.
+
+62
+00:03:25,633 --> 00:03:30,108
+So keep learning, and ask people who know more to teach you what you are missing.
+
+63
+00:03:30,768 --> 00:03:33,577
+Because feeling sure tells you about your light.
+
+64
+00:03:33,617 --> 00:03:37,129
+On its own, it cannot tell you the size of the dark.

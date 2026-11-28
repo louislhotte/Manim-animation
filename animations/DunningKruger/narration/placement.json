@@ -1,0 +1,1087 @@
+{
+ "voice": {
+  "model": "mlx-community/Kokoro-82M-bf16",
+  "voice": "af_heart",
+  "speed": 0.9
+ },
+ "film_seconds": 230.983,
+ "speech_seconds": 176.4,
+ "settings": {
+  "lead_in": 0.25,
+  "card_start": {
+   "Intro": 1.8
+  },
+  "pause_cost": 0.05,
+  "gap_cost": {
+   "start": 2.0,
+   ".": 1.0,
+   "!": 1.0,
+   "?": 1.0,
+   ":": 1.5,
+   ";": 1.5,
+   ",": 4.0
+  }
+ },
+ "lines": [
+  {
+   "scene": "Intro",
+   "text": "Why is it so hard to tell how little we know?",
+   "at": 1.74,
+   "pieces": [
+    {
+     "start": 1.74,
+     "end": 4.111,
+     "text": "Why is it so hard to tell how little we know?",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": []
+  },
+  {
+   "scene": "Move",
+   "text": "One of your first games of chess. You play black. Three moves in, white has already brought out its queen and a bishop.",
+   "at": 14.177,
+   "pieces": [
+    {
+     "start": 14.177,
+     "end": 16.052,
+     "text": "One of your first games of chess.",
+     "extra_pause": 0.004
+    },
+    {
+     "start": 16.27,
+     "end": 17.45,
+     "text": "You play black.",
+     "extra_pause": 0.217
+    },
+    {
+     "start": 17.715,
+     "end": 18.888,
+     "text": "Three moves in,",
+     "extra_pause": 0.266
+    },
+    {
+     "start": 18.953,
+     "end": 21.661,
+     "text": "white has already brought out its queen and a bishop.",
+     "extra_pause": 0.065
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "You play black",
+     "kind": "cue",
+     "picture": 16.117,
+     "word": 16.417,
+     "after_picture": 0.3
+    },
+    {
+     "phrase": "Three moves in",
+     "kind": "cue",
+     "picture": 17.533,
+     "word": 17.845,
+     "after_picture": 0.312
+    },
+    {
+     "phrase": "its queen",
+     "kind": "cue",
+     "picture": 19.817,
+     "word": 20.197,
+     "after_picture": 0.381
+    },
+    {
+     "phrase": "a bishop",
+     "kind": "cue",
+     "picture": 20.767,
+     "word": 20.972,
+     "after_picture": 0.206
+    }
+   ]
+  },
+  {
+   "scene": "Move",
+   "text": "Then you spot it. Move the knight here, and it attacks the queen. What a move! You are sure of it.",
+   "at": 22.343,
+   "pieces": [
+    {
+     "start": 22.343,
+     "end": 23.425,
+     "text": "Then you spot it.",
+     "extra_pause": 0.003
+    },
+    {
+     "start": 23.656,
+     "end": 26.131,
+     "text": "Move the knight here, and it attacks the queen.",
+     "extra_pause": 0.231
+    },
+    {
+     "start": 26.26,
+     "end": 27.197,
+     "text": "What a move!",
+     "extra_pause": 0.129
+    },
+    {
+     "start": 27.717,
+     "end": 28.746,
+     "text": "You are sure of it.",
+     "extra_pause": 0.52
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "Move the knight",
+     "kind": "cue",
+     "picture": 23.5,
+     "word": 23.795,
+     "after_picture": 0.296
+    },
+    {
+     "phrase": "it attacks",
+     "kind": "cue",
+     "picture": 24.467,
+     "word": 24.77,
+     "after_picture": 0.304
+    },
+    {
+     "phrase": "What a move",
+     "kind": "cue",
+     "picture": 26.15,
+     "word": 26.449,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Move",
+   "text": "So you play it. And one move later, the queen takes this pawn, with the bishop guarding her from across the board. Checkmate.",
+   "at": 29.508,
+   "pieces": [
+    {
+     "start": 29.508,
+     "end": 30.566,
+     "text": "So you play it.",
+     "extra_pause": 0.002
+    },
+    {
+     "start": 30.819,
+     "end": 33.612,
+     "text": "And one move later, the queen takes this pawn,",
+     "extra_pause": 0.253
+    },
+    {
+     "start": 33.621,
+     "end": 36.164,
+     "text": "with the bishop guarding her from across the board.",
+     "extra_pause": 0.01
+    },
+    {
+     "start": 36.191,
+     "end": 37.186,
+     "text": "Checkmate.",
+     "extra_pause": 0.027
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "one move later",
+     "kind": "cue",
+     "picture": 30.817,
+     "word": 31.121,
+     "after_picture": 0.305
+    },
+    {
+     "phrase": "the queen takes",
+     "kind": "cue",
+     "picture": 31.75,
+     "word": 32.046,
+     "after_picture": 0.297
+    },
+    {
+     "phrase": "with the bishop",
+     "kind": "cue",
+     "picture": 33.333,
+     "word": 33.631,
+     "after_picture": 0.298
+    },
+    {
+     "phrase": "Checkmate",
+     "kind": "cue",
+     "picture": 36.133,
+     "word": 36.433,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Move",
+   "text": "The danger sat on the board the whole time. To your eyes, it was not there.",
+   "at": 37.941,
+   "pieces": [
+    {
+     "start": 37.941,
+     "end": 40.249,
+     "text": "The danger sat on the board the whole time.",
+     "extra_pause": 0.001
+    },
+    {
+     "start": 40.376,
+     "end": 41.479,
+     "text": "To your eyes,",
+     "extra_pause": 0.128
+    },
+    {
+     "start": 41.479,
+     "end": 42.473,
+     "text": "it was not there.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "To your eyes",
+     "kind": "cue",
+     "picture": 40.267,
+     "word": 40.566,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Move",
+   "text": "The less you know, the harder it is to see how little you know. That is the idea behind the Dunning-Kruger effect.",
+   "at": 43.242,
+   "pieces": [
+    {
+     "start": 43.242,
+     "end": 44.222,
+     "text": "The less you know,",
+     "extra_pause": 0.002
+    },
+    {
+     "start": 44.222,
+     "end": 46.847,
+     "text": "the harder it is to see how little you know.",
+     "extra_pause": 0.001
+    },
+    {
+     "start": 46.891,
+     "end": 50.056,
+     "text": "That is the idea behind the Dunning-Kruger effect.",
+     "extra_pause": 0.043
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "That is",
+     "kind": "cue",
+     "picture": 46.833,
+     "word": 47.133,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "text": "Now picture everything there is to know about a subject as a dark field. What you have learned so far is the small part your light reaches.",
+   "at": 52.098,
+   "pieces": [
+    {
+     "start": 52.098,
+     "end": 56.665,
+     "text": "Now picture everything there is to know about a subject as a dark field.",
+     "extra_pause": 0.075
+    },
+    {
+     "start": 56.69,
+     "end": 60.537,
+     "text": "What you have learned so far is the small part your light reaches.",
+     "extra_pause": 0.025
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "everything there is",
+     "kind": "cue",
+     "picture": 52.733,
+     "word": 52.845,
+     "after_picture": 0.112
+    },
+    {
+     "phrase": "as a dark field",
+     "kind": "cue",
+     "picture": 55.083,
+     "word": 55.445,
+     "after_picture": 0.362
+    },
+    {
+     "phrase": "What you have learned",
+     "kind": "cue",
+     "picture": 56.567,
+     "word": 56.933,
+     "after_picture": 0.366
+    },
+    {
+     "phrase": "your light reaches",
+     "kind": "span",
+     "picture": 59.058,
+     "word": 59.433,
+     "after_picture": 0.375
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "text": "Just past the light, you can make out a few things you have not learned yet. And beyond those, as far as you can tell, there is nothing. Call that line your fence.",
+   "at": 61.24,
+   "pieces": [
+    {
+     "start": 61.24,
+     "end": 62.428,
+     "text": "Just past the light,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 62.428,
+     "end": 65.135,
+     "text": "you can make out a few things you have not learned yet.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 65.274,
+     "end": 66.664,
+     "text": "And beyond those,",
+     "extra_pause": 0.139
+    },
+    {
+     "start": 66.664,
+     "end": 67.849,
+     "text": "as far as you can tell,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 67.849,
+     "end": 68.924,
+     "text": "there is nothing.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 68.974,
+     "end": 70.733,
+     "text": "Call that line your fence.",
+     "extra_pause": 0.05
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "you can make out",
+     "kind": "cue",
+     "picture": 62.15,
+     "word": 62.45,
+     "after_picture": 0.3
+    },
+    {
+     "phrase": "And beyond those",
+     "kind": "cue",
+     "picture": 65.167,
+     "word": 65.464,
+     "after_picture": 0.298
+    },
+    {
+     "phrase": "Call that line",
+     "kind": "cue",
+     "picture": 68.9,
+     "word": 69.202,
+     "after_picture": 0.302
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "text": "So when you ask yourself how much you know, you can only compare the light to what you can see. 22 things out of 29. Most of it!",
+   "at": 71.516,
+   "pieces": [
+    {
+     "start": 71.516,
+     "end": 73.736,
+     "text": "So when you ask yourself how much you know,",
+     "extra_pause": 0.009
+    },
+    {
+     "start": 73.741,
+     "end": 76.573,
+     "text": "you can only compare the light to what you can see.",
+     "extra_pause": 0.005
+    },
+    {
+     "start": 76.588,
+     "end": 78.963,
+     "text": "22 things out of 29.",
+     "extra_pause": 0.015
+    },
+    {
+     "start": 79.248,
+     "end": 80.166,
+     "text": "Most of it!",
+     "extra_pause": 0.285
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "you can only compare",
+     "kind": "cue",
+     "picture": 73.483,
+     "word": 73.78,
+     "after_picture": 0.297
+    },
+    {
+     "phrase": "22 things",
+     "kind": "cue",
+     "picture": 76.533,
+     "word": 76.833,
+     "after_picture": 0.3
+    },
+    {
+     "phrase": "Most of it",
+     "kind": "cue",
+     "picture": 79.067,
+     "word": 79.368,
+     "after_picture": 0.302
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "text": "Now let us lift the fog. The field was this big all along. You know 22 things out of 400.",
+   "at": 80.944,
+   "pieces": [
+    {
+     "start": 80.944,
+     "end": 82.562,
+     "text": "Now let us lift the fog.",
+     "extra_pause": 0.021
+    },
+    {
+     "start": 82.787,
+     "end": 85.037,
+     "text": "The field was this big all along.",
+     "extra_pause": 0.225
+    },
+    {
+     "start": 85.212,
+     "end": 87.689,
+     "text": "You know 22 things out of 400.",
+     "extra_pause": 0.175
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "lift the fog",
+     "kind": "cue",
+     "picture": 81.233,
+     "word": 81.516,
+     "after_picture": 0.283
+    },
+    {
+     "phrase": "You know",
+     "kind": "span",
+     "picture": 85.058,
+     "word": 85.379,
+     "after_picture": 0.321
+    }
+   ]
+  },
+  {
+   "scene": "Light",
+   "text": "And you cannot count what you cannot see. To notice how much is missing, you would need the very knowledge that is missing.",
+   "at": 88.44,
+   "pieces": [
+    {
+     "start": 88.44,
+     "end": 90.73,
+     "text": "And you cannot count what you cannot see.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 90.73,
+     "end": 92.89,
+     "text": "To notice how much is missing,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 92.89,
+     "end": 95.45,
+     "text": "you would need the very knowledge that is missing.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": []
+  },
+  {
+   "scene": "Climb",
+   "text": "Now, the whole journey. Gold is how much of the field you feel you know. Blue is how much you really know.",
+   "at": 97.506,
+   "pieces": [
+    {
+     "start": 97.506,
+     "end": 99.02,
+     "text": "Now, the whole journey.",
+     "extra_pause": 0.082
+    },
+    {
+     "start": 99.275,
+     "end": 101.905,
+     "text": "Gold is how much of the field you feel you know.",
+     "extra_pause": 0.254
+    },
+    {
+     "start": 102.115,
+     "end": 104.142,
+     "text": "Blue is how much you really know.",
+     "extra_pause": 0.21
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "Gold is",
+     "kind": "cue",
+     "picture": 99.433,
+     "word": 99.495,
+     "after_picture": 0.062
+    },
+    {
+     "phrase": "Blue is",
+     "kind": "cue",
+     "picture": 101.75,
+     "word": 102.28,
+     "after_picture": 0.53
+    }
+   ]
+  },
+  {
+   "scene": "Climb",
+   "text": "With the first lessons, the feeling races ahead: a small light, in a field that looks small. This is the first peak of confidence, and you have barely started.",
+   "at": 104.676,
+   "pieces": [
+    {
+     "start": 104.676,
+     "end": 106.036,
+     "text": "With the first lessons,",
+     "extra_pause": 0.003
+    },
+    {
+     "start": 106.038,
+     "end": 107.71,
+     "text": "the feeling races ahead:",
+     "extra_pause": 0.002
+    },
+    {
+     "start": 107.786,
+     "end": 108.973,
+     "text": "a small light,",
+     "extra_pause": 0.075
+    },
+    {
+     "start": 108.973,
+     "end": 110.698,
+     "text": "in a field that looks small.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 110.698,
+     "end": 113.143,
+     "text": "This is the first peak of confidence,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 113.143,
+     "end": 114.538,
+     "text": "and you have barely started.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "the feeling races",
+     "kind": "cue",
+     "picture": 105.767,
+     "word": 106.063,
+     "after_picture": 0.296
+    },
+    {
+     "phrase": "This is the first peak",
+     "kind": "span",
+     "picture": 110.683,
+     "word": 110.988,
+     "after_picture": 0.305
+    }
+   ]
+  },
+  {
+   "scene": "Climb",
+   "text": "Then every answer shows you three new questions. The fence runs away faster than your light can follow, and your confidence falls.",
+   "at": 115.307,
+   "pieces": [
+    {
+     "start": 115.307,
+     "end": 118.327,
+     "text": "Then every answer shows you three new questions.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 118.377,
+     "end": 121.924,
+     "text": "The fence runs away faster than your light can follow,",
+     "extra_pause": 0.05
+    },
+    {
+     "start": 121.924,
+     "end": 123.578,
+     "text": "and your confidence falls.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": []
+  },
+  {
+   "scene": "Climb",
+   "text": "But look at the field: the fence has reached the true edge. For the first time, you can see all of it.",
+   "at": 125.061,
+   "pieces": [
+    {
+     "start": 125.061,
+     "end": 126.273,
+     "text": "But look at the field:",
+     "extra_pause": 0.004
+    },
+    {
+     "start": 126.444,
+     "end": 128.669,
+     "text": "the fence has reached the true edge.",
+     "extra_pause": 0.17
+    },
+    {
+     "start": 128.834,
+     "end": 131.266,
+     "text": "For the first time, you can see all of it.",
+     "extra_pause": 0.165
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "the fence has reached",
+     "kind": "cue",
+     "picture": 126.267,
+     "word": 126.566,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Climb",
+   "text": "So the bottom is not where you know least. It is where you start being right about yourself.",
+   "at": 132.041,
+   "pieces": [
+    {
+     "start": 132.041,
+     "end": 134.286,
+     "text": "So the bottom is not where you know least.",
+     "extra_pause": 0.001
+    },
+    {
+     "start": 134.468,
+     "end": 137.121,
+     "text": "It is where you start being right about yourself.",
+     "extra_pause": 0.182
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "It is where",
+     "kind": "cue",
+     "picture": 134.333,
+     "word": 134.633,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Climb",
+   "text": "And from here on, the feeling and the facts climb together. Confidence comes back. This time, it is earned.",
+   "at": 137.899,
+   "pieces": [
+    {
+     "start": 137.899,
+     "end": 141.059,
+     "text": "And from here on, the feeling and the facts climb together.",
+     "extra_pause": 0.009
+    },
+    {
+     "start": 141.189,
+     "end": 142.927,
+     "text": "Confidence comes back.",
+     "extra_pause": 0.13
+    },
+    {
+     "start": 143.142,
+     "end": 143.959,
+     "text": "This time,",
+     "extra_pause": 0.215
+    },
+    {
+     "start": 143.959,
+     "end": 144.805,
+     "text": "it is earned.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "the feeling and the facts",
+     "kind": "cue",
+     "picture": 138.617,
+     "word": 138.909,
+     "after_picture": 0.293
+    },
+    {
+     "phrase": "This time",
+     "kind": "span",
+     "picture": 142.983,
+     "word": 143.292,
+     "after_picture": 0.309
+    }
+   ]
+  },
+  {
+   "scene": "Expert",
+   "text": "At the other end, there is a smaller mistake, and it points the other way. Here is someone who has lit almost the whole field.",
+   "at": 146.773,
+   "pieces": [
+    {
+     "start": 146.773,
+     "end": 149.443,
+     "text": "At the other end, there is a smaller mistake,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 149.443,
+     "end": 151.166,
+     "text": "and it points the other way.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 151.191,
+     "end": 154.234,
+     "text": "Here is someone who has lit almost the whole field.",
+     "extra_pause": 0.025
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "Here is someone",
+     "kind": "cue",
+     "picture": 151.133,
+     "word": 151.433,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Expert",
+   "text": "When something has become easy for you, you assume it is easy for everyone. So the expert pictures everybody else with a light as big as their own, and places themselves above the middle of the pack, but well short of the top.",
+   "at": 155.308,
+   "pieces": [
+    {
+     "start": 155.308,
+     "end": 157.418,
+     "text": "When something has become easy for you,",
+     "extra_pause": 0.001
+    },
+    {
+     "start": 157.418,
+     "end": 159.978,
+     "text": "you assume it is easy for everyone.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 159.978,
+     "end": 164.373,
+     "text": "So the expert pictures everybody else with a light as big as their own,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 164.373,
+     "end": 167.146,
+     "text": "and places themselves above the middle of the pack,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 167.146,
+     "end": 168.869,
+     "text": "but well short of the top.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "you assume",
+     "kind": "cue",
+     "picture": 157.233,
+     "word": 157.53,
+     "after_picture": 0.297
+    },
+    {
+     "phrase": "So the expert",
+     "kind": "cue",
+     "picture": 159.967,
+     "word": 160.268,
+     "after_picture": 0.301
+    },
+    {
+     "phrase": "and places themselves",
+     "kind": "cue",
+     "picture": 164.217,
+     "word": 164.518,
+     "after_picture": 0.301
+    }
+   ]
+  },
+  {
+   "scene": "Expert",
+   "text": "In truth, most lights are small. Line everyone up by what they really know, and the expert stands at the very top, without knowing it.",
+   "at": 169.644,
+   "pieces": [
+    {
+     "start": 169.644,
+     "end": 171.946,
+     "text": "In truth, most lights are small.",
+     "extra_pause": 0.004
+    },
+    {
+     "start": 171.959,
+     "end": 174.577,
+     "text": "Line everyone up by what they really know,",
+     "extra_pause": 0.013
+    },
+    {
+     "start": 174.58,
+     "end": 176.833,
+     "text": "and the expert stands at the very top,",
+     "extra_pause": 0.003
+    },
+    {
+     "start": 176.833,
+     "end": 177.902,
+     "text": "without knowing it.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "Line everyone up",
+     "kind": "cue",
+     "picture": 171.917,
+     "word": 172.217,
+     "after_picture": 0.3
+    },
+    {
+     "phrase": "at the very top",
+     "kind": "cue",
+     "picture": 175.533,
+     "word": 175.832,
+     "after_picture": 0.299
+    }
+   ]
+  },
+  {
+   "scene": "Expert",
+   "text": "So beginners misjudge themselves. Experts misjudge everyone else.",
+   "at": 178.833,
+   "pieces": [
+    {
+     "start": 178.833,
+     "end": 180.871,
+     "text": "So beginners misjudge themselves.",
+     "extra_pause": 0.16
+    },
+    {
+     "start": 181.056,
+     "end": 183.066,
+     "text": "Experts misjudge everyone else.",
+     "extra_pause": 0.185
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "beginners",
+     "kind": "cue",
+     "picture": 178.933,
+     "word": 179.068,
+     "after_picture": 0.135
+    },
+    {
+     "phrase": "Experts",
+     "kind": "cue",
+     "picture": 180.767,
+     "word": 181.215,
+     "after_picture": 0.449
+    }
+   ]
+  },
+  {
+   "scene": "Everyone",
+   "text": "And none of this is about foolish people. Each of us carries many lights: a big one for what we do every day, and small ones for almost everything else.",
+   "at": 184.89,
+   "pieces": [
+    {
+     "start": 184.89,
+     "end": 187.46,
+     "text": "And none of this is about foolish people.",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 187.51,
+     "end": 189.723,
+     "text": "Each of us carries many lights:",
+     "extra_pause": 0.05
+    },
+    {
+     "start": 189.723,
+     "end": 192.09,
+     "text": "a big one for what we do every day,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 192.09,
+     "end": 194.552,
+     "text": "and small ones for almost everything else.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "a big one",
+     "kind": "span",
+     "picture": 189.637,
+     "word": 189.937,
+     "after_picture": 0.3
+    },
+    {
+     "phrase": "and small ones",
+     "kind": "span",
+     "picture": 191.825,
+     "word": 192.125,
+     "after_picture": 0.3
+    }
+   ]
+  },
+  {
+   "scene": "Everyone",
+   "text": "And from the inside, a small light can feel almost as complete as a big one.",
+   "at": 195.323,
+   "pieces": [
+    {
+     "start": 195.323,
+     "end": 196.711,
+     "text": "And from the inside,",
+     "extra_pause": 0.0
+    },
+    {
+     "start": 196.711,
+     "end": 200.065,
+     "text": "a small light can feel almost as complete as a big one.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": []
+  },
+  {
+   "scene": "Everyone",
+   "text": "A small light cannot show you where the field ends. Learning more does. So keep learning, and ask people who know more to teach you what you are missing.",
+   "at": 200.843,
+   "pieces": [
+    {
+     "start": 200.843,
+     "end": 203.728,
+     "text": "A small light cannot show you where the field ends.",
+     "extra_pause": 0.003
+    },
+    {
+     "start": 203.803,
+     "end": 205.273,
+     "text": "Learning more does.",
+     "extra_pause": 0.075
+    },
+    {
+     "start": 205.453,
+     "end": 206.708,
+     "text": "So keep learning,",
+     "extra_pause": 0.18
+    },
+    {
+     "start": 206.708,
+     "end": 209.633,
+     "text": "and ask people who know more to teach you what you are missing.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "Learning more does",
+     "kind": "cue",
+     "picture": 203.733,
+     "word": 204.028,
+     "after_picture": 0.294
+    },
+    {
+     "phrase": "and ask people",
+     "kind": "span",
+     "picture": 206.45,
+     "word": 206.758,
+     "after_picture": 0.308
+    }
+   ]
+  },
+  {
+   "scene": "Everyone",
+   "text": "Because feeling sure tells you about your light. On its own, it cannot tell you the size of the dark.",
+   "at": 210.708,
+   "pieces": [
+    {
+     "start": 210.708,
+     "end": 213.308,
+     "text": "Because feeling sure tells you about your light.",
+     "extra_pause": 0.001
+    },
+    {
+     "start": 213.419,
+     "end": 214.539,
+     "text": "On its own,",
+     "extra_pause": 0.112
+    },
+    {
+     "start": 214.539,
+     "end": 216.723,
+     "text": "it cannot tell you the size of the dark.",
+     "extra_pause": 0.0
+    }
+   ],
+   "cues": [
+    {
+     "phrase": "On its own",
+     "kind": "cue",
+     "picture": 213.317,
+     "word": 213.617,
+     "after_picture": 0.3
+    }
+   ]
+  }
+ ],
+ "video": {
+  "file": "media/DunningKruger_1080p60-narrated.mp4",
+  "seconds": 231.0,
+  "video_stream_unchanged": true,
+  "loudness_lufs": -16.01,
+  "true_peak_db": -2.0
+ }
+}
